@@ -1,11 +1,12 @@
 {
+  "type": "module",
   "name": "futu",
   "version": "0.0.1",
   "description": "",
   "main": "index.coffee",
   "scripts": {
     "start": "node -r coffeescript/register.js -r esm index.coffee",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node -r coffeescript/register.js -r esm test/futu.coffee"
   },
   "repository": {
     "type": "git",
@@ -18,9 +19,11 @@
   },
   "homepage": "https://github.com/twhtanghk/futu#readme",
   "dependencies": {
+    "bluebird": "^3.7.2",
     "coffeescript": "^2.5.1",
     "esm": "^3.2.25",
     "futu-api": "^5.6.1808",
+    "lodash": "^4.17.21",
     "ws": "^7.5.3"
   }
 }
