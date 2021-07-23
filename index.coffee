@@ -12,12 +12,25 @@ class Futu
         @ws.onlogin = resolve
       @
       
+  # basic data
+  marketState: ({securityList}={}) ->
+    await @ws.GetMarketState c2s: {securityList}
+
+  capitalFlow: ({security}) ->
+    await @ws.GetCapitalFlow c2s: {security}
+
+  capitalDistribution: ({security}) ->
+    await @ws.GetCapitalDistribution c2s: {security}
+
+  ownerPlate: ({securityList}) ->
+    await @ws.GetOwnerPlate c2s: {securityList}
+
+  historyKL: ({rehabType, klType, security, beginTime, endTime}) ->
+    await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
+
   plateSet: ({market, placeSetType}={}) ->
     opts = _.defaults {market, placeSetType}, placeSetType: 0
     await @ws.GetPlateSet c2s: opts
-
-  marketState: ({securityList}={}) ->
-    await @ws.GetMarketState c2s: {securityList}
 
   subInfo: ({isReqAllConn}={}) ->
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true

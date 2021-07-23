@@ -5,7 +5,6 @@
   "description": "",
   "main": "index.coffee",
   "scripts": {
-    "start": "node -r coffeescript/register.js -r esm index.coffee",
     "test": "node -r coffeescript/register.js -r esm test/futu.coffee"
   },
   "repository": {
