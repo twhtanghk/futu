@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from futu import *
 
 client = OpenQuoteContext(host='futu', port=11111)
