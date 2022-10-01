@@ -1,3 +1,4 @@
 futu==0.0.1
 futu_api==6.3.2808
+hug==2.6.1
 setuptools==63.2.0
