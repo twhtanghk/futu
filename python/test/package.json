@@ -1,0 +1,16 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".mochajs.js",
+  "scripts": {
+    "test": "mocha *.coffee"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "coffeescript": "^2.7.0",
+    "mocha": "^10.0.0",
+    "supertest": "^6.2.4"
+  }
+}
