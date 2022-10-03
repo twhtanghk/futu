@@ -48,7 +48,7 @@ class FutuClient:
       ret = data.iloc[0].filter(items=items).rename(index=columns).to_dict()
       change = ret['close'] - ret['prev_close_price']
       ret['quote'] = {
-        'change': [ round(change, 2), round(change / ret['close'] * 100, 2) ],
+        'change': [ round(change, 2), round(change / ret['prev_close_price'] * 100, 2) ],
         'curr': ret['close'],
         'high': ret['high'],
         'last': ret['prev_close_price'],

@@ -39,7 +39,7 @@ def quote():
     print(data)
     mqtt.client.publish('stock/aastocks', payload=json.dumps(data, ignore_nan=True))
 
-schedule.every(1).minutes.do(quote)
+schedule.every(5).minutes.do(quote)
 while True:
   schedule.run_pending()
   time.sleep(1)
