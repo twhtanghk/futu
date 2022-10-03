@@ -36,10 +36,11 @@ def quote():
     data = mqtt.futuClient.quote('HK.' + code)
     data['symbol'] = code
     data['src'] = 'aastocks'
-    print(data)
-    mqtt.client.publish('stock/aastocks', payload=json.dumps(data, ignore_nan=True))
+    data = data.to_dict(orient='records')
+    print(data[0])
+    mqtt.client.publish('stock/aastocks', payload=json.dumps(data[0], ignore_nan=True))
 
-schedule.every(5).minutes.do(quote)
+schedule.every(1).minutes.do(quote)
 while True:
   schedule.run_pending()
   time.sleep(1)
