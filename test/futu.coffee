@@ -8,7 +8,7 @@ do ->
     security =
       market: 1
       code: '00700'
-    futu = await new Futu host: 'futuopend', port: 11112
+    futu = await new Futu host: 'localhost', port: 33333
     debug await futu.marketState securityList: [security]
     debug await futu.capitalFlow {security}
     debug await futu.capitalDistribution {security}
