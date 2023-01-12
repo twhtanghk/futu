@@ -23,7 +23,8 @@ do ->
       beginTime: '2021-01-01'
       endTime: '2021-06-30'
     debug await futu.plateSet market: 1
-    debug await futu.subscribe ['00700', '00388']
+    debug await futu.subscribe ['00700', '00388', '01211', '800000']
     debug await futu.subInfo()
+    futu.on '1', debug
   catch err
     console.error err

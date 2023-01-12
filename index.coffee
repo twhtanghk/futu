@@ -1,3 +1,4 @@
+import {EventEmitter} from 'events'
 import ftWebsocket from 'futu-api'
 import {Qot_Common} from 'futu-api/proto'
 {SubType, QotMarket} = Qot_Common
@@ -6,17 +7,29 @@ _ = require 'lodash'
 Promise = require 'bluebird'
 global.WebSocket = require 'ws'
 
-class Futu
+class Futu extends EventEmitter
   symbols: []
 
   constructor: ({host, port}) ->
+    super()
     return do =>
       await new Promise (resolve, reject) =>
         @ws = new ftWebsocket()
         @ws.start host, port, false, null
         @ws.onlogin = resolve
-        @ws.onPush = (cmd, res) ->
-          console.error JSON.stringify res, null, 2
+        @ws.onPush = (cmd, {s2c}) =>
+          {security, klList} = s2c
+          {code} = security
+          [q, ...] = klList
+          @emit '1',
+            code: code
+            timestamp: q.timestamp
+            high: q.highPrice
+            low: q.lowPrice
+            open: q.openPrice
+            close: q.closePrice
+            volume: q.volume.low
+            turnover: q.turnover
       @
       
   # basic data
