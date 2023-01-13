@@ -1,3 +1,4 @@
+_  = require 'lodash'
 import {EventEmitter} from 'events'
 import moment from 'moment'
 import ftWebsocket from 'futu-api'
@@ -54,7 +55,6 @@ class Futu extends EventEmitter
     endTime ?= moment()
       .add days: 1
       .format 'yyyy-MM-DD' 
-    console.log c2s: {rehabType, klType, security, beginTime, endTime}
     await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
 
   plateSet: ({market, placeSetType}={}) ->
@@ -64,22 +64,39 @@ class Futu extends EventEmitter
   subInfo: ({isReqAllConn}={}) ->
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true
 
-  subscribe: (codes) ->
-    if not Array.isArray codes
-      codes = [codes]
-    @symbols = @symbols
-      .concat codes
-      .sort()
-    securityList = @symbols
+  securityList: ->
+    @symbols
       .map (code) ->
         market: QotMarket.QotMarket_HK_Security
         code: code
-    @ws.Sub
+
+  subscribe: (codes) ->
+    if not Array.isArray codes
+      codes = [codes]
+    @symbols = _
+      .union @symbols, codes
+      .sort()
+    await @ws.Sub
       c2s:
-        securityList: securityList
+        securityList: @securityList()
         subTypeList: [SubType.SubType_KL_1Min]
         isSubOrUnSub: true
         isRegOrUnRegPush: true
+
+  unsubscribe: (codes=@symbols) ->
+    # unsubscribe all
+    await @ws.Sub
+      c2s:
+        securityList: @securityList()
+        subTypeList: [SubType.SubType_KL_1Min]
+        isSubOrUnSub: false
+        isUnsubAll: true
+
+    # remove input codes from symbols
+    if not Array.isArray codes
+      codes = [codes]
+      @symbols = _.difference @symbols, codes
+      await @subscribe @symbols
 
 module.exports =
   Futu: Futu

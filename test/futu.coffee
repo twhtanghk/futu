@@ -19,8 +19,19 @@ do ->
     debug await futu.ownerPlate securityList: [security]
     debug await futu.historyKL {security}
     debug await futu.plateSet market: 1
+
     debug await futu.subscribe ['00700', '00388', '01211', '800000']
-    debug await futu.subInfo()
     futu.on '1', debug
+    debug await futu.subInfo()
+
+    await new Promise (resolve) ->
+      setTimeout resolve, 60000
+    debug await futu.unsubscribe '00700'
+    debug await futu.subInfo()
+
+    await new Promise (resolve) ->
+      setTimeout resolve, 60000
+    debug await futu.unsubscribe()
+    debug await futu.subInfo()
   catch err
     console.error err

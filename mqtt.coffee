@@ -1,4 +1,5 @@
 _ = require 'lodash'
+{Futu} = require './index'
 
 mqtt =
   url: process.env.MQTTURL
