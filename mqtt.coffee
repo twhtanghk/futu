@@ -23,6 +23,7 @@ client = require 'mqtt'
           subscribe data
         when 'unsubcribe'
           unsubscribe data
+  .on 'error', console.error
 
 symbols = []
 
