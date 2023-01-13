@@ -1,7 +1,8 @@
 import {EventEmitter} from 'events'
+import moment from 'moment'
 import ftWebsocket from 'futu-api'
 import {Qot_Common} from 'futu-api/proto'
-{SubType, QotMarket} = Qot_Common
+{SubType, RehabType, KLType, QotMarket} = Qot_Common
 
 _ = require 'lodash'
 Promise = require 'bluebird'
@@ -46,6 +47,14 @@ class Futu extends EventEmitter
     await @ws.GetOwnerPlate c2s: {securityList}
 
   historyKL: ({rehabType, klType, security, beginTime, endTime}) ->
+    rehabType ?= RehabType.RehabType_Forward
+    klType ?= KLType.KLType_1Min
+    beginTime ?= moment()
+      .format 'yyyy-MM-DD'
+    endTime ?= moment()
+      .add days: 1
+      .format 'yyyy-MM-DD' 
+    console.log c2s: {rehabType, klType, security, beginTime, endTime}
     await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
 
   plateSet: ({market, placeSetType}={}) ->

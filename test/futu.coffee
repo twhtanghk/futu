@@ -1,6 +1,7 @@
 {Futu} = require '../index.coffee'
 import {Qot_Common} from 'futu-api/proto'
-{QotMarket} = Qot_Common
+{KLType, QotMarket} = Qot_Common
+{KLType_1Min} = KLType
 
 debug = (obj) ->
   console.error JSON.stringify obj, null, 2
@@ -16,12 +17,7 @@ do ->
     debug await futu.capitalFlow {security}
     debug await futu.capitalDistribution {security}
     debug await futu.ownerPlate securityList: [security]
-    debug await futu.historyKL 
-      rehabType: 1
-      klType: 2
-      security: security
-      beginTime: '2021-01-01'
-      endTime: '2021-06-30'
+    debug await futu.historyKL {security}
     debug await futu.plateSet market: 1
     debug await futu.subscribe ['00700', '00388', '01211', '800000']
     debug await futu.subInfo()
