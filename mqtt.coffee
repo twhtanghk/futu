@@ -1,6 +1,8 @@
 _ = require 'lodash'
 {Futu} = require './index'
 
+futu = await new Futu host: 'localhost', port: 33333
+
 mqtt =
   url: process.env.MQTTURL
   user: process.env.MQTTUSER
@@ -35,6 +37,8 @@ subscribe = (list) ->
     .sort (a, b) ->
       a - b
   symbols = _.sortedUniq symbols
+  console.log symbols
+  await futu.subscribe symbols
   client.emit 'symbols', symbols, old
 
 unsubscribe = (list) ->
@@ -43,3 +47,8 @@ unsubscribe = (list) ->
     .filter (code) ->
       code not in data
   client.emit 'symbols', symbols, old
+
+futu.on '1', (quote) ->
+  {code, timestamp, high, low, open, close, volume, turnover} = quote
+  console.log quote
+  client.emit 'stock/aastocks', JSON.stringify quote
