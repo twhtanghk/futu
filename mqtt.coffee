@@ -30,7 +30,7 @@ symbols = []
 
 subscribe = (list) ->
   old = symbols
-  symbols
+  symbols = symbols
     .concat list
     .sort (a, b) ->
       a - b
@@ -39,7 +39,7 @@ subscribe = (list) ->
 
 unsubscribe = (list) ->
   old = client.symbols
-  client.symbols = client.symbols
+  symbols = symbols
     .filter (code) ->
       code not in data
-  client.emit 'symbols', client.symbols, old
+  client.emit 'symbols', symbols, old
