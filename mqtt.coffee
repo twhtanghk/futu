@@ -53,5 +53,6 @@ futu.on '1', (quote) ->
   src = 'aastocks'
   symbol = code
   lastUpdatedAt = timestamp
-  console.log {src, symbol, high, low, open, close, volume, turnover}
-  client.publish 'stock/aastocks', JSON.stringify {src, symbol, high, low, open, close, volume, turnover}
+  msg = {src, symbol, lastUpdatedAt, high, low, open, close, volume, turnover}
+  console.log msg
+  client.publish 'stock/aastocks', JSON.stringify msg
