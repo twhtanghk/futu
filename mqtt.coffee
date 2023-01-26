@@ -50,5 +50,8 @@ unsubscribe = (list) ->
 
 futu.on '1', (quote) ->
   {code, timestamp, high, low, open, close, volume, turnover} = quote
-  console.log quote
-  client.emit 'stock/aastocks', JSON.stringify quote
+  src = 'aastocks'
+  symbol = code
+  lastUpdatedAt = timestamp
+  console.log {src, symbol, high, low, open, close, volume, turnover}
+  client.publish 'stock/aastocks', JSON.stringify {src, symbol, high, low, open, close, volume, turnover}
