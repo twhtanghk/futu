@@ -23,30 +23,10 @@ client = require 'mqtt'
       {action, data} = msg
       switch action
         when 'subscribe'
-          subscribe data
+          await futu.subscribe data
         when 'unsubcribe'
-          unsubscribe data
+          await futu.unsubscribe data
   .on 'error', console.error
-
-symbols = []
-
-subscribe = (list) ->
-  old = symbols
-  symbols = symbols
-    .concat list
-    .sort (a, b) ->
-      a - b
-  symbols = _.sortedUniq symbols
-  console.log symbols
-  await futu.subscribe symbols
-  client.emit 'symbols', symbols, old
-
-unsubscribe = (list) ->
-  old = client.symbols
-  symbols = symbols
-    .filter (code) ->
-      code not in data
-  client.emit 'symbols', symbols, old
 
 futu.on '1', (quote) ->
   {code, timestamp, high, low, open, close, volume, turnover} = quote
