@@ -1,7 +1,14 @@
 _ = require 'lodash'
 {Futu} = require './index'
 
-futu = await new Futu host: 'localhost', port: 33333
+futu = (await new Futu host: 'localhost', port: 33333).on '1', (quote) ->
+  {code, timestamp, high, low, open, close, volume, turnover} = quote
+  src = 'aastocks'
+  symbol = code
+  lastUpdatedAt = timestamp
+  msg = {src, symbol, lastUpdatedAt, high, low, open, close, volume, turnover}
+  console.log msg
+  client.publish 'stock/aastocks', JSON.stringify msg
 
 mqtt =
   url: process.env.MQTTURL
@@ -27,12 +34,3 @@ client = require 'mqtt'
         when 'unsubcribe'
           await futu.unsubscribe data
   .on 'error', console.error
-
-futu.on '1', (quote) ->
-  {code, timestamp, high, low, open, close, volume, turnover} = quote
-  src = 'aastocks'
-  symbol = code
-  lastUpdatedAt = timestamp
-  msg = {src, symbol, lastUpdatedAt, high, low, open, close, volume, turnover}
-  console.log msg
-  client.publish 'stock/aastocks', JSON.stringify msg
