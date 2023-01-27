@@ -62,7 +62,7 @@ class Futu extends EventEmitter
     endTime ?= moment()
       .add days: 1
       .format 'yyyy-MM-DD' 
-    await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
+    @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
 
   plateSet: ({market, placeSetType}={}) ->
     opts = _.defaults {market, placeSetType}, placeSetType: 0
