@@ -1,4 +1,5 @@
 {Futu} = require '../index.coffee'
+import moment from 'moment'
 import {Qot_Common} from 'futu-api/proto'
 {KLType, QotMarket} = Qot_Common
 {KLType_1Min} = KLType
@@ -13,6 +14,7 @@ do ->
       code: '00700'
     securityList = [security]
     futu = await new Futu host: 'localhost', port: 33333
+
     debug await futu.marketState securityList: [security]
     debug await futu.capitalFlow {security}
     debug await futu.capitalDistribution {security}
@@ -33,5 +35,15 @@ do ->
       setTimeout resolve, 60000
     debug await futu.unsubscribe()
     debug await futu.subInfo()
+
+    beginTime = moment()
+      .add month: 1
+      .startOf 'Month'
+      .format 'YYYY-MM-DD'
+    endTime = moment()
+      .add month: 1
+      .endOf 'Month'
+      .format 'YYYY-MM-DD'
+    debug await futu.optionChain {code: '00700', strikeRange: [390, 420], beginTime, beginTime, endTime: endTime}
   catch err
     console.error err

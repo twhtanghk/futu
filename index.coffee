@@ -2,8 +2,9 @@ _  = require 'lodash'
 import {EventEmitter} from 'events'
 import moment from 'moment'
 import ftWebsocket from 'futu-api'
-import {Qot_Common} from 'futu-api/proto'
+import {Common, Qot_Common} from 'futu-api/proto'
 {SubType, RehabType, KLType, QotMarket} = Qot_Common
+{RetType} = Common
 
 _ = require 'lodash'
 Promise = require 'bluebird'
@@ -34,6 +35,12 @@ class Futu extends EventEmitter
             turnover: q.turnover
       @
       
+  errHandler: ({errCode, retMsg, retType, s2c}) ->
+    if retType != RetType.RetType_Succeed
+      throw new Error "#{errCode}: #{retMsg}"
+    else
+      s2c
+
   # basic data
   marketState: ({securityList}={}) ->
     await @ws.GetMarketState c2s: {securityList}
@@ -98,5 +105,27 @@ class Futu extends EventEmitter
       @symbols = _.difference @symbols, codes
       await @subscribe @symbols
 
+  optionChain: ({code, strikeRange, beginTime, endTime}) ->
+    beginTime ?= moment()
+      .startOf 'month'
+      .format 'YYYY-MM-DD'
+    endTime ?= moment()
+      .endOf 'month'
+      .format 'YYYY-MM-DD'
+    {optionChain} = @errHandler await @ws.GetOptionChain
+      c2s:
+        owner:
+          market: QotMarket.QotMarket_HK_Security
+          code: code
+        beginTime: beginTime
+        endTime: endTime
+    _.map optionChain, ({option, strikeTime, strikeTimestamp}) ->
+      strikeTime: strikeTime
+      option: _.filter option, ({call, put}) ->
+        {basic, optionExData} = call
+        {strikePrice} = optionExData
+        [min, max] = strikeRange
+        min <= strikePrice and strikePrice <= max
+      
 module.exports =
   Futu: Futu
