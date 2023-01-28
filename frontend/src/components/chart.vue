@@ -6,19 +6,19 @@
 import {createChart} from 'lightweight-charts'
 import mqtt from '../plugins/mqtt.coffee'
 
-chart = null
-      
 export default
   props:
     code:
       type: String
       default: '00700'
-    autosize:
-      type: Boolean
-      default: true
     chartOptions:
       type: Object
-      default: {}
+      default:
+        layout:
+          textColor: 'black'
+          background:
+            type: 'solid'
+            color: 'white'
     seriesOptions:
       type: Object
       default:
@@ -29,8 +29,18 @@ export default
     priceScaleOptions:
       type: Object
       default: {}
+  data: ->
+    chart: null
+  methods:
+    resize: ->
+      {width, height} = a = @$refs.curr.getBoundingClientRect()
+      console.log "#{a} #{width} #{height}"
+      @chart?.resize width, window.innerHeight
   mounted: ->
-    chart = createChart @$refs.curr
+    window.addEventListener 'resize', =>
+      @resize()
+    @chart = createChart @$refs.curr, @chartOptions
+    series = @chart.addCandlestickSeries()
     mqtt
       .on 'message', (topic, msg) =>
         if topic == 'stock/candle/data'
@@ -38,21 +48,14 @@ export default
           {security, klList} = msg
           {market, code} = security
           if code == @code
-            series = chart.addCandlestickSeries()
-            data = klList.map (i) ->
-              {time, highPrice, lowPrice, openPrice, closePrice} = i
-              time: time
-              high: highPrice
-              low: lowPrice
-              open: openPrice
-              close: closePrice
-            console.log JSON.stringify data
-            series.setData data
-            chart.timeScale().fitContent()
+            console.log JSON.stringify klList
+            series.setData klList
+            @resize()
+            @chart.timeScale().fitContent()
       .publish 'stock/candle', JSON.stringify code: @code
   unmounted: ->
-    chart?.remove()
-    chart = null
+    @chart?.remove()
+    @chart = null
 </script>
 
 <style lang='scss' scoped>
