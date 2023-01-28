@@ -2,7 +2,6 @@ opts =
   url: process.env.VUE_APP_MQTTURL
   user: process.env.VUE_APP_MQTTUSER
   client: process.env.VUE_APP_MQTTCLIENT
-  topic: process.env.VUE_APP_MQTTTOPIC
 
 client = require 'mqtt'
   .connect opts.url,
@@ -10,7 +9,7 @@ client = require 'mqtt'
     clientId: opts.client
     clean: false
   .on 'connect', ->
-    client.subscribe "#{opts.topic}/#", qos: 2
+    client.subscribe "stock/candle/#", qos: 2
     console.debug 'mqtt connected'
   .on 'error', console.error
         

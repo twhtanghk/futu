@@ -1,5 +1,16 @@
 <template>
-  <div class="chart" ref='curr'/>
+  <v-container>
+    <v-row algin='center'>
+      <v-col>name</v-col>
+      <v-col><v-select :items='intervalList' v-model='interval' filled/></v-col>
+      <v-col><v-text-field v-model='code'/></v-col>
+    </v-row>
+    <v-row>
+      <v-col cols='18'>
+        <div class='chart' ref='curr'/>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script lang='coffee'>
@@ -8,9 +19,6 @@ import mqtt from '../plugins/mqtt.coffee'
 
 export default
   props:
-    code:
-      type: String
-      default: '00700'
     chartOptions:
       type: Object
       default:
@@ -19,18 +27,21 @@ export default
           background:
             type: 'solid'
             color: 'white'
-    seriesOptions:
-      type: Object
-      default:
-        color: 'rgb(45, 77, 205)'
-    timeScaleOptions:
-      type: Object
-      default: {}
-    priceScaleOptions:
-      type: Object
-      default: {}
   data: ->
     chart: null
+    code: '00700'
+    interval: '1'
+    intervalList: [
+      '1'
+      '5'
+      '15'
+      '30'
+      '1h'
+      '4h'
+      '1d'
+      '1w'
+      '1m'
+    ] 
   methods:
     resize: ->
       {width, height} = @$refs.curr.getBoundingClientRect()
@@ -40,8 +51,11 @@ export default
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
     @chart.timeScale().applyOptions timeVisible: true
+    @chart.timeScale().subscribeVisibleTimeRangeChange (newRange) ->
+      console.log JSON.stringify newRange
     series = @chart.addCandlestickSeries()
     mqtt
+      .publish 'stock/candle', JSON.stringify code: @code
       .on 'message', (topic, msg) =>
         if topic == 'stock/candle/data'
           msg = JSON.parse msg.toString()
@@ -53,7 +67,6 @@ export default
               i
             @resize()
             @chart.timeScale().fitContent()
-      .publish 'stock/candle', JSON.stringify code: @code
   unmounted: ->
     @chart?.remove()
     @chart = null
