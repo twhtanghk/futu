@@ -3,7 +3,7 @@ import {EventEmitter} from 'events'
 import moment from 'moment'
 import ftWebsocket from 'futu-api'
 import {Common, Qot_Common} from 'futu-api/proto'
-{SubType, RehabType, KLType, QotMarket} = Qot_Common
+{TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
 
 _ = require 'lodash'
@@ -54,15 +54,41 @@ class Futu extends EventEmitter
   ownerPlate: ({securityList}) ->
     await @ws.GetOwnerPlate c2s: {securityList}
 
+  tradeDate: ({market, beginTime, endTime} = {}) ->
+    market ?= TradeDateMarket.TradeDateMarket_HK
+    beginTime = moment()
+      .subtract month: 1
+      .startOf 'month'
+      .format 'YYYY-MM-DD'
+    endTime ?= moment()
+      .format 'YYYY-MM-DD'
+    (@errHandler await @ws.RequestTradeDate c2s: {market, beginTime, endTime})
+      .tradeDateList
+
+  lastTradeDate: ->
+    [..., last] = await @tradeDate()
+    last
+    
   historyKL: ({rehabType, klType, security, beginTime, endTime}) ->
     rehabType ?= RehabType.RehabType_Forward
     klType ?= KLType.KLType_1Min
-    beginTime ?= moment()
-      .format 'yyyy-MM-DD'
+    beginTime ?= (await @lastTradeDate()).time
     endTime ?= moment()
       .add days: 1
       .format 'yyyy-MM-DD' 
-    @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
+    {security, klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
+    security: security
+    klList: klList.map (i) ->
+      {timestamp, openPrice, highPrice, lowPrice, closePrice, lastClosePrice, volume, turnover, changeRate} = i
+      time: timestamp
+      open: openPrice
+      high: highPrice
+      low: lowPrice
+      close: closePrice
+      lastClose: lastClosePrice
+      volume: volume.low
+      turnover: turnover
+      changeRate: changeRate
 
   plateSet: ({market, placeSetType}={}) ->
     opts = _.defaults {market, placeSetType}, placeSetType: 0
