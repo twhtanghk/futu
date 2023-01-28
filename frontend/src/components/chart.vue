@@ -33,13 +33,13 @@ export default
     chart: null
   methods:
     resize: ->
-      {width, height} = a = @$refs.curr.getBoundingClientRect()
-      console.log "#{a} #{width} #{height}"
+      {width, height} = @$refs.curr.getBoundingClientRect()
       @chart?.resize width, window.innerHeight
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
+    @chart.timeScale().applyOptions timeVisible: true
     series = @chart.addCandlestickSeries()
     mqtt
       .on 'message', (topic, msg) =>
@@ -48,8 +48,9 @@ export default
           {security, klList} = msg
           {market, code} = security
           if code == @code
-            console.log JSON.stringify klList
-            series.setData klList
+            series.setData klList.map (i) ->
+              i.time += 8 * 60 * 60 # adjust to HKT+8
+              i
             @resize()
             @chart.timeScale().fitContent()
       .publish 'stock/candle', JSON.stringify code: @code
@@ -60,6 +61,6 @@ export default
 
 <style lang='scss' scoped>
 .chart {
-  height: 100%;
+  height: auto;
 }
 </style>
