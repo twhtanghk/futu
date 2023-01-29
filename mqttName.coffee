@@ -4,8 +4,8 @@ futu = await new Futu host: 'localhost', port: 33333
 
 opts =
   url: process.env.MQTTURL
-  user: process.env.MQTTUSER
-  client: 'candle'
+  user: 'name'
+  client: 'name'
 
 client = require 'mqtt'
   .connect opts.url,
@@ -13,16 +13,16 @@ client = require 'mqtt'
     clientId: opts.client
     clean: false
   .on 'connect', ->
-    client.subscribe "stock/candle", qos: 2
+    client.subscribe "stock/name", qos: 2
     console.debug 'mqtt connected'
   .on 'message', (topic, msg) ->
-    if topic == 'stock/candle'
-      {code} = JSON.parse msg.toString()
-      security =
-        market: 1
-        code: code
+    if topic == 'stock/name'
+      list = JSON.parse msg.toString()
+        .map (security) ->
+          security.market = 1
+          security
       try
-        client.publish 'stock/candle/data', JSON.stringify await futu.historyKL {security}
+        client.publish 'stock/name/data', JSON.stringify await futu.marketState list
       catch err
-        console.error err
+        client.publish 'stock/name/data', JSON.stringify error: err
   .on 'error', console.error

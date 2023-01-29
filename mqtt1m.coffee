@@ -7,7 +7,6 @@ futu = (await new Futu host: 'localhost', port: 33333).on '1', (quote) ->
   symbol = code
   lastUpdatedAt = timestamp
   msg = {src, symbol, lastUpdatedAt, high, low, open, close, volume, turnover}
-  console.log msg
   client.publish 'stock/aastocks', JSON.stringify msg
 
 mqtt =

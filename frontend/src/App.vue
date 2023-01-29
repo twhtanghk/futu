@@ -1,5 +1,5 @@
 <template>
-  <chart code='00700'/>
+  <chart/>
 </template>
 
 <script>

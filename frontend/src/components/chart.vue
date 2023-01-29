@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <v-row algin='center'>
-      <v-col>name</v-col>
+      <v-col>{{ name }}</v-col>
       <v-col><v-select :items='intervalList' v-model='interval' filled/></v-col>
-      <v-col><v-text-field v-model='code'/></v-col>
+      <v-col><v-text-field v-model='code' @keyup.enter='setCode'/></v-col>
     </v-row>
     <v-row>
       <v-col cols='18'>
@@ -29,7 +29,9 @@ export default
             color: 'white'
   data: ->
     chart: null
+    series: null
     code: '00700'
+    name: null
     interval: '1'
     intervalList: [
       '1'
@@ -43,30 +45,51 @@ export default
       '1m'
     ] 
   methods:
+    setCode: (event) ->
+      @getName()
+      @getData()
     resize: ->
       {width, height} = @$refs.curr.getBoundingClientRect()
       @chart?.resize width, window.innerHeight
+    getName: ->
+      mqtt
+        .publish 'stock/name', JSON.stringify [code: @code]
+    getData: ->
+      mqtt
+        .publish 'stock/candle', JSON.stringify code: @code
+    parseRes: ->
+      mqtt
+        .on 'message', (topic, msg) =>
+          switch topic
+            when 'stock/candle/data'
+              msg = JSON.parse msg.toString()
+              {security, klList} = msg
+              {market, code} = security
+              if code == @code
+                @series.setData klList.map (i) ->
+                  i.time += 8 * 60 * 60 # adjust to HKT+8
+                  i
+                @resize()
+                @chart.timeScale().fitContent()
+            when 'stock/name/data'
+              res = JSON.parse msg.toString()
+              if 'error' of res
+                @name = res.error
+              else
+                [{security, name}, ...] = res
+                if security.code == @code
+                  @name = name
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
+    @parseRes()
     @chart = createChart @$refs.curr, @chartOptions
     @chart.timeScale().applyOptions timeVisible: true
     @chart.timeScale().subscribeVisibleTimeRangeChange (newRange) ->
       console.log JSON.stringify newRange
-    series = @chart.addCandlestickSeries()
-    mqtt
-      .publish 'stock/candle', JSON.stringify code: @code
-      .on 'message', (topic, msg) =>
-        if topic == 'stock/candle/data'
-          msg = JSON.parse msg.toString()
-          {security, klList} = msg
-          {market, code} = security
-          if code == @code
-            series.setData klList.map (i) ->
-              i.time += 8 * 60 * 60 # adjust to HKT+8
-              i
-            @resize()
-            @chart.timeScale().fitContent()
+    @series = @chart.addCandlestickSeries()
+    @getName()
+    @getData()
   unmounted: ->
     @chart?.remove()
     @chart = null

@@ -42,8 +42,9 @@ class Futu extends EventEmitter
       s2c
 
   # basic data
-  marketState: ({securityList}={}) ->
-    await @ws.GetMarketState c2s: {securityList}
+  marketState: (securityList) ->
+    (@errHandler await @ws.GetMarketState c2s: {securityList})
+      .marketInfoList
 
   capitalFlow: ({security}) ->
     await @ws.GetCapitalFlow c2s: {security}

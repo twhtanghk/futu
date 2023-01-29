@@ -9,7 +9,7 @@ client = require 'mqtt'
     clientId: opts.client
     clean: false
   .on 'connect', ->
-    client.subscribe "stock/candle/#", qos: 2
+    client.subscribe "stock/#", qos: 2
     console.debug 'mqtt connected'
   .on 'error', console.error
         
