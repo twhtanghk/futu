@@ -73,10 +73,24 @@ class Futu extends EventEmitter
   historyKL: ({rehabType, klType, security, beginTime, endTime}) ->
     rehabType ?= RehabType.RehabType_Forward
     klType ?= KLType.KLType_1Min
-    beginTime ?= (await @lastTradeDate()).time
     endTime ?= moment()
       .add days: 1
       .format 'yyyy-MM-DD' 
+    switch klType
+      when KLType.KLType_1Min, KLType.KLType_5Min, KLType.KLType_15Min
+        beginTime ?= (await @lastTradeDate()).time
+      when KLType.KLType_30Min, KLType.KLType_60Min, KLType.KLType_Day
+        beginTime ?= moment()
+          .subtract month: 1
+          .format 'yyyy-MM-DD' 
+      when KLType.KLType_Week, KLType.KLType_Month
+        beginTime ?= moment()
+          .subtract month: 24
+          .format 'yyyy-MM-DD' 
+      when KLType.KLType_Year
+        beginTime ?= moment()
+          .subtract year: 30
+          .format 'yyyy-MM-DD' 
     {security, klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
     security: security
     klList: klList.map (i) ->
@@ -104,7 +118,7 @@ class Futu extends EventEmitter
         market: QotMarket.QotMarket_HK_Security
         code: code
 
-  subscribe: (codes) ->
+  subscribe: (codes, subtype=SubType.SubType_KL_1Min) ->
     if not Array.isArray codes
       codes = [codes]
     @symbols = _
@@ -117,7 +131,7 @@ class Futu extends EventEmitter
         isSubOrUnSub: true
         isRegOrUnRegPush: true
 
-  unsubscribe: (codes=@symbols) ->
+  unsubscribe: (codes=@symbols, subtype=SubType.SubType_KL_1Min) ->
     # unsubscribe all
     await @ws.Sub
       c2s:

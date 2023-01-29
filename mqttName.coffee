@@ -2,15 +2,10 @@
 
 futu = await new Futu host: 'localhost', port: 33333
 
-opts =
-  url: process.env.MQTTURL
-  user: 'name'
-  client: 'name'
-
 client = require 'mqtt'
-  .connect opts.url,
-    username: opts.user
-    clientId: opts.client
+  .connect process.env.MQTTURL,
+    username: 'name'
+    clientId: 'name'
     clean: false
   .on 'connect', ->
     client.subscribe "stock/name", qos: 2

@@ -1,5 +1,7 @@
 _ = require 'lodash'
 {Futu} = require './index'
+{Qot_Common} = require 'futu-api/proto'
+{SubType} = Qot_Common
 
 futu = (await new Futu host: 'localhost', port: 33333).on '1', (quote) ->
   {code, timestamp, high, low, open, close, volume, turnover} = quote
@@ -9,27 +11,28 @@ futu = (await new Futu host: 'localhost', port: 33333).on '1', (quote) ->
   msg = {src, symbol, lastUpdatedAt, high, low, open, close, volume, turnover}
   client.publish 'stock/aastocks', JSON.stringify msg
 
-mqtt =
-  url: process.env.MQTTURL
-  user: process.env.MQTTUSER
-  client: process.env.MQTTCLIENT
-  topic: process.env.MQTTTOPIC
+subtype =
+  '1': SubType.SubType_KL_1Min
+  '5': SubType.SubType_KL_5Min
+  '15': SubType.SubType_KL_15Min
 
 client = require 'mqtt'
-  .connect mqtt.url,
-    username: mqtt.user
-    clientId: mqtt.client
+  .connect process.env.MQTTURL,
+    username: 'realtime'
+    clientId: 'realtime'
     clean: false
   .on 'connect', ->
-    client.subscribe "#{mqtt.topic}/#", qos: 2
+    client.subscribe "stock/#", qos: 2
     console.debug 'mqtt connected'
   .on 'message', (topic, msg) ->
-    if topic == mqtt.topic
-      msg = JSON.parse msg.toString()
-      {action, data} = msg
-      switch action
-        when 'subscribe'
-          await futu.subscribe data
-        when 'unsubcribe'
-          await futu.unsubscribe data
+    msg = JSON.parse msg.toString()
+    switch topic
+      when 'stock/subscribe'
+        {code, interval} = msg
+        if interval in ['1', '5', '15']
+          await futu.subscribe code, subtype[interval]
+      when 'stock/unsubcribe'
+        {code, interval} = msg
+        if interval in ['1', '5', '15']
+          await futu.unsubscribe code, subType[interval]
   .on 'error', console.error

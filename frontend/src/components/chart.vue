@@ -39,24 +39,24 @@ export default
       '15'
       '30'
       '1h'
-      '4h'
       '1d'
       '1w'
       '1m'
+      '1y'
     ] 
   methods:
     setCode: (event) ->
       @getName()
-      @getData()
+      @getHistory()
     resize: ->
       {width, height} = @$refs.curr.getBoundingClientRect()
       @chart?.resize width, window.innerHeight
     getName: ->
       mqtt
         .publish 'stock/name', JSON.stringify [code: @code]
-    getData: ->
+    getHistory: ->
       mqtt
-        .publish 'stock/candle', JSON.stringify code: @code
+        .publish 'stock/candle', JSON.stringify code: @code, interval: @interval
     parseRes: ->
       mqtt
         .on 'message', (topic, msg) =>
@@ -79,6 +79,9 @@ export default
                 [{security, name}, ...] = res
                 if security.code == @code
                   @name = name
+            when '1', '5', '15'
+              if @interval == topic
+                console.log JSON.parse msg.toString()
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
@@ -88,11 +91,15 @@ export default
     @chart.timeScale().subscribeVisibleTimeRangeChange (newRange) ->
       console.log JSON.stringify newRange
     @series = @chart.addCandlestickSeries()
-    @getName()
-    @getData()
+    @setCode()
   unmounted: ->
     @chart?.remove()
     @chart = null
+  watch:
+    interval: (newVal, oldVal) ->
+      @getHistory()
+      mqtt.publish 'stock/unsubscribe', JSON.stringify {code: @code, interval: oldVal}
+      mqtt.publish 'stock/subscribe', JSON.stringify {code: @code, interval: newVal}
 </script>
 
 <style lang='scss' scoped>
