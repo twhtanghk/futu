@@ -2,8 +2,9 @@
   <v-container>
     <v-row algin='center'>
       <v-col>{{ name }}</v-col>
-      <v-col><v-select :items='intervalList' v-model='interval' filled/></v-col>
+      <v-col><v-select :items='marketList' item-title='text' item-value='value' v-model='market' filled/></v-col>
       <v-col><v-text-field v-model='code' @keyup.enter='setCode'/></v-col>
+      <v-col><v-select :items='intervalList' v-model='interval' filled/></v-col>
     </v-row>
     <v-row>
       <v-col cols='18'>
@@ -16,6 +17,7 @@
 <script lang='coffee'>
 import {createChart} from 'lightweight-charts'
 import mqtt from '../plugins/mqtt.coffee'
+import futu from '../plugins/futu.coffee'
 
 export default
   props:
@@ -44,6 +46,16 @@ export default
       '1m'
       '1y'
     ] 
+    market: futu.market['hkSecurity']
+    marketList: [
+      {text: 'HK Security', value: futu.market['hkSecurity']}
+      {text: 'HK Future', value: futu.market['hkFuture']}
+      {text: 'US Security', value: futu.market['usSecurity']}
+      {text: 'CNSH Security', value: futu.market['cnshSecurity']}
+      {text: 'CNSZ Security', value: futu.market['cnszSecurity']}
+      {text: 'SG Security', value: futu.market['sgSecurity']}
+      {text: 'JP Security', value: futu.market['jpSecurity']}
+    ]
   methods:
     hktz: (time) ->
       time + 8 * 60 * 60 # adjust to HKT+8
