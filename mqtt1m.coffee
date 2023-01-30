@@ -3,13 +3,31 @@ _ = require 'lodash'
 {Qot_Common} = require 'futu-api/proto'
 {SubType} = Qot_Common
 
-futu = (await new Futu host: 'localhost', port: 33333).on '1', (quote) ->
+formatQuote = (quote) ->
   {code, timestamp, high, low, open, close, volume, turnover} = quote
-  src = 'aastocks'
   symbol = code
   lastUpdatedAt = timestamp
-  msg = {src, symbol, lastUpdatedAt, high, low, open, close, volume, turnover}
-  client.publish 'stock/aastocks', JSON.stringify msg
+  {symbol, lastUpdatedAt, high, low, open, close, volume, turnover}
+
+futu = (await new Futu host: 'localhost', port: 33333)
+  .on '1', (quote) ->
+    quote = formatQuote quote
+    client
+      .publish 'stock/aastocks', JSON.stringify(_.extend quote, src: 'aastocks')
+    client
+      .publish 'stock/realtime', JSON.stringify
+        interval: '1'
+        quote: quote
+  .on '5', (quote) ->
+    client
+      .publish 'stock/realtime', JSON.stringify
+        interval: '5'
+        quote: formatQuoate quote
+  .on '15', (quote) ->
+    client
+      .publish 'stock/realtime', JSON.stringify
+        interval: '5'
+        quote: formatQuoate quote
 
 subtype =
   '1': SubType.SubType_KL_1Min
