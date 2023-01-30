@@ -45,6 +45,8 @@ export default
       '1y'
     ] 
   methods:
+    hktz: (time) ->
+      time + 8 * 60 * 60 # adjust to HKT+8
     setCode: (event) ->
       @getName()
       @getHistory()
@@ -60,28 +62,29 @@ export default
     parseRes: ->
       mqtt
         .on 'message', (topic, msg) =>
+          msg = JSON.parse msg.toString()
           switch topic
             when 'stock/candle/data'
-              msg = JSON.parse msg.toString()
               {security, klList} = msg
               {market, code} = security
               if code == @code
-                @series.setData klList.map (i) ->
-                  i.time += 8 * 60 * 60 # adjust to HKT+8
+                @series.setData klList.map (i) =>
+                  i.time = @hktz i.time
                   i
                 @resize()
                 @chart.timeScale().fitContent()
             when 'stock/name/data'
-              res = JSON.parse msg.toString()
-              if 'error' of res
+              if 'error' of msg
                 @name = res.error
               else
-                [{security, name}, ...] = res
+                [{security, name}, ...] = msg
                 if security.code == @code
                   @name = name
-            when '1', '5', '15'
-              if @interval == topic
-                console.log JSON.parse msg.toString()
+            when 'stock/realtime'
+              {interval, quote} = msg
+              if interval == @interval and quote.symbol == @code
+                quote.time = @hktz quote.lastUpdatedAt
+                @series.update quote
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
