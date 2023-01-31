@@ -16,8 +16,11 @@
 
 <script lang='coffee'>
 import {createChart} from 'lightweight-charts'
-import mqtt from '../plugins/mqtt.coffee'
-import futu from '../plugins/futu.coffee'
+import mqtt from '../plugins/mqtt'
+import {default as futu} from '../../../backend/futu'
+{Model} = require('model').default
+
+api = new Model baseUrl: '/api'
 
 export default
   props:
@@ -66,32 +69,33 @@ export default
       {width, height} = @$refs.curr.getBoundingClientRect()
       @chart?.resize width, window.innerHeight
     getName: ->
-      mqtt
-        .publish 'stock/name', JSON.stringify [code: @code]
+      [{security, name}, ...] = await api.read 
+        data:
+          id: 'name'
+          market: @market
+          code: @code
+      if security.code == @code
+        @name = name
     getHistory: ->
-      mqtt
-        .publish 'stock/candle', JSON.stringify code: @code, interval: @interval
+      {security, klList} = await api.read 
+        data: 
+          id: 'candle'
+          security:
+            market: @market
+            code: @code
+          klType: futu.klType[@interval]
+      {market, code} = security
+      if code == @code
+        @series.setData klList.map (i) =>
+          i.time = @hktz i.time
+          i
+      @resize()
+      @chart.timeScale().fitContent()
     parseRes: ->
       mqtt
         .on 'message', (topic, msg) =>
           msg = JSON.parse msg.toString()
           switch topic
-            when 'stock/candle/data'
-              {security, klList} = msg
-              {market, code} = security
-              if code == @code
-                @series.setData klList.map (i) =>
-                  i.time = @hktz i.time
-                  i
-                @resize()
-                @chart.timeScale().fitContent()
-            when 'stock/name/data'
-              if 'error' of msg
-                @name = res.error
-              else
-                [{security, name}, ...] = msg
-                if security.code == @code
-                  @name = name
             when 'stock/realtime'
               {interval, quote} = msg
               if interval == @interval and quote.symbol == @code

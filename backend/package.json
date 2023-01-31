@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "0.0.1",
+  "description": "futu api",
+  "scripts": {
+    "start": "node -r coffeescript/register -r esm index.coffee",
+    "test": "mocha test/*.coffee"
+  },
+  "author": "Tommy Tang",
+  "license": "MIT",
+  "dependencies": {
+    "@koa/cors": "^4.0.0",
+    "coffeescript": "^2.7.0",
+    "koa": "^2.14.1",
+    "koa-bodyparser": "^4.3.0",
+    "koa-logger": "^3.2.1",
+    "koa-methodoverride": "^2.0.0",
+    "koa-router": "^12.0.0",
+    "koa-static": "^5.0.0"
+  }
+}
