@@ -17,8 +17,4 @@ export default {
 body {
   margin: 0;
 }
-
-#app {
-  height: 100%
-}
 </style>
