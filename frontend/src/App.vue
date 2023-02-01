@@ -1,5 +1,14 @@
 <template>
-  <chart/>
+  <v-container>
+    <v-row>
+      <v-col><chart/></v-col>
+      <v-col><chart/></v-col>
+    </v-row>
+    <v-row>
+      <v-col><chart/></v-col>
+      <v-col><chart/></v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

@@ -6,7 +6,7 @@
       <v-col><v-text-field v-model='code' @keyup.enter='setCode'/></v-col>
       <v-col><v-select :items='intervalList' v-model='interval' filled/></v-col>
     </v-row>
-    <v-row class='fill-height'>
+    <v-row>
       <v-col cols='18'>
         <div class='chart' ref='curr'/>
       </v-col>
@@ -72,9 +72,8 @@ export default
       @getName()
       @getHistory()
     resize: ->
-      {width, height} = @$refs.curr.getBoundingClientRect()
-      console.log "#{height} #{width}"
-      @chart?.resize width, window.innerHeight
+      {offsetWidth, offsetHeight} = @$refs.curr
+      @chart?.resize offsetWidth, offsetHeight 
     getName: ->
       [{security, name}, ...] = await api.read 
         data:
@@ -126,6 +125,6 @@ export default
 
 <style lang='scss' scoped>
 .chart {
-  height: auto;
+  height: 30vh;
 }
 </style>
