@@ -38,17 +38,7 @@ export default
     code: '00700'
     name: null
     interval: '1'
-    intervalList: [
-      '1'
-      '5'
-      '15'
-      '30'
-      '1h'
-      '1d'
-      '1w'
-      '1m'
-      '1y'
-    ] 
+    intervalList: _.map futu.klType, (v, k) -> k
     market: futu.market['hkSecurity']
     marketList: [
       {text: 'HK Security', value: futu.market['hkSecurity']}
