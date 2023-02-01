@@ -1,5 +1,5 @@
 import {Common, Qot_Common} from 'futu-api/proto'
-{KLType} = Qot_Common
+{KLType, SubType} = Qot_Common
 
 export default
   klType:
@@ -21,3 +21,4 @@ export default
     cnszSecurity: 22
     sgSecurity: 31
     jpSecurity: 41
+  SubType: SubType

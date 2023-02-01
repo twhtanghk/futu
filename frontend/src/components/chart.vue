@@ -16,11 +16,12 @@
 
 <script lang='coffee'>
 import {createChart} from 'lightweight-charts'
-import mqtt from '../plugins/mqtt'
 import {default as futu} from '../../../backend/futu'
 {Model} = require('model').default
 
 api = new Model baseUrl: '/api'
+ws = new WebSocket 'ws://172.19.0.3:3000/quote'
+ws.addEventListener 'error', console.error
 
 export default
   props:
@@ -82,15 +83,11 @@ export default
       @resize()
       @chart.timeScale().fitContent()
     parseRes: ->
-      mqtt
-        .on 'message', (topic, msg) =>
-          msg = JSON.parse msg.toString()
-          switch topic
-            when 'stock/realtime'
-              {interval, quote} = msg
-              if interval == @interval and quote.symbol == @code
-                quote.time = @hktz quote.lastUpdatedAt
-                @series.update quote
+      ws.onmessage = ({data}) =>
+        {interval, quote} = JSON.parse data
+        if interval == @interval and quote.code == @code
+          quote.time = @hktz quote.timestamp
+          @series.update quote
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
@@ -107,8 +104,14 @@ export default
   watch:
     interval: (newVal, oldVal) ->
       @getHistory()
-      mqtt.publish 'stock/unsubscribe', JSON.stringify {code: @code, interval: oldVal}
-      mqtt.publish 'stock/subscribe', JSON.stringify {code: @code, interval: newVal}
+      ws.send JSON.stringify
+        action: 'unsubscribe'
+        code: @code
+        interval: oldVal
+      ws.send JSON.stringify
+        action: 'subscribe'
+        code: @code
+        interval: newVal
 </script>
 
 <style lang='scss' scoped>

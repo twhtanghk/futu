@@ -124,7 +124,7 @@ class Futu extends EventEmitter
     @symbols = _
       .union @symbols, codes
       .sort()
-    await @ws.Sub
+    @errHandler await @ws.Sub
       c2s:
         securityList: @securityList()
         subTypeList: [SubType.SubType_KL_1Min]
@@ -133,7 +133,7 @@ class Futu extends EventEmitter
 
   unsubscribe: (codes=@symbols, subtype=SubType.SubType_KL_1Min) ->
     # unsubscribe all
-    await @ws.Sub
+    @errHandler await @ws.Sub
       c2s:
         securityList: @securityList()
         subTypeList: [SubType.SubType_KL_1Min]
@@ -144,7 +144,7 @@ class Futu extends EventEmitter
     if not Array.isArray codes
       codes = [codes]
       @symbols = _.difference @symbols, codes
-      await @subscribe @symbols
+      @errHandler await @subscribe @symbols
 
   optionChain: ({code, strikeRange, beginTime, endTime}) ->
     beginTime ?= moment()
