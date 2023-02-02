@@ -15,14 +15,12 @@
 </template>
 
 <script lang='coffee'>
+import {default as ws} from '../plugins/ws'
 import {createChart} from 'lightweight-charts'
 import {default as futu} from '../../../backend/futu'
 {Model} = require('model').default
 
 api = new Model baseUrl: '/api'
-#ws = new WebSocket 'ws://172.19.0.3:3000'
-ws = new WebSocket "ws://#{location.host}"
-ws.addEventListener 'error', console.error
 
 export default
   props:
@@ -39,6 +37,7 @@ export default
             type: 'solid'
             color: 'white'
   data: ->
+    ws: null
     chart: null
     series: null
     code: null
@@ -62,7 +61,7 @@ export default
       market ?= @market
       code ?= @code
       interval ?= @interval
-      ws.send JSON.stringify
+      @ws.send JSON.stringify
         action: 'subscribe'
         market: market
         code: code
@@ -71,7 +70,7 @@ export default
       market ?= @market
       code ?= @code
       interval ?= @interval
-      ws.send JSON.stringify
+      @ws.send JSON.stringify
         action: 'unsubscribe'
         market: market
         code: code
@@ -79,6 +78,7 @@ export default
     setCode: (event) ->
       @getName()
       @getHistory()
+      @subscribe()
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
       @chart?.resize offsetWidth, offsetHeight 
@@ -105,23 +105,23 @@ export default
           i
       @resize()
       @chart.timeScale().fitContent()
-    parseRes: ->
-      ws.addEventListener 'message', ({data}) =>
-        {interval, quote} = JSON.parse data
-        if interval == @interval and quote.code == @code
-          quote.time = @hktz quote.timestamp
-          @series.update quote
-  mounted: ->
+  beforeMount: ->
+    @ws = await ws
+    @ws.addEventListener 'message', ({data}) =>
+      {interval, quote} = JSON.parse data
+      if interval == @interval and quote.code == @code
+        quote.time = @hktz quote.timestamp
+        @series.update quote
     @code = @initCode
+    @setCode()
+  mounted: ->
     window.addEventListener 'resize', =>
       @resize()
-    @parseRes()
     @chart = createChart @$refs.curr, @chartOptions
     @series = @chart.addCandlestickSeries upColor: 'transparent'
     @chart.timeScale().applyOptions timeVisible: true
     @chart.timeScale().subscribeVisibleTimeRangeChange (newRange) ->
       console.log JSON.stringify newRange
-    @setCode()
   unmounted: ->
     @chart?.remove()
     @chart = null
