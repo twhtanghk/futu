@@ -15,12 +15,11 @@
 </template>
 
 <script lang='coffee'>
+import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart} from 'lightweight-charts'
 import {default as futu} from '../../../backend/futu'
 {Model} = require('model').default
-
-api = new Model baseUrl: '/api'
 
 export default
   props:
@@ -37,7 +36,10 @@ export default
             type: 'solid'
             color: 'white'
   data: ->
+    api: new Model baseUrl: '/api'
     ws: null
+    candles: []
+    nodata: false
     chart: null
     series: null
     code: null
@@ -55,6 +57,9 @@ export default
       {text: 'JP Security', value: futu.market['jpSecurity']}
     ]
   methods:
+    clear: ->
+      @candles = []
+      @nodata = false
     hktz: (time) ->
       time + 8 * 60 * 60 # adjust to HKT+8
     subscribe: ({market, code, interval} = {}) ->
@@ -76,6 +81,7 @@ export default
         code: code
         interval: interval
     setCode: (event) ->
+      @clear()
       @getName()
       @getHistory()
       @subscribe()
@@ -83,28 +89,38 @@ export default
       {offsetWidth, offsetHeight} = @$refs.curr
       @chart?.resize offsetWidth, offsetHeight 
     getName: ->
-      [{security, name}, ...] = await api.read 
+      [{security, name}, ...] = await @api.read 
         data:
           id: 'name'
           market: @market
           code: @code
       if security.code == @code
         @name = name
-    getHistory: ->
-      {security, klList} = await api.read 
+    getHistory: ({beginTime, endTime} = {}) ->
+      if beginTime?
+        beginTime = beginTime
+          .format 'YYYY-MM-DD'
+      if endTime?
+        endTime = endTime
+          .format 'YYYY-MM-DD'
+      {security, klList} = await @api.read 
         data: 
           id: 'candle'
           security:
             market: @market
             code: @code
           klType: futu.klType[@interval]
+          beginTime: beginTime
+          endTime: endTime
       {market, code} = security
       if code == @code
-        @series.setData klList.map (i) =>
+        data = klList.map (i) =>
           i.time = @hktz i.time
           i
+        @nodata = klList.length == 0
+        @candles = [data..., @candles...]
+        @series.setData @candles
       @resize()
-      @chart.timeScale().fitContent()
   beforeMount: ->
     @ws = await ws
     @ws.addEventListener 'message', ({data}) =>
@@ -115,18 +131,46 @@ export default
     @code = @initCode
     @setCode()
   mounted: ->
+    flag = false
     window.addEventListener 'resize', =>
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
     @series = @chart.addCandlestickSeries upColor: 'transparent'
     @chart.timeScale().applyOptions timeVisible: true
-    @chart.timeScale().subscribeVisibleTimeRangeChange (newRange) ->
-      console.log JSON.stringify newRange
+    @chart.timeScale().subscribeVisibleTimeRangeChange =>
+      if flag
+        return
+      flag = true
+      timer = setTimeout ->
+      logicalRange = @chart.timeScale().getVisibleLogicalRange()
+      barsInfo = @series.barsInLogicalRange logicalRange
+      [first, ..., last] = @candles
+      if barsInfo?.barsBefore < 10
+        endTime = moment
+          .unix first.time
+          .subtract days: 1
+        diff = switch @interval
+          when '1', '5', '15', '30', '1h'
+            days: 10
+          when '1d'
+            month: 1
+          when '1w'
+            month: 6
+          when '1m'
+            year: 1
+          when '1y'
+            year: 20
+        beginTime = moment endTime.valueOf()
+          .subtract diff
+        if not @nodata
+          await @getHistory {beginTime, endTime}
+      flag = false
   unmounted: ->
     @chart?.remove()
     @chart = null
   watch:
     interval: (newVal, oldVal) ->
+      @clear()
       @getHistory()
       @unsubscribe interval: oldVal
       @subscribe interval: newVal
