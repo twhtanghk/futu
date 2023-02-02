@@ -1,10 +1,10 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row no-gutters>
       <v-col><chart initCode='800000'/></v-col>
       <v-col><chart initCode='01211'/></v-col>
     </v-row>
-    <v-row>
+    <v-row no-gutters>
       <v-col><chart initCode='00388'/></v-col>
       <v-col><chart initCode='00700'/></v-col>
     </v-row>

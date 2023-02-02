@@ -2,11 +2,11 @@
   <v-container>
     <v-row>
       <v-col>{{ name }}</v-col>
-      <v-col><v-select :items='marketList' item-title='text' item-value='value' v-model='market' filled/></v-col>
-      <v-col><v-text-field v-model='code' @keyup.enter='setCode'/></v-col>
-      <v-col><v-select :items='intervalList' v-model='interval' filled/></v-col>
+      <v-col><v-select density='compact' :items='marketList' item-title='text' item-value='value' v-model='market'/></v-col>
+      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='setCode'/></v-col>
+      <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
-    <v-row>
+    <v-row no-gutters>
       <v-col cols='18'>
         <div class='chart' ref='curr'/>
       </v-col>
@@ -134,6 +134,6 @@ export default
 
 <style lang='scss' scoped>
 .chart {
-  height: 30vh;
+  height: 40vh;
 }
 </style>
