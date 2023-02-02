@@ -5,10 +5,6 @@
   "description": "",
   "main": "index.coffee",
   "scripts": {
-    "start": "for i in mqtt1m mqttCandle mqttName; do (node -r coffeescript/register -r esm $i.coffee &); done",
-    "1m": "node -r coffeescript/register -r esm mqtt1m.coffee",
-    "candle": "node -r coffeescript/register -r esm mqttCandle.coffee",
-    "name": "node -r coffeescript/register -r esm mqttName.coffee",
     "test": "node -r coffeescript/register -r esm test/futu.coffee"
   },
   "repository": {
