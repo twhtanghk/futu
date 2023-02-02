@@ -26,6 +26,10 @@ ws.addEventListener 'error', console.error
 
 export default
   props:
+    initCode:
+      type: String
+      default:
+        '00700'
     chartOptions:
       type: Object
       default:
@@ -37,7 +41,7 @@ export default
   data: ->
     chart: null
     series: null
-    code: '00700'
+    code: null
     name: null
     interval: '1'
     intervalList: _.map futu.klType, (v, k) -> k
@@ -54,19 +58,23 @@ export default
   methods:
     hktz: (time) ->
       time + 8 * 60 * 60 # adjust to HKT+8
-    subscribe: ({code, interval} = {}) ->
+    subscribe: ({market, code, interval} = {}) ->
+      market ?= @market
       code ?= @code
       interval ?= @interval
       ws.send JSON.stringify
         action: 'subscribe'
+        market: market
         code: code
         interval: interval
-    unsubscribe: ({code, interval} = {}) ->
+    unsubscribe: ({market, code, interval} = {}) ->
+      market ?= @market
       code ?= @code
       interval ?= @interval
       ws.send JSON.stringify
         action: 'unsubscribe'
-        code: @code
+        market: market
+        code: code
         interval: interval
     setCode: (event) ->
       @getName()
@@ -104,6 +112,7 @@ export default
           quote.time = @hktz quote.timestamp
           @series.update quote
   mounted: ->
+    @code = @initCode
     window.addEventListener 'resize', =>
       @resize()
     @parseRes()

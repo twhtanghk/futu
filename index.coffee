@@ -2,6 +2,7 @@ _  = require 'lodash'
 import {EventEmitter} from 'events'
 import moment from 'moment'
 import ftWebsocket from 'futu-api'
+import { ftCmdID } from 'futu-api'
 import {Common, Qot_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
@@ -11,7 +12,7 @@ Promise = require 'bluebird'
 global.WebSocket = require 'ws'
 
 class Futu extends EventEmitter
-  symbols: []
+  subList: []
 
   constructor: ({host, port}) ->
     super()
@@ -21,18 +22,26 @@ class Futu extends EventEmitter
         @ws.start host, port, false, null
         @ws.onlogin = resolve
         @ws.onPush = (cmd, {s2c}) =>
-          {security, klList} = s2c
-          {code} = security
-          [q, ...] = klList
-          @emit '1',
-            code: code
-            timestamp: q.timestamp
-            high: q.highPrice
-            low: q.lowPrice
-            open: q.openPrice
-            close: q.closePrice
-            volume: q.volume.low
-            turnover: q.turnover
+          switch cmd
+            when ftCmdID.QotUpdateOrderBook.cmd
+              {security, orderBookAskList, orderBookBidList} = s2c
+              {market, code} = security
+              @emit 'orderBook', 
+                {market, code, orderBookAskList, orderBookBidList}
+            when ftCmdID.QotUpdateKL.cmd
+              {security, klList} = s2c
+              {market, code} = security
+              [q, ...] = klList
+              @emit 'candle',
+                market: market
+                code: code
+                timestamp: q.timestamp
+                high: q.highPrice
+                low: q.lowPrice
+                open: q.openPrice
+                close: q.closePrice
+                volume: q.volume.low
+                turnover: q.turnover
       @
       
   errHandler: ({errCode, retMsg, retType, s2c}) ->
@@ -112,39 +121,26 @@ class Futu extends EventEmitter
   subInfo: ({isReqAllConn}={}) ->
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true
 
-  securityList: ->
-    @symbols
-      .map (code) ->
-        market: QotMarket.QotMarket_HK_Security
-        code: code
-
-  subscribe: (codes, subtype=SubType.SubType_KL_1Min) ->
-    if not Array.isArray codes
-      codes = [codes]
-    @symbols = _
-      .union @symbols, codes
-      .sort()
+  subscribe: ({market, code, subtype}) ->
+    subtype ?= SubType.SubType_KL_1Min
+    @subList.push {market, code, subtype}
     @errHandler await @ws.Sub
       c2s:
-        securityList: @securityList()
-        subTypeList: [SubType.SubType_KL_1Min]
+        securityList: [ {market, code} ]
+        subTypeList: [subtype]
         isSubOrUnSub: true
         isRegOrUnRegPush: true
 
-  unsubscribe: (codes=@symbols, subtype=SubType.SubType_KL_1Min) ->
-    # unsubscribe all
+  unsubscribe: ({market, code, subtype}) ->
+    subtype ?= SubType.SubType_KL_1Min
+    @subList = @subList.filter (i) ->
+      not (i.market == market and i.code == code and i.subtype == subtype)
     @errHandler await @ws.Sub
       c2s:
-        securityList: @securityList()
-        subTypeList: [SubType.SubType_KL_1Min]
+        securityList: [ {market, code} ]
+        subTypeList: [subtype]
         isSubOrUnSub: false
-        isUnsubAll: true
-
-    # remove input codes from symbols
-    if not Array.isArray codes
-      codes = [codes]
-      @symbols = _.difference @symbols, codes
-      @errHandler await @subscribe @symbols
+        isUnsubAll: false
 
   optionChain: ({code, strikeRange, beginTime, endTime}) ->
     beginTime ?= moment()
@@ -168,5 +164,7 @@ class Futu extends EventEmitter
         [min, max] = strikeRange
         min <= strikePrice and strikePrice <= max
       
+  accountList: ->
+    @errHandler await @ws.GetAccList c2s: userID: 0
 module.exports =
   Futu: Futu
