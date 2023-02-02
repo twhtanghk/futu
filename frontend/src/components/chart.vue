@@ -20,8 +20,8 @@ import {default as futu} from '../../../backend/futu'
 {Model} = require('model').default
 
 api = new Model baseUrl: '/api'
-ws = new WebSocket 'ws://172.19.0.3:3000'
-#ws = new WebSocket "ws://#{location.host}"
+#ws = new WebSocket 'ws://172.19.0.3:3000'
+ws = new WebSocket "ws://#{location.host}"
 ws.addEventListener 'error', console.error
 
 export default
@@ -98,7 +98,7 @@ export default
       @resize()
       @chart.timeScale().fitContent()
     parseRes: ->
-      ws.onmessage = ({data}) =>
+      ws.addEventListener 'message', ({data}) =>
         {interval, quote} = JSON.parse data
         if interval == @interval and quote.code == @code
           quote.time = @hktz quote.timestamp
