@@ -15,7 +15,8 @@ do ->
 
     await api.subscribe
       market: futu.QotMarket.QotMarket_HK_Security
-      code: 'BYD230227C270000'
+      code: '00700'
+#      code: 'BYD230227C270000'
       subtype: futu.SubType.SubType_OrderBook
   catch err
     console.error err

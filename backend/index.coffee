@@ -1,6 +1,5 @@
 {Futu} = require '../index'
 Koa = require 'koa'
-session = require 'koa-session'
 logger = require 'koa-logger'
 bodyParser = require 'koa-bodyparser'
 methodOverride = require 'koa-methodoverride'
@@ -14,7 +13,6 @@ app.keys = process.env.KEYS?.split(',') || ['keep it secret']
 do ->
   app.context.api = await new Futu host: 'localhost', port: 33333
 app
-  .use session app
   .use logger()
   .use bodyParser()
   .use methodOverride()

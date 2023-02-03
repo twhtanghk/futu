@@ -58,8 +58,7 @@ export default
       market ?= @market
       code ?= @code
       interval ?= @interval
-      @ws.send JSON.stringify
-        action: 'subscribe'
+      @ws.subscribe
         market: market
         code: code
         interval: interval
@@ -67,8 +66,7 @@ export default
       market ?= @market
       code ?= @code
       interval ?= @interval
-      @ws.send JSON.stringify
-        action: 'unsubscribe'
+      @ws.unsubscribe
         market: market
         code: code
         interval: interval
@@ -105,12 +103,10 @@ export default
       @resize()
   beforeMount: ->
     @ws = await ws
-    @ws.addEventListener 'message', ({data}) =>
-      {interval, quote} = JSON.parse data
-      if interval == @interval and quote.code == @code
-        quote.time = @hktz quote.timestamp
-        console.log "#{quote.timestamp} #{quote.time}"
-        @series.update quote
+    @ws.on 'message', ({topic, data}) =>
+      if topic == 'candle' and data.code == @code
+        data.time = @hktz data.timestamp
+        @series.update data
     @code = @initCode
     @setCode()
   mounted: ->
