@@ -84,22 +84,25 @@ class Futu extends EventEmitter
     klType ?= KLType.KLType_1Min
     endTime ?= moment()
       .add days: 1
-      .format 'yyyy-MM-DD' 
+      .format 'YYYY-MM-DD' 
     switch klType
       when KLType.KLType_1Min, KLType.KLType_5Min, KLType.KLType_15Min
-        beginTime ?= (await @lastTradeDate()).time
+        beginTime ?= moment
+          .unix (await @lastTradeDate()).timestamp
+          .subtract day: 1
+          .format 'YYYY-MM-DD'
       when KLType.KLType_30Min, KLType.KLType_60Min, KLType.KLType_Day
         beginTime ?= moment()
           .subtract month: 1
-          .format 'yyyy-MM-DD' 
+          .format 'YYYY-MM-DD' 
       when KLType.KLType_Week, KLType.KLType_Month
         beginTime ?= moment()
           .subtract month: 24
-          .format 'yyyy-MM-DD' 
+          .format 'YYYY-MM-DD' 
       when KLType.KLType_Year
         beginTime ?= moment()
           .subtract year: 30
-          .format 'yyyy-MM-DD' 
+          .format 'YYYY-MM-DD' 
     {security, klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
     security: security
     klList: klList.map (i) ->
