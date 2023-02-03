@@ -36,7 +36,7 @@ export default
             type: 'solid'
             color: 'white'
   data: ->
-    api: new Model baseUrl: '/api'
+    api: require('../plugins/api').default
     ws: null
     candles: []
     nodata: false
@@ -46,16 +46,8 @@ export default
     name: null
     interval: '1'
     intervalList: _.map futu.klType, (v, k) -> k
-    market: futu.market['hkSecurity']
-    marketList: [
-      {text: 'HK Security', value: futu.market['hkSecurity']}
-      {text: 'HK Future', value: futu.market['hkFuture']}
-      {text: 'US Security', value: futu.market['usSecurity']}
-      {text: 'CNSH Security', value: futu.market['cnshSecurity']}
-      {text: 'CNSZ Security', value: futu.market['cnszSecurity']}
-      {text: 'SG Security', value: futu.market['sgSecurity']}
-      {text: 'JP Security', value: futu.market['jpSecurity']}
-    ]
+    market: futu.QotMarket.QotMarket_HK_Security
+    marketList: require('../plugins/const').default.marketList
   methods:
     clear: ->
       @candles = []
@@ -82,20 +74,12 @@ export default
         interval: interval
     setCode: (event) ->
       @clear()
-      @getName()
-      @getHistory()
+      @name = await @api.getName {@market, @code}
+      await @getHistory()
       @subscribe()
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
       @chart?.resize offsetWidth, offsetHeight 
-    getName: ->
-      [{security, name}, ...] = await @api.read 
-        data:
-          id: 'name'
-          market: @market
-          code: @code
-      if security.code == @code
-        @name = name
     getHistory: ({beginTime, endTime} = {}) ->
       if beginTime?
         beginTime = beginTime
@@ -103,15 +87,13 @@ export default
       if endTime?
         endTime = endTime
           .format 'YYYY-MM-DD'
-      {security, klList} = await @api.read 
-        data: 
-          id: 'candle'
-          security:
-            market: @market
-            code: @code
-          klType: futu.klType[@interval]
-          beginTime: beginTime
-          endTime: endTime
+      {security, klList} = await @api.getHistory
+        security:
+          market: @market
+          code: @code
+        klType: futu.klType[@interval]
+        beginTime: beginTime
+        endTime: endTime
       {market, code} = security
       if code == @code
         data = klList.map (i) =>
@@ -127,6 +109,7 @@ export default
       {interval, quote} = JSON.parse data
       if interval == @interval and quote.code == @code
         quote.time = @hktz quote.timestamp
+        console.log "#{quote.timestamp} #{quote.time}"
         @series.update quote
     @code = @initCode
     @setCode()
@@ -141,7 +124,6 @@ export default
       if flag
         return
       flag = true
-      timer = setTimeout ->
       logicalRange = @chart.timeScale().getVisibleLogicalRange()
       barsInfo = @series.barsInLogicalRange logicalRange
       [first, ..., last] = @candles

@@ -14,3 +14,9 @@ module.exports = router
       market: market
       code: i
     await next()
+  .get '/api/optionChain', (ctx, next) ->
+    {market, code, min, max, beginTime, endTime} = ctx.request.body
+    strikeRange = [min, max]
+    opts = {market, code, strikeRange, beginTime, endTime}
+    ctx.response.body = await ctx.api.optionChain opts
+    await next()

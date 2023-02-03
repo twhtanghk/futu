@@ -13,6 +13,7 @@
     "lodash": "^4.17.21",
     "model": "https://github.com/twhtanghk/model",
     "vue": "^3.2.13",
+    "vue-router": "^4.1.6",
     "vuetify": "^3"
   },
   "devDependencies": {
