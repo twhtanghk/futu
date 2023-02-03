@@ -5,8 +5,7 @@
   "description": "",
   "main": "index.coffee",
   "scripts": {
-    "start": "node -r coffeescript/register.js -r esm mqtt.coffee",
-    "test": "node -r coffeescript/register.js -r esm test/futu.coffee"
+    "test": "node -r coffeescript/register -r esm test/futu.coffee"
   },
   "repository": {
     "type": "git",

@@ -2,8 +2,9 @@ _  = require 'lodash'
 import {EventEmitter} from 'events'
 import moment from 'moment'
 import ftWebsocket from 'futu-api'
+import { ftCmdID } from 'futu-api'
 import {Common, Qot_Common} from 'futu-api/proto'
-{SubType, RehabType, KLType, QotMarket} = Qot_Common
+{TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
 
 _ = require 'lodash'
@@ -11,7 +12,7 @@ Promise = require 'bluebird'
 global.WebSocket = require 'ws'
 
 class Futu extends EventEmitter
-  symbols: []
+  subList: []
 
   constructor: ({host, port}) ->
     super()
@@ -21,18 +22,26 @@ class Futu extends EventEmitter
         @ws.start host, port, false, null
         @ws.onlogin = resolve
         @ws.onPush = (cmd, {s2c}) =>
-          {security, klList} = s2c
-          {code} = security
-          [q, ...] = klList
-          @emit '1',
-            code: code
-            timestamp: q.timestamp
-            high: q.highPrice
-            low: q.lowPrice
-            open: q.openPrice
-            close: q.closePrice
-            volume: q.volume.low
-            turnover: q.turnover
+          switch cmd
+            when ftCmdID.QotUpdateOrderBook.cmd
+              {security, orderBookAskList, orderBookBidList} = s2c
+              {market, code} = security
+              @emit 'orderBook', 
+                {market, code, orderBookAskList, orderBookBidList}
+            when ftCmdID.QotUpdateKL.cmd
+              {security, klList} = s2c
+              {market, code} = security
+              [q, ...] = klList
+              @emit 'candle',
+                market: market
+                code: code
+                timestamp: q.timestamp
+                high: q.highPrice
+                low: q.lowPrice
+                open: q.openPrice
+                close: q.closePrice
+                volume: q.volume.low
+                turnover: q.turnover
       @
       
   errHandler: ({errCode, retMsg, retType, s2c}) ->
@@ -42,8 +51,9 @@ class Futu extends EventEmitter
       s2c
 
   # basic data
-  marketState: ({securityList}={}) ->
-    await @ws.GetMarketState c2s: {securityList}
+  marketState: (securityList) ->
+    (@errHandler await @ws.GetMarketState c2s: {securityList})
+      .marketInfoList
 
   capitalFlow: ({security}) ->
     await @ws.GetCapitalFlow c2s: {security}
@@ -54,15 +64,58 @@ class Futu extends EventEmitter
   ownerPlate: ({securityList}) ->
     await @ws.GetOwnerPlate c2s: {securityList}
 
+  tradeDate: ({market, beginTime, endTime} = {}) ->
+    market ?= TradeDateMarket.TradeDateMarket_HK
+    beginTime = moment()
+      .subtract month: 1
+      .startOf 'month'
+      .format 'YYYY-MM-DD'
+    endTime ?= moment()
+      .format 'YYYY-MM-DD'
+    (@errHandler await @ws.RequestTradeDate c2s: {market, beginTime, endTime})
+      .tradeDateList
+
+  lastTradeDate: ->
+    [..., last] = await @tradeDate()
+    last
+    
   historyKL: ({rehabType, klType, security, beginTime, endTime}) ->
     rehabType ?= RehabType.RehabType_Forward
     klType ?= KLType.KLType_1Min
-    beginTime ?= moment()
-      .format 'yyyy-MM-DD'
     endTime ?= moment()
       .add days: 1
-      .format 'yyyy-MM-DD' 
-    @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
+      .format 'YYYY-MM-DD' 
+    switch klType
+      when KLType.KLType_1Min, KLType.KLType_5Min, KLType.KLType_15Min
+        beginTime ?= moment
+          .unix (await @lastTradeDate()).timestamp
+          .subtract day: 1
+          .format 'YYYY-MM-DD'
+      when KLType.KLType_30Min, KLType.KLType_60Min, KLType.KLType_Day
+        beginTime ?= moment()
+          .subtract month: 1
+          .format 'YYYY-MM-DD' 
+      when KLType.KLType_Week, KLType.KLType_Month
+        beginTime ?= moment()
+          .subtract month: 24
+          .format 'YYYY-MM-DD' 
+      when KLType.KLType_Year
+        beginTime ?= moment()
+          .subtract year: 30
+          .format 'YYYY-MM-DD' 
+    {security, klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
+    security: security
+    klList: klList.map (i) ->
+      {timestamp, openPrice, highPrice, lowPrice, closePrice, lastClosePrice, volume, turnover, changeRate} = i
+      time: timestamp
+      open: openPrice
+      high: highPrice
+      low: lowPrice
+      close: closePrice
+      lastClose: lastClosePrice
+      volume: volume.low
+      turnover: turnover
+      changeRate: changeRate
 
   plateSet: ({market, placeSetType}={}) ->
     opts = _.defaults {market, placeSetType}, placeSetType: 0
@@ -71,39 +124,26 @@ class Futu extends EventEmitter
   subInfo: ({isReqAllConn}={}) ->
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true
 
-  securityList: ->
-    @symbols
-      .map (code) ->
-        market: QotMarket.QotMarket_HK_Security
-        code: code
-
-  subscribe: (codes) ->
-    if not Array.isArray codes
-      codes = [codes]
-    @symbols = _
-      .union @symbols, codes
-      .sort()
-    await @ws.Sub
+  subscribe: ({market, code, subtype}) ->
+    subtype ?= SubType.SubType_KL_1Min
+    @subList.push {market, code, subtype}
+    @errHandler await @ws.Sub
       c2s:
-        securityList: @securityList()
-        subTypeList: [SubType.SubType_KL_1Min]
+        securityList: [ {market, code} ]
+        subTypeList: [subtype]
         isSubOrUnSub: true
         isRegOrUnRegPush: true
 
-  unsubscribe: (codes=@symbols) ->
-    # unsubscribe all
-    await @ws.Sub
+  unsubscribe: ({market, code, subtype}) ->
+    subtype ?= SubType.SubType_KL_1Min
+    @subList = @subList.filter (i) ->
+      not (i.market == market and i.code == code and i.subtype == subtype)
+    @errHandler await @ws.Sub
       c2s:
-        securityList: @securityList()
-        subTypeList: [SubType.SubType_KL_1Min]
+        securityList: [ {market, code} ]
+        subTypeList: [subtype]
         isSubOrUnSub: false
-        isUnsubAll: true
-
-    # remove input codes from symbols
-    if not Array.isArray codes
-      codes = [codes]
-      @symbols = _.difference @symbols, codes
-      await @subscribe @symbols
+        isUnsubAll: false
 
   optionChain: ({code, strikeRange, beginTime, endTime}) ->
     beginTime ?= moment()
@@ -127,5 +167,7 @@ class Futu extends EventEmitter
         [min, max] = strikeRange
         min <= strikePrice and strikePrice <= max
       
+  accountList: ->
+    @errHandler await @ws.GetAccList c2s: userID: 0
 module.exports =
   Futu: Futu
