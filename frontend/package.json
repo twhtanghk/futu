@@ -10,8 +10,10 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "core-js": "^3.8.3",
+    "futu-api": "^7.0.3208",
     "lodash": "^4.17.21",
     "model": "https://github.com/twhtanghk/model",
+    "moment": "^2.29.4",
     "vue": "^3.2.13",
     "vue-router": "^4.1.6",
     "vuetify": "^3"
