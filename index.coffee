@@ -1,4 +1,5 @@
 _  = require 'lodash'
+import {Promise} from 'bluebird'
 import {EventEmitter} from 'events'
 import moment from 'moment'
 import ftWebsocket from 'futu-api'
@@ -7,8 +8,6 @@ import {Common, Qot_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
 
-_ = require 'lodash'
-Promise = require 'bluebird'
 global.WebSocket = require 'ws'
 
 class Futu extends EventEmitter
@@ -168,6 +167,7 @@ class Futu extends EventEmitter
         min <= strikePrice and strikePrice <= max
       
   accountList: ->
-    @errHandler await @ws.GetAccList c2s: userID: 0
+    (@errHandler await @ws.GetAccList c2s: userID: 0).accList
+
 module.exports =
   Futu: Futu
