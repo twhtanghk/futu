@@ -5,6 +5,7 @@
   "description": "",
   "main": "index.coffee",
   "scripts": {
+    "mqtt": "node -r coffeescript/register -r esm mqtt1m.coffee",
     "test": "node -r coffeescript/register -r esm test/futu.coffee"
   },
   "repository": {
@@ -26,5 +27,8 @@
     "moment": "^2.29.4",
     "mqtt": "^4.3.7",
     "ws": "^7.5.3"
+  },
+  "devDependencies": {
+    "hkex": "github:twhtanghk/hkex"
   }
 }
