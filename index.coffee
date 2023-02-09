@@ -120,6 +120,11 @@ class Futu extends EventEmitter
     opts = _.defaults {market, placeSetType}, placeSetType: 0
     await @ws.GetPlateSet c2s: opts
 
+  plateSecurity: ({market, code}) ->
+    (@errHandler await @ws.GetPlateSecurity
+      c2s:
+        plate: {market, code}).staticInfoList
+
   subInfo: ({isReqAllConn}={}) ->
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true
 
@@ -168,6 +173,19 @@ class Futu extends EventEmitter
       
   accountList: ->
     (@errHandler await @ws.GetAccList c2s: userID: 0).accList
+
+  accountFund: ->
+    [{trdEnv, accID, trdMarketAuthList}, ...] = (await @accountList())
+      .filter ({trdEnv, trdMarketAuthList}) ->
+        trdEnv == 1 and trdMarketAuthList.some (auth) ->
+          auth == 1
+    req =
+      c2s:
+        header:
+          trdEnv: trdEnv
+          accID: accID.low
+          traMarket: trdMarketAuthList[0]
+    @errHandler await @ws.GetFunds req
 
 module.exports =
   Futu: Futu
