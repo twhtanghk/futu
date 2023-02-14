@@ -1,7 +1,8 @@
 _ = require 'lodash'
 import * as Promise from 'bluebird'
+import ReconnectingWebSocket from 'reconnecting-websocket'
 
-class WS extends WebSocket
+class WS extends ReconnectingWebSocket
   constructor: (url, protocol) ->
     super url, protocol
 
