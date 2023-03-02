@@ -11,17 +11,24 @@
       <v-col v-for='i in optionChain'>
         <v-container>
           <v-row>
-            <v-col cols='4'>{{ i.strikeTime }}</v-col>
+            <v-col>{{ i.strikeTime }}</v-col>
             <v-col>
-              <v-row v-for='option in i.option'>
-                <v-col>
-                  <v-row v-for='(v, k) in option'>
-                    <v-col>{{ k }}</v-col>
-                    <v-col>{{ v.basic.security.code }}</v-col>
-                    <v-col>{{ v.optionExData.strikePrice }}</v-col>
-                  </v-row>
-                </v-col>
-              </v-row>
+              <v-expansion-panels v-for='option in i.option'>
+                <v-expansion-panel :title="'call ' + option.call.optionExData.strikePrice">
+                  <v-expansion-panel-text>
+                    <order :code='option.call.basic.security.code'/>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </v-col>
+            <v-col>
+              <v-expansion-panels v-for='option in i.option'>
+                <v-expansion-panel :title="'put ' + option.put.optionExData.strikePrice">
+                  <v-expansion-panel-text>
+                    <order :code='option.put.basic.security.code'/>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
             </v-col>
           </v-row>
         </v-container>
@@ -34,6 +41,7 @@
 import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {default as futu} from '../../../backend/futu'
+import order from './order.vue'
 require('model').default
 
 export default
@@ -42,6 +50,8 @@ export default
       type: String
       default:
         '00700'
+  components:
+    order: order
   data: ->
     api: require('../plugins/api').default
     code: null
@@ -54,6 +64,8 @@ export default
   methods:
     setCode: (event) ->
       @name = await @api.getName {@market, @code}
+    copyToClipboard: (text) ->
+      window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
   beforeMount: ->
     @code = @initCode
     @setCode()
