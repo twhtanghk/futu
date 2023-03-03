@@ -20,3 +20,6 @@ module.exports = router
     opts = {market, code, strikeRange, beginTime, endTime}
     ctx.response.body = await ctx.api.optionChain opts
     await next()
+  .get '/api/position', (ctx, next) ->
+    ctx.response.body = await ctx.api.position()
+    await next()

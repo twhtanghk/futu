@@ -19,4 +19,6 @@ class Rest extends Model
     {market, code, min, max, beginTime, endTime} = opts
     await @read data: _.extend id: 'optionChain', opts
 
+  getPosition: (opts) ->
+    await @read data: _.extend id: 'position', opts
 export default new Rest()

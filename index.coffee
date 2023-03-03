@@ -4,9 +4,10 @@ import {EventEmitter} from 'events'
 import moment from 'moment'
 import ftWebsocket from 'futu-api'
 import { ftCmdID } from 'futu-api'
-import {Common, Qot_Common} from 'futu-api/proto'
+import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
+{TrdMarket, TrdEnv} = Trd_Common
 
 global.WebSocket = require 'ws'
 
@@ -177,11 +178,16 @@ class Futu extends EventEmitter
   accountList: ->
     (@errHandler await @ws.GetAccList c2s: userID: 0).accList
 
-  accountFund: ->
-    [{trdEnv, accID, trdMarketAuthList}, ...] = (await @accountList())
+  account: (market) ->
+    market ?= TrdMarket.TrdMarket_HK
+    [first, ...] = (await @accountList())
       .filter ({trdEnv, trdMarketAuthList}) ->
-        trdEnv == 1 and trdMarketAuthList.some (auth) ->
-          auth == 1
+        trdEnv == TrdEnv.TrdEnv_Real and trdMarketAuthList.some (auth) ->
+          auth == TrdMarket.TrdMarket_HK
+    first
+    
+  accountFund: ->
+    {trdEnv, accID, trdMarketAuthList} = (await @account())
     req =
       c2s:
         header:
@@ -190,6 +196,16 @@ class Futu extends EventEmitter
           trdMarket: trdMarketAuthList[0]
     @errHandler await @ws.GetFunds req
 
+  position: ->
+    {trdEnv, accID, trdMarketAuthList} = (await @account())
+    req =
+      c2s:
+        header:
+          trdEnv: trdEnv
+          accID: accID
+          trdMarket: trdMarketAuthList[0]
+    (@errHandler await @ws.GetPositionList req).positionList
+    
   basicQuote: ({market, code}) ->
     market ?= QotMarket.QotMarket_HK_Security
     await @subscribe {market, code}
