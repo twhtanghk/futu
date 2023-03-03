@@ -186,8 +186,8 @@ class Futu extends EventEmitter
       c2s:
         header:
           trdEnv: trdEnv
-          accID: accID.low
-          traMarket: trdMarketAuthList[0]
+          accID: accID
+          trdMarket: trdMarketAuthList[0]
     @errHandler await @ws.GetFunds req
 
   basicQuote: ({market, code}) ->
