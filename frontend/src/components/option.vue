@@ -11,7 +11,7 @@
       <v-col v-for='i in optionChain'>
         <v-container>
           <v-row>
-            <v-col>{{ i.strikeTime }}</v-col>
+            <v-col cols='2'>{{ i.strikeTime }}</v-col>
             <v-col>
               <v-expansion-panels v-for='option in i.option'>
                 <v-expansion-panel :title="'call ' + option.call.optionExData.strikePrice">

@@ -31,6 +31,7 @@ class Futu extends EventEmitter
               {security, klList} = s2c
               {market, code} = security
               [q, ...] = klList
+              {lastClosePrice} = await @basicQuote {code}
               @emit 'candle',
                 market: market
                 code: code
@@ -39,6 +40,7 @@ class Futu extends EventEmitter
                 low: q.lowPrice
                 open: q.openPrice
                 close: q.closePrice
+                lastClose: lastClosePrice
                 volume: q.volume.low
                 turnover: q.turnover
       @
@@ -129,12 +131,13 @@ class Futu extends EventEmitter
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true
 
   subscribe: ({market, code, subtype}) ->
+    market ?= QotMarket.QotMarket_HK_Security
     subtype ?= SubType.SubType_KL_1Min
     @subList.push {market, code, subtype}
     @errHandler await @ws.Sub
       c2s:
         securityList: [ {market, code} ]
-        subTypeList: [subtype]
+        subTypeList: [subtype, SubType.SubType_Basic]
         isSubOrUnSub: true
         isRegOrUnRegPush: true
 
@@ -187,5 +190,14 @@ class Futu extends EventEmitter
           traMarket: trdMarketAuthList[0]
     @errHandler await @ws.GetFunds req
 
+  basicQuote: ({market, code}) ->
+    market ?= QotMarket.QotMarket_HK_Security
+    await @subscribe {market, code}
+    req =
+      c2s:
+        securityList: [{market, code}]
+    [ret, ...] = (@errHandler await @ws.GetBasicQot req).basicQotList
+    ret
+      
 module.exports =
   Futu: Futu
