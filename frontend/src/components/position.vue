@@ -18,6 +18,8 @@ export default
       {title: 'Price', key: 'price'}
       {title: 'Cost', key: 'costPrice'}
       {title: 'Value', key: 'val'}
+      {title: 'P&L', key: 'plVal'}
+      {title: 'P&L Ratio', key: 'plRatio'}
     ]
     position: []
   mounted: ->
