@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :sort-by='sortBy' :headers='headers' :items='position'/>
+  <v-data-table :sort-by='sortBy' :headers='headers' :items='position' :items-per-page='-1' density='compact'/>
 </template>
 
 <script lang='coffee'>
@@ -10,7 +10,7 @@ export default
   data: ->
     api: require('../plugins/api').default
     market: futu.QotMarket.QotMarket_HK_Security
-    sortBy: [{key: 'val', order: 'desc'}]
+    sortBy: [{key: 'name', order: 'desc'}]
     headers: [
       {title: 'Code', key: 'code'}
       {title: 'Name', key: 'name'}
