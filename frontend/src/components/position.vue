@@ -1,5 +1,16 @@
 <template>
-  <v-data-table :sort-by='sortBy' :headers='headers' :items='position' :items-per-page='-1' density='compact'/>
+  <v-data-table :sort-by='sortBy' :headers='headers' :items='position' :items-per-page='-1' density='compact'>
+    <template v-slot:column.plVal='{ column }'>
+      <v-chip :color="plSum() > 0 ? 'green' : 'red'">
+        {{ column.title }} {{ plSum() }}
+      </v-chip>
+    </template>
+    <template v-slot:item.plVal='{ item }'>
+      <v-chip :color="item.raw.plVal > 0 ? 'green' : 'red'">
+        {{ item.raw.plVal }}
+      </v-chip>
+    </template>
+  </v-data-table>
 </template>
 
 <script lang='coffee'>
@@ -22,6 +33,12 @@ export default
       {title: 'P&L Ratio', key: 'plRatio'}
     ]
     position: []
+  methods: 
+    plSum: ->
+      ret = 0
+      for i in @position
+        ret += i.plVal
+      ret
   mounted: ->
     @position = (await @api.getPosition())
 </script>
