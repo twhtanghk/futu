@@ -215,5 +215,41 @@ class Futu extends EventEmitter
     [ret, ...] = (@errHandler await @ws.GetBasicQot req).basicQotList
     ret
       
+  historyOrder: ({beginTime, endTime} = {}) ->
+    beginTime ?= moment()
+      .subtract day: 1
+      .format 'YYYY-MM-DD HH:mm:ss'
+    endTime ?= moment()
+      .format 'YYYY-MM-DD HH:mm:ss'
+    {trdEnv, accID, trdMarketAuthList} = (await @account())
+    req =
+      c2s:
+        header:
+          trdEnv: trdEnv
+          accID: accID
+          trdMarket: trdMarketAuthList[0]
+        filterConditions:
+          beginTime: beginTime
+          endTime: endTime
+    (@errHandler await @ws.GetHistoryOrderList req).orderList
+
+  historyDeal: ({beginTime, endTime} = {}) ->
+    beginTime ?= moment()
+      .subtract day: 1
+      .format 'YYYY-MM-DD HH:mm:ss'
+    endTime ?= moment()
+      .format 'YYYY-MM-DD HH:mm:ss'
+    {trdEnv, accID, trdMarketAuthList} = (await @account())
+    req =
+      c2s:
+        header:
+          trdEnv: trdEnv
+          accID: accID
+          trdMarket: trdMarketAuthList[0]
+        filterConditions:
+          beginTime: beginTime
+          endTime: endTime
+    (@errHandler await @ws.GetHistoryOrderFillList req).orderFillList
+    
 module.exports =
   Futu: Futu

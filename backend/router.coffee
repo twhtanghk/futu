@@ -23,3 +23,6 @@ module.exports = router
   .get '/api/position', (ctx, next) ->
     ctx.response.body = await ctx.api.position()
     await next()
+  .get '/api/deal', (ctx, next) ->
+    ctx.response.body = await ctx.api.historyDeal()
+    await next()
