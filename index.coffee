@@ -13,6 +13,7 @@ global.WebSocket = require 'ws'
 
 class Futu extends EventEmitter
   subList: []
+  tradeSerialNo: 0
 
   constructor: ({host, port}) ->
     super()
@@ -178,12 +179,13 @@ class Futu extends EventEmitter
   accountList: ->
     (@errHandler await @ws.GetAccList c2s: userID: 0).accList
 
-  account: (market) ->
+  account: ({market, trdEnv} = {}) ->
     market ?= TrdMarket.TrdMarket_HK
+    trdEnv ?= TrdEnv.TrdEnv_Real
     [first, ...] = (await @accountList())
-      .filter ({trdEnv, trdMarketAuthList}) ->
-        trdEnv == TrdEnv.TrdEnv_Real and trdMarketAuthList.some (auth) ->
-          auth == TrdMarket.TrdMarket_HK
+      .filter (i) ->
+        i.trdEnv == trdEnv and i.trdMarketAuthList.some (auth) ->
+          auth == market
     first
     
   accountFund: ->
@@ -197,7 +199,7 @@ class Futu extends EventEmitter
     @errHandler await @ws.GetFunds req
 
   position: ->
-    {trdEnv, accID, trdMarketAuthList} = (await @account())
+    {trdEnv, accID, trdMarketAuthList} = await @account()
     req =
       c2s:
         header:
@@ -215,6 +217,18 @@ class Futu extends EventEmitter
     [ret, ...] = (@errHandler await @ws.GetBasicQot req).basicQotList
     ret
       
+  orderList: ({market, trdEnv} = {}) ->
+    market ?= TrdMarket.TrdMarket_HK
+    trdEnv ?= TrdEnv.TrdEnv_Real
+    {accID, trdMarketAuthList} = await @account()
+    req =
+      c2s:
+        header:
+          trdEnv: trdEnv
+          accID: accID
+          trdMarket: trdMarketAuthList[0]
+    (@errHandler await @ws.GetOrderList req).orderList
+    
   historyOrder: ({beginTime, endTime} = {}) ->
     beginTime ?= moment()
       .subtract day: 1
@@ -251,5 +265,26 @@ class Futu extends EventEmitter
           endTime: endTime
     (@errHandler await @ws.GetHistoryOrderFillList req).orderFillList
     
+  placeOrder: ({trdEnv, trdMarket, trdSide, orderType, code, qty, price, secMarket}) ->
+    trdEnv ?= TrdEnv.TrdEnv_Simulate
+    trdMarket ?= TrdMarket.TrdMarket_HK
+    orderType ?= OrderType.OrderType_Normal
+    secMarket ?= TrdSecMarket.TrdSecMarket_HK
+    req =
+      packetID:
+        connID: @ws.getConnID()
+        serialNo: @tradeSerialNo++
+      header:
+        trdEnv: trdEnv
+        accID: await account {trdEnv}
+        trdMarket: trdMarket
+      trdSide: trdSide
+      orderType: orderType
+      code: code
+      qty: qty
+      price: price
+      secMarket: secMarket
+    (@errHandler await @ws.PlaceOrder req).orderID
+
 module.exports =
   Futu: Futu
