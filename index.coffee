@@ -7,13 +7,14 @@ import { ftCmdID } from 'futu-api'
 import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
-{TrdMarket, TrdEnv} = Trd_Common
+{OrderType, TrdMarket, TrdSecMarket, TrdEnv} = require('./backend/futu').default
 
 global.WebSocket = require 'ws'
 
 class Futu extends EventEmitter
   subList: []
   tradeSerialNo: 0
+  trdEnv: if process.env.TRDENV? then parseInt process.env.TRDENV else TrdEnv.TrdEnv_Simulate
 
   constructor: ({host, port}) ->
     super()
@@ -181,15 +182,18 @@ class Futu extends EventEmitter
 
   account: ({market, trdEnv} = {}) ->
     market ?= TrdMarket.TrdMarket_HK
-    trdEnv ?= TrdEnv.TrdEnv_Real
+    trdEnv ?= @trdEnv
+    console.log @trdEnv
     [first, ...] = (await @accountList())
       .filter (i) ->
         i.trdEnv == trdEnv and i.trdMarketAuthList.some (auth) ->
           auth == market
     first
     
-  accountFund: ->
-    {trdEnv, accID, trdMarketAuthList} = (await @account())
+  accountFund: ({market, trdEnv} = {}) ->
+    market ?= TrdMarket.TrdMarket_HK
+    trdEnv ?= @trdEnv
+    {trdEnv, accID, trdMarketAuthList} = (await @account {market, trdEnv})
     req =
       c2s:
         header:
@@ -219,7 +223,7 @@ class Futu extends EventEmitter
       
   orderList: ({market, trdEnv} = {}) ->
     market ?= TrdMarket.TrdMarket_HK
-    trdEnv ?= TrdEnv.TrdEnv_Real
+    trdEnv ?= @trdEnv
     {accID, trdMarketAuthList} = await @account()
     req =
       c2s:
@@ -266,24 +270,25 @@ class Futu extends EventEmitter
     (@errHandler await @ws.GetHistoryOrderFillList req).orderFillList
     
   placeOrder: ({trdEnv, trdMarket, trdSide, orderType, code, qty, price, secMarket}) ->
-    trdEnv ?= TrdEnv.TrdEnv_Simulate
+    trdEnv ?= @trdEnv
     trdMarket ?= TrdMarket.TrdMarket_HK
     orderType ?= OrderType.OrderType_Normal
     secMarket ?= TrdSecMarket.TrdSecMarket_HK
     req =
-      packetID:
-        connID: @ws.getConnID()
-        serialNo: @tradeSerialNo++
-      header:
-        trdEnv: trdEnv
-        accID: await account {trdEnv}
-        trdMarket: trdMarket
-      trdSide: trdSide
-      orderType: orderType
-      code: code
-      qty: qty
-      price: price
-      secMarket: secMarket
+      c2s:
+        packetID:
+          connID: @ws.getConnID()
+          serialNo: @tradeSerialNo++
+        header:
+          trdEnv: trdEnv
+          accID: (await @account {trdEnv}).accID
+          trdMarket: trdMarket
+        trdSide: trdSide
+        orderType: orderType
+        code: code
+        qty: qty
+        price: price
+        secMarket: secMarket
     (@errHandler await @ws.PlaceOrder req).orderID
 
 module.exports =

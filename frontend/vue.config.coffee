@@ -2,7 +2,7 @@
 
 module.exports = defineConfig
   devServer:
-    proxy: 'http://172.19.0.6:3000'
+    proxy: 'http://172.19.0.4:3000'
   outputDir: '../backend/dist'
   transpileDependencies: true
   lintOnSave: false

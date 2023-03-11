@@ -29,3 +29,7 @@ module.exports = router
   .get '/api/deal', (ctx, next) ->
     ctx.response.body = await ctx.api.historyDeal()
     await next()
+  .post '/api/trade', (ctx, next) ->
+    {trdSide, code, qty, price} = ctx.request.body
+    ctx.response.body = await ctx.api.placeOrder {trdSide, code, qty, price}
+    await next()

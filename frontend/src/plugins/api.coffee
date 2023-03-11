@@ -23,9 +23,6 @@ class Rest extends Model
     await @read data: _.extend id: 'position', opts
 
   getDeal: (opts) ->
-    (await @read data: _.extend id: 'deal', opts).map (i) ->
-      _.extend i,
-        createTimestamp: new Date 1000 * i.createTimestamp
-        updateTimestamp: new Date 1000 * i.updateTimestamp
+    await @read data: _.extend id: 'deal', opts
 
 export default new Rest()
