@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :sort-by='sortBy' :headers='headers' :items='deal' :items-per-page='-1' density='compact'>
+  <v-data-table :sort-by='sortBy' :headers='headers' :items='trade' :items-per-page='-1' density='compact' fixed-header='true' height='100%'>
     <template v-slot:item.trdSide='{ item }'>
       <v-chip :color="item.raw.trdSide == 2 ? 'green' : 'red'">
         {{ item.raw.trdSide == 2 ? 'Sell' : 'Buy'}}
@@ -15,15 +15,15 @@
 </template>
 
 <script lang='coffee'>
-import {default as ws} from '../plugins/ws'
-import {default as api} from '../plugins/api'
-import {default as futu} from '../../../backend/futu'
+moment = require 'moment'
+ws = require('../plugins/ws').default
+api = require('../plugins/api').default
+trade = require('../plugins/trade').default
+{QotMarket} = require('../../../backend/futu').default
 
 export default
   data: ->
-    ws: null
-    api: require('../plugins/api').default
-    market: futu.QotMarket.QotMarket_HK_Security
+    market: QotMarket.QotMarket_HK_Security
     sortBy: [{key: 'updateTimestamp', order: 'desc'}]
     headers: [
       {title: 'Action', key: 'trdSide'}
@@ -34,14 +34,23 @@ export default
       {title: 'Created at', key: 'createTimestamp'}
       {title: 'Updated at', key: 'updateTimestamp'}
     ]
-    deal: []
+    trade: []
+  methods:
+    nextPage: ->
+      [..., last] = @trade
+      endTime = null
+      if last?
+        endTime = moment
+          .unix last.updateTimestamp
+          .format 'YYYY-MM-DD HH:mm:ss'
+      @trade = @trade.concat await trade.list {endTime}
   mounted: ->
     @ws = (await ws)
       .on 'message', (msg) =>
         {topic, data} = msg
         {orderFill} = data
         if topic == 'trdFilled'
-          @deal.push _.pick orderFill, [
+          @trade.push _.pick orderFill, [
             'trdSide'
             'code'
             'name'
@@ -50,5 +59,7 @@ export default
             'createTimestamp'
             'updateTimestamp'
           ]
-    @deal= (await @api.getDeal())
+  beforeMount: ->
+    @emitter.on 'scrollEnd', =>
+      @nextPage()
 </script>

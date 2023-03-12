@@ -54,5 +54,5 @@ export default
             'createTimestamp'
             'updateTimestamp'
           ]
-    @trade = (await trade.list())
+    #@trade = await trade.list()
 </script>

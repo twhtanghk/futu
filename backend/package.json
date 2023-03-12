@@ -10,7 +10,6 @@
   "license": "MIT",
   "dependencies": {
     "@koa/cors": "^4.0.0",
-    "async": "^3.2.4",
     "coffeescript": "^2.7.0",
     "koa": "^2.14.1",
     "koa-bodyparser": "^4.3.0",

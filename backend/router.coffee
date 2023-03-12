@@ -1,5 +1,4 @@
 moment = require 'moment'
-async = require 'async'
 Router = require 'koa-router'
 router = new Router()
 
@@ -36,22 +35,22 @@ module.exports = router
     ctx.response.body = await ctx.api.placeOrder {trdSide, code, qty, price}
     await next()
   .get '/api/trade', (ctx, next) ->
-    {beginTime, endTime, page} = ctx.request.body
+    {endTime, page} = ctx.request.body
     page ?= 20
     endTime ?= moment()
-      .format 'YYYY-MM-DD HH:mm:ss'
     elapsed = 1
     res = []
-    ret = async.detectSeries res, ->
+    test = (cb) ->
       if res.length >= page
         res.slice 0, page
       else
-        beginTime ?= moment()
-          .subtract day: elapsed++
-          .format 'YYYY-MM-DD HH:mm:ss'
-        console.log "#{beginTime} #{endTime}"
-        res = await ctx.api.historyOrder {beginTime, endTime}
-    console.log res
-    console.log ret
-    ctx.response.body = res
+        await cb()
+    next = ->
+      beginTime = moment endTime
+        .subtract day: elapsed++
+      res = await ctx.api.historyOrder
+        beginTime: beginTime.format 'YYYY-MM-DD HH:mm:ss'
+        endTime: endTime.format 'YYYY-MM-DD HH:mm:ss'
+      await test next
+    ctx.response.body = await test next
     await next()

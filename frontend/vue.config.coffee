@@ -10,3 +10,5 @@ module.exports = defineConfig
     config
       .plugin 'polyfills'
       .use require 'node-polyfill-webpack-plugin'
+  configureWebpack:
+    devtool: 'eval-cheap-source-map'

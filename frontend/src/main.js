@@ -12,6 +12,7 @@ import widget from './components/widget.vue'
 import position from './components/position.vue'
 import deal from './components/deal.vue'
 import trade from './components/trade.vue'
+import mitt from 'mitt'
 
 components.VDataTable = VDataTable
 const vuetify = createVuetify({components, directives, blueprint: md2})
@@ -27,7 +28,9 @@ const router = VueRouter.createRouter({
   routes
 })
 
-createApp(App)
+const app = createApp(App)
+app.config.globalProperties.emitter = mitt()
+app
   .use(vuetify)
   .use(router)
   .mount('#app')
