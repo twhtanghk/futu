@@ -46,6 +46,10 @@ class Futu extends EventEmitter
                 lastClose: lastClosePrice
                 volume: q.volume.low
                 turnover: q.turnover
+            when ftCmdID.TrdUpdateOrder.cmd
+              {TrdUpdateOrder} = s2c
+              {order} = TrdUpdateOrder
+              @emit 'trdUpdate', order
       @
       
   errHandler: ({errCode, retMsg, retType, s2c}) ->
@@ -133,6 +137,12 @@ class Futu extends EventEmitter
   subInfo: ({isReqAllConn}={}) ->
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true
 
+  subscribeAcc: ({accIDList} = {}) ->
+    accIDList ?= (await @accountList())
+      .map ({accID}) ->
+        accID
+    @errHandler await @ws.SubAccPush c2s: {accIDList}
+
   subscribe: ({market, code, subtype}) ->
     market ?= QotMarket.QotMarket_HK_Security
     subtype ?= SubType.SubType_KL_1Min
@@ -183,7 +193,6 @@ class Futu extends EventEmitter
   account: ({market, trdEnv} = {}) ->
     market ?= TrdMarket.TrdMarket_HK
     trdEnv ?= @trdEnv
-    console.log @trdEnv
     [first, ...] = (await @accountList())
       .filter (i) ->
         i.trdEnv == trdEnv and i.trdMarketAuthList.some (auth) ->

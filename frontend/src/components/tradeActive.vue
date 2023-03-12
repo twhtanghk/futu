@@ -15,15 +15,14 @@
 </template>
 
 <script lang='coffee'>
-import {default as ws} from '../plugins/ws'
-import {default as api} from '../plugins/api'
-import {default as futu} from '../../../backend/futu'
+ws = require('../plugins/ws').default
+api = require('../plugins/api').default
+trade = require('../plugins/trade').default
+{QotMarket} = require('../../../backend/futu').default
 
 export default
   data: ->
-    ws: null
-    api: require('../plugins/api').default
-    market: futu.QotMarket.QotMarket_HK_Security
+    market: QotMarket.QotMarket_HK_Security
     sortBy: [{key: 'updateTimestamp', order: 'desc'}]
     headers: [
       {title: 'Action', key: 'trdSide'}
@@ -31,12 +30,15 @@ export default
       {title: 'Name', key: 'name'}
       {title: 'Qty', key: 'qty'}
       {title: 'Price', key: 'price'}
+      {title: 'Filled Qty', key: 'fillQty'}
+      {title: 'Filled Avg Price', key: 'fillAvgPrice'}
       {title: 'Created at', key: 'createTimestamp'}
       {title: 'Updated at', key: 'updateTimestamp'}
     ]
-    deal: []
+    trade: []
   mounted: ->
     @ws = (await ws)
+      .subscribeAcc()
       .on 'message', (msg) =>
         {topic, data} = msg
         {orderFill} = data
@@ -47,8 +49,10 @@ export default
             'name'
             'qty'
             'price'
+            'fillQty'
+            'fillAvgPrice'
             'createTimestamp'
             'updateTimestamp'
           ]
-    @deal = (await @api.getDeal())
+    @trade = (await trade.list())
 </script>

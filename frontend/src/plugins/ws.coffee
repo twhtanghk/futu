@@ -10,6 +10,9 @@ class WS extends ReconnectingWebSocket
     super JSON.stringify obj
     @
 
+  subscribeAcc: (opts) ->
+    @send _.extend action: 'subscribeAcc', opts
+
   subscribe: (opts) ->
     {subtype, market, code, interval} = opts
     @send _.extend action: 'subscribe', opts
