@@ -26,7 +26,7 @@ export default
         @emitter.emit 'scrollEnd'
 </script>
 
-<style lang='scss'>
+<style lang='scss' scoped>
 html, body {
   overflow: hidden;
 }
