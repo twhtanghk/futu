@@ -32,3 +32,6 @@ module.exports = (ctx, msg) ->
       ctx.websocket.send JSON.stringify topic: 'candle', data: data
     .on 'orderBook', (data) ->
       ctx.websocket.send JSON.stringify topic: 'orderBook', data: data
+    .on 'trdUpdate', (data) ->
+      console.log JSON.stringify data, null, 2
+      ctx.websocket.send JSON.stringify topic: 'trdUpdate', data: data

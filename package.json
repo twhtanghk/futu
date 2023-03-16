@@ -29,6 +29,7 @@
     "ws": "^7.5.3"
   },
   "devDependencies": {
-    "hkex": "github:twhtanghk/hkex"
+    "hkex": "github:twhtanghk/hkex",
+    "md5": "^2.3.0"
   }
 }

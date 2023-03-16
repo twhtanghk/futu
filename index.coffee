@@ -7,7 +7,7 @@ import { ftCmdID } from 'futu-api'
 import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
-{OrderType, TrdMarket, TrdSecMarket, TrdEnv} = require('./backend/futu').default
+{OrderType, SecurityFirm, TrdMarket, TrdSecMarket, TrdEnv} = require('./backend/futu').default
 
 global.WebSocket = require 'ws'
 
@@ -47,8 +47,7 @@ class Futu extends EventEmitter
                 volume: q.volume.low
                 turnover: q.turnover
             when ftCmdID.TrdUpdateOrder.cmd
-              {TrdUpdateOrder} = s2c
-              {order} = TrdUpdateOrder
+              {order} = s2c
               @emit 'trdUpdate', order
       @
       
@@ -299,6 +298,14 @@ class Futu extends EventEmitter
         price: price
         secMarket: secMarket
     (@errHandler await @ws.PlaceOrder req).orderID
+
+  unlock: ({pwdMD5}) ->
+    req =
+      c2s:
+        unlock: true
+        securityFirm: SecurityFirm.SecurityFirm_FutuSecurities
+        pwdMD5: pwdMD5
+    @errHandler await @ws.UnlockTrade req
 
 module.exports =
   Futu: Futu

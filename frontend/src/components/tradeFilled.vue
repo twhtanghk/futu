@@ -81,18 +81,9 @@ export default
     @ws = (await ws)
       .on 'message', (msg) =>
         {topic, data} = msg
-        {orderFill} = data
-        if topic == 'trdFilled'
-          @trade.push _.pick orderFill, [
-            'trdSide'
-            'orderStatus'
-            'code'
-            'name'
-            'qty'
-            'price'
-            'createTimestamp'
-            'updateTimestamp'
-          ]
+        if topic == 'trdUpdate'
+          @trade.push data
+          @trade = _.uniq @trade, 'orderID'
   beforeMount: ->
     @emitter.on 'scrollEnd', =>
       @nextPage()

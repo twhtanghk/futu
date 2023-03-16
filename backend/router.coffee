@@ -54,3 +54,8 @@ module.exports = router
       await test next
     ctx.response.body = await test next
     await next()
+  .put '/api/trade/unlock', (ctx, next) ->
+    {pwdMD5} = ctx.request.body
+    await ctx.api.unlock {pwdMD5}
+    ctx.response.body = {}
+    await next()

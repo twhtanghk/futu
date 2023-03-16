@@ -13,6 +13,7 @@ import position from './components/position.vue'
 import deal from './components/deal.vue'
 import trade from './components/trade.vue'
 import mitt from 'mitt'
+import '@mdi/font/css/materialdesignicons.css'
 
 components.VDataTable = VDataTable
 const vuetify = createVuetify({components, directives, blueprint: md2})
