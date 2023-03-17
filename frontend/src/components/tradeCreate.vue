@@ -7,7 +7,7 @@
       </v-row>
       <v-row>
         <v-col>{{ name }}</v-col>
-        <v-col><v-text-field v-model='trdSide'/></v-col>
+        <v-col><v-select :items='trdSideList' item-title='text' item-value='value' v-model='trdSide'/></v-col>
         <v-col><v-text-field v-model='code' @keyup.enter='getName'/></v-col>
         <v-col><v-text-field v-model='qty'/></v-col>
         <v-col><v-text-field v-model='price'/></v-col>
@@ -25,10 +25,16 @@ md5 = require 'md5'
 
 export default
   data: ->
+    trdSide: TrdSide.TrdSide_Buy
+    trdSideList: [
+      {text: 'Buy', value: TrdSide.TrdSide_Buy}
+      {text: 'Sell', value: TrdSide.TrdSide_Sell}
+      {text: 'SellShort', value: TrdSide.TrdSide_SellShort}
+      {text: 'BuyBack', value: TrdSide.TrdSide_BuyBack}
+    ]
     market: QotMarket.QotMarket_HK_Security
     passwd: null
     show: false
-    trdSide: TrdSide.TrdSide_Buy
     code: null
     name: null
     qty: 0

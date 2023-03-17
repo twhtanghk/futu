@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <v-row no-gutters>{{code}}</v-row>
     <v-row no-gutters>
       <v-col>
         <v-row no-gutters>bid</v-row>

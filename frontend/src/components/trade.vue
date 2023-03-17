@@ -1,7 +1,6 @@
 <template>
   <v-container>
     <v-row><tradeCreate/></v-row>
-    <v-row><tradeActive/></v-row>
     <v-row>
       <tradeFilled/>
       <div v-intersect='onShow'/>
@@ -32,17 +31,12 @@ html, body {
 }
 
 .v-container .v-row:nth-child(1) {
-  height: 20vh;
-  width: 100%;
-}
-
-.v-container .v-row:nth-child(2) {
   height: 30vh;
   width: 100%;
 }
 
 .v-container .v-row:nth-child(3) {
-  height: 50vh;
+  height: 70vh;
   width: 100%;
   overflow: auto;
 }

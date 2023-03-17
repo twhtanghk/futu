@@ -64,8 +64,6 @@ export default
   methods:
     setCode: (event) ->
       @name = await @api.getName {@market, @code}
-    copyToClipboard: (text) ->
-      window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
   beforeMount: ->
     @code = @initCode
     @setCode()
