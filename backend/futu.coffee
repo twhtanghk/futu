@@ -1,6 +1,6 @@
 import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {QotMarket, KLType, SubType} = Qot_Common
-{OrderType, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide} = Trd_Common
+{ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide} = Trd_Common
 
 export default
   klType:
@@ -25,8 +25,10 @@ export default
   SubType: SubType
   QotMarket: QotMarket
   OrderType: OrderType
+  OrderStatus: OrderStatus
   SecurityFirm: SecurityFirm
   TrdEnv: TrdEnv
   TrdMarket: TrdMarket
   TrdSecMarket: TrdSecMarket
   TrdSide: TrdSide
+  ModifyOrderOp: ModifyOrderOp

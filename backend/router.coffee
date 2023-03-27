@@ -54,6 +54,9 @@ module.exports = router
       await test next
     ctx.response.body = await test next
     await next()
+  .del '/api/trade/:id', (ctx, next) ->
+    ctx.response.body = await ctx.api.cancelOrder id: ctx.request.params.id
+    await next()
   .put '/api/trade/unlock', (ctx, next) ->
     {pwdMD5} = ctx.request.body
     await ctx.api.unlock {pwdMD5}

@@ -20,6 +20,13 @@
     <template v-slot:item.updateTimestamp='{ item }'>
       {{new Date(1000 * item.raw.updateTimestamp).toLocaleString()}}
     </template>
+    <template v-slot:item.action='{ item }'>
+      <v-btn density='compact' @click='cancel(item.raw)'
+        v-if='! isFilled(item.raw)'
+      >
+        Cancel
+      </v-btn>
+    </template>
   </v-data-table>
 </template>
 
@@ -28,14 +35,14 @@ moment = require 'moment'
 ws = require('../plugins/ws').default
 api = require('../plugins/api').default
 trade = require('../plugins/trade').default
-{QotMarket} = require('../../../backend/futu').default
+{QotMarket, OrderStatus} = require('../../../backend/futu').default
 
 export default
   data: ->
     market: QotMarket.QotMarket_HK_Security
     sortBy: [{key: 'updateTimestamp', order: 'desc'}]
     headers: [
-      {title: 'Action', key: 'trdSide'}
+      {title: 'Trade', key: 'trdSide'}
       {title: 'Status', key: 'orderStatus'}
       {title: 'Code', key: 'code'}
       {title: 'Name', key: 'name'}
@@ -43,6 +50,7 @@ export default
       {title: 'Price', key: 'price'}
       {title: 'Created at', key: 'createTimestamp'}
       {title: 'Updated at', key: 'updateTimestamp'}
+      {title: 'Action', key: 'action'}
     ]
     trade: []
   methods:
@@ -56,6 +64,15 @@ export default
       @trade = @trade.concat await trade.list {endTime}
     trdSide: (i) ->
       ['Unknown', 'Buy', 'Sell', 'SellShort', 'Buyback'][i]
+    isFilled: ({orderStatus}) ->
+      orderStatus not in [
+        OrderStatus.OrderStatus_Filled_Part
+        OrderStatus.OrderStatus_Submitted
+        OrderStatus.OrderStatus_WaitingSubmit
+        OrderStatus.OrderStatus_Submitting
+      ]
+    cancel: ({orderID}) ->
+      await trade.delete data: id: orderID
     orderStatus: (i) ->
       map = {
         '-1': 'Unknown'

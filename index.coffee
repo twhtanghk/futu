@@ -7,7 +7,7 @@ import { ftCmdID } from 'futu-api'
 import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
-{OrderType, SecurityFirm, TrdMarket, TrdSecMarket, TrdEnv} = require('./backend/futu').default
+{ModifyOrderOp, OrderType, SecurityFirm, TrdMarket, TrdSecMarket, TrdEnv} = require('./backend/futu').default
 
 global.WebSocket = require 'ws'
 
@@ -49,6 +49,9 @@ class Futu extends EventEmitter
             when ftCmdID.TrdUpdateOrder.cmd
               {order} = s2c
               @emit 'trdUpdate', order
+            when ftCmdID.TrdUpdateOrderFill.cmd
+              {order} = s2c
+              @emit 'trdUpdate', orderFill
       @
       
   errHandler: ({errCode, retMsg, retType, s2c}) ->
@@ -157,12 +160,16 @@ class Futu extends EventEmitter
     subtype ?= SubType.SubType_KL_1Min
     @subList = @subList.filter (i) ->
       not (i.market == market and i.code == code and i.subtype == subtype)
-    @errHandler await @ws.Sub
-      c2s:
-        securityList: [ {market, code} ]
-        subTypeList: [subtype]
-        isSubOrUnSub: false
-        isUnsubAll: false
+    try
+      @errHandler await @ws.Sub
+        c2s:
+          securityList: [ {market, code} ]
+          subTypeList: [subtype]
+          isSubOrUnSub: false
+          isUnsubAll: false
+    catch e
+      console.log JSON.stringify {market, code, subtype}, null, 2
+      throw e
 
   optionChain: ({code, strikeRange, beginTime, endTime}) ->
     beginTime ?= moment()
@@ -298,6 +305,24 @@ class Futu extends EventEmitter
         price: price
         secMarket: secMarket
     (@errHandler await @ws.PlaceOrder req).orderID
+
+  cancelOrder: ({id}) ->
+    {accID, trdEnv, trdMarketAuthList} = await @account()
+    [trdMarket, ...] = trdMarketAuthList 
+    {qty, fillQty, price} = (await @orderList()).find ({orderID}) ->
+      orderID.toString() == id
+    req =
+      c2s:
+        packetID:
+          connID: @ws.getConnID()
+          serialNo: @tradeSerialNo++
+        header:
+          {trdEnv, accID, trdMarket}
+        orderID: id
+        modifyOrderOp: ModifyOrderOp.ModifyOrderOp_Cancel
+        qty: qty - fillQty
+        price: price
+     @errHandler await @ws.ModifyOrder req   
 
   unlock: ({pwdMD5}) ->
     req =
