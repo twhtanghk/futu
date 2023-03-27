@@ -13,8 +13,8 @@
           <v-row>
             <v-col cols='2'>{{ i.strikeTime }}</v-col>
             <v-col>
-              <v-expansion-panels v-for='option in i.option'>
-                <v-expansion-panel :title="'call ' + option.call.optionExData.strikePrice">
+              <v-expansion-panels>
+                <v-expansion-panel :title="'call ' + option.call.optionExData.strikePrice" @click='click($event, option.call)' v-for='option in i.option'>
                   <v-expansion-panel-text>
                     <order :code='option.call.basic.security.code'/>
                   </v-expansion-panel-text>
@@ -22,8 +22,8 @@
               </v-expansion-panels>
             </v-col>
             <v-col>
-              <v-expansion-panels v-for='option in i.option'>
-                <v-expansion-panel :title="'put ' + option.put.optionExData.strikePrice">
+              <v-expansion-panels>
+                <v-expansion-panel :title="'put ' + option.put.optionExData.strikePrice" @click='click($event, option.put)' v-for='option in i.option'>
                   <v-expansion-panel-text>
                     <order :code='option.put.basic.security.code'/>
                   </v-expansion-panel-text>
@@ -39,10 +39,9 @@
 
 <script lang='coffee'>
 import moment from 'moment'
-import {default as ws} from '../plugins/ws'
+import {default as api} from '../plugins/api'
 import {default as futu} from '../../../backend/futu'
-import order from './order.vue'
-require('model').default
+import order from './order'
 
 export default
   props:
@@ -53,7 +52,6 @@ export default
   components:
     order: order
   data: ->
-    api: require('../plugins/api').default
     code: null
     name: null
     min: null
@@ -63,7 +61,7 @@ export default
     marketList: require('../plugins/const').default.marketList
   methods:
     setCode: (event) ->
-      @name = await @api.getName {@market, @code}
+      @name = await api.getName {@market, @code}
   beforeMount: ->
     @code = @initCode
     @setCode()
@@ -73,7 +71,7 @@ export default
   watch:
     strikeRange: ->
       if @min? and @max? and @max >= @min
-        @optionChain = await @api.getOptionChain {@market, @code, @min, @max}
+        @optionChain = await api.getOptionChain {@market, @code, @min, @max}
 </script>
 
 <style lang='scss' scoped>

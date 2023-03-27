@@ -24,6 +24,7 @@
 
 <script lang='coffee'>
 import {default as ws} from '../plugins/ws'
+import {default as api} from '../plugins/api'
 import {default as futu} from '../../../backend/futu'
 
 export default
@@ -33,26 +34,30 @@ export default
       default:
         '00700'
   data: ->
-    api: require('../plugins/api').default
-    ws: null
     market: futu.QotMarket.QotMarket_HK_Security
     ask: []
     bid: []
+    active: false
+  methods: 
+    subscribe: ->
+      (await ws).subscribe
+        subtype: futu.SubType.SubType_OrderBook
+        market: @market
+        code: @code
+    unsubscribe: ->
+      (await ws).unsubscribe
+        subtype: futu.SubType.SubType_OrderBook
+        market: @market
+        code: @code
   mounted: ->
-    @ws = (await ws)
+    @subscribe()
+    (await ws)
       .on 'message', (msg) =>
         {topic, data} = msg
         {market, code, orderBookAskList, orderBookBidList} = data
         if topic == 'orderBook' and market == @market and code == @code
           @ask = orderBookAskList
           @bid = orderBookBidList
-      .subscribe
-        subtype: futu.SubType.SubType_OrderBook
-        market: @market
-        code: @code
   unmounted: ->
-    @ws.unsubscribe
-      subtype: futu.SubType.SubType_OrderBook
-      market: @market
-      code: @symbol
+    @unsubscribe()
 </script>
