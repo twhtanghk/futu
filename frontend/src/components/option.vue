@@ -13,8 +13,8 @@
           <v-row>
             <v-col cols='2'>{{ i.strikeTime }}</v-col>
             <v-col>
-              <v-expansion-panels>
-                <v-expansion-panel :title="'call ' + option.call.optionExData.strikePrice" @click='click($event, option.call)' v-for='option in i.option'>
+              <v-expansion-panels v-for='option in i.option'>
+                <v-expansion-panel :title="'call ' + option.call.optionExData.strikePrice">
                   <v-expansion-panel-text>
                     <order :code='option.call.basic.security.code'/>
                   </v-expansion-panel-text>
@@ -22,8 +22,8 @@
               </v-expansion-panels>
             </v-col>
             <v-col>
-              <v-expansion-panels>
-                <v-expansion-panel :title="'put ' + option.put.optionExData.strikePrice" @click='click($event, option.put)' v-for='option in i.option'>
+              <v-expansion-panels v-for='option in i.option'>
+                <v-expansion-panel :title="'put ' + option.put.optionExData.strikePrice">
                   <v-expansion-panel-text>
                     <order :code='option.put.basic.security.code'/>
                   </v-expansion-panel-text>
