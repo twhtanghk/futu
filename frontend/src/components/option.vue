@@ -1,11 +1,12 @@
 <template>
   <v-container>
     <v-row>
-      <v-col>{{ name }}</v-col>
-      <v-col><v-select density='compact' :items='marketList' item-title='text' item-value='value' v-model='market'/></v-col>
-      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='setCode'/></v-col>
-      <v-col><v-text-field density='compact' v-model.number='min'/></v-col>
-      <v-col><v-text-field density='compact' v-model.number='max'/></v-col>
+      <v-col md='2'>{{ name }}</v-col>
+      <v-col md='3'><v-select density='compact' :items='marketList' item-title='text' item-value='value' v-model='market'/></v-col>
+      <v-col md='3'><v-select density='compact' :items='dateList' v-model='expiryDate'/></v-col>
+      <v-col md='2'><v-text-field density='compact' v-model='code' @keyup.enter='setCode'/></v-col>
+      <v-col md='1'><v-text-field density='compact' v-model.number='min'/></v-col>
+      <v-col md='1'><v-text-field density='compact' v-model.number='max'/></v-col>
     </v-row>
     <v-row no-gutters>
       <v-col v-for='i in optionChain'>
@@ -59,19 +60,35 @@ export default
     optionChain: []
     market: futu.QotMarket.QotMarket_HK_Security
     marketList: require('../plugins/const').default.marketList
+    expiryDate: @comingMonth()[0]
+    dateList: @comingMonth()
   methods:
     setCode: (event) ->
       @name = await api.getName {@market, @code}
+    comingMonth: ->
+      curr = moment().startOf 'month'
+      [
+        curr
+        moment(curr).add month: 1
+        moment(curr).add month: 2
+      ].map (i) ->
+        i.format 'YYYY-MM'
   beforeMount: ->
     @code = @initCode
     @setCode()
   computed:
-    strikeRange: ->
-      [@min, @max]
+    strikeParam: ->
+      [@expiryDate, @min, @max]
   watch:
-    strikeRange: ->
+    strikeParam: ->
       if @min? and @max? and @max >= @min
-        @optionChain = await api.getOptionChain {@market, @code, @min, @max}
+        beginTime = moment @expiryDate, 'YYYY-MM'
+          .startOf 'month'
+          .format 'YYYY-MM-DD'
+        endTime = moment beginTime
+          .endOf 'month'
+          .format 'YYYY-MM-DD'
+        @optionChain = await api.getOptionChain {@market, @code, @min, @max, beginTime, endTime}
 </script>
 
 <style lang='scss' scoped>
