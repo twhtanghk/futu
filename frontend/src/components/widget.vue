@@ -12,9 +12,9 @@
 </template>
 
 <script lang='coffee'>
-import chart from './chart.vue'
-import option from './option.vue'
-import orderBook from './orderBook.vue'
+import chart from './chart'
+import option from './option'
+import orderBook from './orderBook'
 
 export default
   components:
