@@ -39,7 +39,8 @@ export default
     name: null
   methods:
     getName: ->
-      @name = await api.getName {@market, code: @item.code}
+      if @item.code?
+        @name = await api.getName {@market, code: @item.code}
     create: ->
       await trade.create data: @item
   beforeMount: ->
