@@ -12,14 +12,12 @@
 <script lang='coffee'>
 import unlockAcc from './unlockAcc'
 import tradeCreate from './tradeCreate'
-import tradeActive from './tradeActive'
 import tradeFilled from './tradeFilled'
 
 export default
   components: { 
     unlockAcc
     tradeCreate
-    tradeActive
     tradeFilled
   }
   methods:
