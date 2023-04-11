@@ -11,6 +11,7 @@
 
 <script lang='coffee'>
 md5 = require 'md5'
+trade = require('../plugins/trade').default
 
 export default
   data: ->

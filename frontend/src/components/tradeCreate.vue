@@ -23,11 +23,6 @@ export default
   props:
     item:
       type: Object # {trdSide, code, qty, price}
-      default:
-        trdSide: TrdSide.TrdSide_Buy
-        code: null
-        qty: null
-        price: null
   data: ->
     trdSideList: [
       {text: 'Buy', value: TrdSide.TrdSide_Buy}

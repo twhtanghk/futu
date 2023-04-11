@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row><unlockAcc/></v-row>
-    <v-row><tradeCreate/></v-row>
+    <v-row><tradeCreate :item='item'/></v-row>
     <v-row>
       <tradeFilled/>
       <div v-intersect='onShow'/>
@@ -13,6 +13,8 @@
 import unlockAcc from './unlockAcc'
 import tradeCreate from './tradeCreate'
 import tradeFilled from './tradeFilled'
+import {default as futu} from '../../../backend/futu'
+{TrdSide} = futu
 
 export default
   components: { 
@@ -20,6 +22,11 @@ export default
     tradeCreate
     tradeFilled
   }
+  data: ->
+    item:
+      trdSide: TrdSide.TrdSide_Buy
+      code: '00700'
+      qty: 1
   methods:
     onShow: (isIntersecting, entries, observer) ->
       if isIntersecting
