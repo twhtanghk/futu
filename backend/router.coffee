@@ -37,7 +37,7 @@ module.exports = router
   .get '/api/trade', (ctx, next) ->
     {endTime, page} = ctx.request.body
     page ?= 20
-    endTime ?= moment()
+    endTime = if endTime? then moment(endTime, 'YYYY-MM-DD HH:mm:ss') else moment()
     elapsed = 5
     res = []
     test = (cb) ->

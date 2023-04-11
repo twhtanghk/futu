@@ -1,9 +1,12 @@
 <template>
-  <v-data-table :sort-by='sortBy' :headers='headers' :items='trade' :items-per-page='-1' density='compact' fixed-header='true' height='100%'>
+  <v-data-table :sort-by='sortBy' :headers='headers' :items='trade' density='compact' fixed-header='true' height='100%' items-per-page='-1'>
     <template v-slot:item.trdSide='{ item }'>
       <v-chip :color="item.raw.trdSide == 2 ? 'green' : 'red'">
         {{trdSide(item.raw.trdSide)}}
       </v-chip>
+    </template>
+    <template v-slot:item.orderID='{ item }'>
+      {{item.raw.orderID}}
     </template>
     <template v-slot:item.orderStatus='{ item }'>
       {{orderStatus(item.raw.orderStatus)}}
@@ -27,6 +30,11 @@
         Cancel
       </v-btn>
     </template>
+    <template v-slot:bottom>
+      <div id='intersect' v-intersect='onShow'>
+        Loading... Please wait
+      </div>
+    </template>
   </v-data-table>
 </template>
 
@@ -42,6 +50,7 @@ export default
     market: QotMarket.QotMarket_HK_Security
     sortBy: [{key: 'updateTimestamp', order: 'desc'}]
     headers: [
+      {title: 'Order ID', key: 'orderID'}
       {title: 'Trade', key: 'trdSide'}
       {title: 'Status', key: 'orderStatus'}
       {title: 'Code', key: 'code'}
@@ -59,9 +68,9 @@ export default
       endTime = null
       if last?
         endTime = moment
-          .unix last.updateTimestamp
+          .unix last.createTimestamp
           .format 'YYYY-MM-DD HH:mm:ss'
-      @trade = @trade.concat await trade.list {endTime}
+      @trade = @trade.concat await trade.list data: {endTime}
     trdSide: (i) ->
       ['Unknown', 'Buy', 'Sell', 'SellShort', 'Buyback'][i]
     isFilled: ({orderStatus}) ->
@@ -94,6 +103,9 @@ export default
         24: 'FillCancelled'
       }
       map[i]
+    onShow: (isIntersecting, entries, observer) ->
+      if isIntersecting
+        await @nextPage()
   mounted: ->
     @ws = (await ws)
       .on 'message', (msg) =>
@@ -101,7 +113,4 @@ export default
         if topic == 'trdUpdate'
           @trade.push data
           @trade = _.uniq @trade, 'orderID'
-  beforeMount: ->
-    @emitter.on 'scrollEnd', =>
-      @nextPage()
 </script>

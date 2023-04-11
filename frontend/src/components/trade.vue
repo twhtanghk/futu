@@ -4,7 +4,6 @@
     <v-row><tradeCreate :item='item'/></v-row>
     <v-row>
       <tradeFilled/>
-      <div v-intersect='onShow'/>
     </v-row>
   </v-container>
 </template>
@@ -27,10 +26,6 @@ export default
       trdSide: TrdSide.TrdSide_Buy
       code: '00700'
       qty: 1
-  methods:
-    onShow: (isIntersecting, entries, observer) ->
-      if isIntersecting
-        @emitter.emit 'scrollEnd'
 </script>
 
 <style lang='scss' scoped>

@@ -12,7 +12,6 @@ import widget from './components/widget.vue'
 import position from './components/position.vue'
 import deal from './components/deal.vue'
 import trade from './components/trade.vue'
-import mitt from 'mitt'
 import '@mdi/font/css/materialdesignicons.css'
 
 components.VDataTable = VDataTable
@@ -30,7 +29,6 @@ const router = VueRouter.createRouter({
 })
 
 const app = createApp(App)
-app.config.globalProperties.emitter = mitt()
 app
   .use(vuetify)
   .use(router)
