@@ -108,6 +108,7 @@ export default
         await @nextPage()
   mounted: ->
     @ws = (await ws)
+      .subscribeAcc()
       .on 'message', (msg) =>
         {topic, data} = msg
         if topic == 'trdUpdate'
