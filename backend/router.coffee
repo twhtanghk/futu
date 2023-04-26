@@ -45,14 +45,14 @@ module.exports = router
         res.slice 0, page
       else
         await cb()
-    next = ->
+    nextPage = ->
       beginTime = moment endTime
         .subtract day: elapsed++
       res = await ctx.api.historyOrder
         beginTime: beginTime.format 'YYYY-MM-DD HH:mm:ss'
         endTime: endTime.format 'YYYY-MM-DD HH:mm:ss'
-      await test next
-    ctx.response.body = await test next
+      await test nextPage
+    ctx.response.body = await test nextPage
     await next()
   .del '/api/trade/:id', (ctx, next) ->
     ctx.response.body = await ctx.api.cancelOrder id: ctx.request.params.id

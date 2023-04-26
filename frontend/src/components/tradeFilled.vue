@@ -112,6 +112,6 @@ export default
       .on 'message', (msg) =>
         {topic, data} = msg
         if topic == 'trdUpdate'
-          @trade.push data
-          @trade = _.uniq @trade, 'orderID'
+          @trade.shift data
+          @trade = _.uniqBy @trade, 'orderID'
 </script>

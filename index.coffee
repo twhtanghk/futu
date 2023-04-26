@@ -51,7 +51,7 @@ class Futu extends EventEmitter
               @emit 'trdUpdate', order
             when ftCmdID.TrdUpdateOrderFill.cmd
               {order} = s2c
-              @emit 'trdUpdate', orderFill
+              @emit 'trdUpdate', order
       @
       
   errHandler: ({errCode, retMsg, retType, s2c}) ->
@@ -168,7 +168,6 @@ class Futu extends EventEmitter
           isSubOrUnSub: false
           isUnsubAll: false
     catch e
-      console.log JSON.stringify {market, code, subtype}, null, 2
       throw e
 
   optionChain: ({code, strikeRange, beginTime, endTime}) ->
