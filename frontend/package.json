@@ -17,6 +17,7 @@
     "model": "https://github.com/twhtanghk/model",
     "moment": "^2.29.4",
     "reconnecting-websocket": "^4.4.0",
+    "volatility": "^0.2.1",
     "vue": "^3.2.13",
     "vue-router": "^4.1.6",
     "vuetify": "^3"

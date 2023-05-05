@@ -27,7 +27,6 @@ class WS extends ReconnectingWebSocket
     @
 
 export default new Promise (resolve, reject) ->
-  #ws = new WS 'ws://172.19.0.8:3000'
   ws = new WS "ws://#{location.host}"
   ws.addEventListener 'error', console.error
   ws.addEventListener 'open', ->
