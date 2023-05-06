@@ -19,6 +19,7 @@ import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart} from 'lightweight-charts'
 import {default as futu} from '../../../backend/futu'
+import {volSML} from '../plugins/lib'
 {Model} = require('model').default
 
 export default
@@ -41,7 +42,8 @@ export default
     candles: []
     nodata: false
     chart: null
-    series: null
+    klSeries: null
+    volSeries: null
     code: null
     name: null
     interval: '1'
@@ -99,14 +101,20 @@ export default
           i
         @nodata = klList.length == 0
         @candles = [data..., @candles...]
-        @series.setData @candles
+        volSML @candles, 20, 60, 120
+        [..., last] = @candles
+        console.log JSON.stringify last, null, 2
+        @klSeries.setData @candles
+        @volSeries.setData @candles.map ({time, volatility}) ->
+          time: time
+          value: volatility.s
       @resize()
   beforeMount: ->
     @ws = await ws
     @ws.on 'message', ({topic, data}) =>
       if topic == 'candle' and data.code == @code
         data.time = @hktz data.timestamp
-        @series.update data
+        @klSeries.update data
     @code = @initCode
     @setCode()
   mounted: ->
@@ -114,14 +122,20 @@ export default
     window.addEventListener 'resize', =>
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
-    @series = @chart.addCandlestickSeries upColor: 'transparent'
+    @klSeries = @chart.addCandlestickSeries upColor: 'transparent'
+    @volSeries = @chart.addLineSeries 
+      color: 'blue'
+      lineWidth: 1
+      priceFormat:
+        type: 'price'
+      priceScaleId: ''
     @chart.timeScale().applyOptions timeVisible: true
     @chart.timeScale().subscribeVisibleTimeRangeChange =>
       if flag
         return
       flag = true
       logicalRange = @chart.timeScale().getVisibleLogicalRange()
-      barsInfo = @series.barsInLogicalRange logicalRange
+      barsInfo = @klSeries.barsInLogicalRange logicalRange
       [first, ..., last] = @candles
       if barsInfo?.barsBefore < 10
         endTime = moment
