@@ -77,6 +77,7 @@ export default
       @name = await @api.getName {@market, @code}
       await @getHistory()
       @subscribe()
+      @$emit 'update:initCode', @code
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
       @chart?.resize offsetWidth, offsetHeight 
@@ -101,9 +102,8 @@ export default
           i
         @nodata = klList.length == 0
         @candles = [data..., @candles...]
-        volSML @candles, 20, 60, 120
+        volSML @candles, 20, 20, 20
         [..., last] = @candles
-        console.log JSON.stringify last, null, 2
         @klSeries.setData @candles
         @volSeries.setData @candles.map ({time, volatility}) ->
           time: time

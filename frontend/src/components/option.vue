@@ -50,6 +50,8 @@ export default
       type: String
       default:
         '00700'
+    option:
+      type: Object
   components:
     order: order
   data: ->
@@ -76,12 +78,14 @@ export default
   beforeMount: ->
     @code = @initCode
     @setCode()
+    [@expiryDate, @min, @max] = @option
   computed:
     strikeParam: ->
       [@expiryDate, @min, @max]
   watch:
     strikeParam: ->
       if @min? and @max? and @max >= @min
+        @$emit 'update:option', @strikeParam
         beginTime = moment @expiryDate, 'YYYY-MM'
           .startOf 'month'
           .format 'YYYY-MM-DD'
