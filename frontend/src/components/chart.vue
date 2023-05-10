@@ -25,9 +25,7 @@ import {volSML} from '../plugins/lib'
 export default
   props:
     initCode:
-      type: String
-      default:
-        '00700'
+      type: Array
     chartOptions:
       type: Object
       default:
@@ -77,7 +75,7 @@ export default
       @name = await @api.getName {@market, @code}
       await @getHistory()
       @subscribe()
-      @$emit 'update:initCode', @code
+      @$emit 'update:initCode', [@code, @initCode[1..]...]
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
       @chart?.resize offsetWidth, offsetHeight 
@@ -115,7 +113,7 @@ export default
       if topic == 'candle' and data.code == @code
         data.time = @hktz data.timestamp
         @klSeries.update data
-    @code = @initCode
+    @code = @initCode[0]
     @setCode()
   mounted: ->
     flag = false

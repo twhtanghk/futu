@@ -6,8 +6,6 @@
           :is='$route.params.view'
           :initCode='codes[0]'
           @update:initCode='codes[0] = $event'
-          :option='options[0]'
-          @update:option='options[0] = $event'
         />
       </v-col>
       <v-col>
@@ -15,8 +13,6 @@
           :is='$route.params.view'
           :initCode='codes[1]'
           @update:initCode='codes[1] = $event'
-          :option='options[1]'
-          @update:option='options[1] = $event'
         />
       </v-col>
     </v-row>
@@ -26,8 +22,6 @@
           :is='$route.params.view'
           :initCode='codes[2]'
           @update:initCode='codes[2] = $event'
-          :option='options[2]'
-          @update:option='options[2] = $event'
         />
       </v-col>
       <v-col>
@@ -35,8 +29,6 @@
           :is='$route.params.view'
           :initCode='codes[3]'
           @update:initCode='codes[3] = $event'
-          :option='options[3]'
-          @update:option='options[3] = $event'
         />
       </v-col>
     </v-row>
@@ -55,31 +47,20 @@ export default
     option: option
     orderBook: orderBook
   data: ->
+    # array of [code, strikeDate, minPrice, maxPrice]
     codes: [
-      '800000'
-      '01211'
-      '00388'
-      '00700'
-    ]
-    options: [
-      []
-      []
-      []
-      []
+      ['800000', null, null, null]
+      ['01211', null, null, null]
+      ['00388', null, null, null]
+      ['00700', null, null, null]
     ]
   beforeMount: ->
     cookie = parse document.cookie
     if 'codes' of cookie
       @codes = JSON.parse cookie.codes
-    if 'options' of cookie
-      @options = JSON.parse cookie.options
   watch:
     codes:
       handler: (newCodes, oldCodes) -> 
         document.cookie = "codes=#{JSON.stringify newCodes}"
-      deep: true
-    options:
-      handler: (newOpts, oldOpts) ->
-        document.cookie = "options=#{JSON.stringify newOpts}"
       deep: true
 </script>

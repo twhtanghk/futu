@@ -47,11 +47,7 @@ import order from './order'
 export default
   props:
     initCode:
-      type: String
-      default:
-        '00700'
-    option:
-      type: Object
+      type: Array
   components:
     order: order
   data: ->
@@ -76,16 +72,16 @@ export default
       ].map (i) ->
         i.format 'YYYY-MM'
   beforeMount: ->
-    @code = @initCode
+    [@code, @expiryDate, @min, @max] = @initCode
+    @expiryDate ?= @comingMonth()[0]
     @setCode()
-    [@expiryDate, @min, @max] = @option
   computed:
     strikeParam: ->
       [@expiryDate, @min, @max]
   watch:
     strikeParam: ->
       if @min? and @max? and @max >= @min
-        @$emit 'update:option', @strikeParam
+        @$emit 'update:initCode', [@code, @expiryDate, @min, @max]
         beginTime = moment @expiryDate, 'YYYY-MM'
           .startOf 'month'
           .format 'YYYY-MM-DD'
