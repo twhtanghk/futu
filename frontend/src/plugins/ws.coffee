@@ -1,6 +1,7 @@
 _ = require 'lodash'
 import * as Promise from 'bluebird'
 import ReconnectingWebSocket from 'reconnecting-websocket'
+{QotMarket, OrderStatus} = require('../../../backend/futu').default
 
 class WS extends ReconnectingWebSocket
   constructor: (url, protocol) ->
@@ -14,11 +15,11 @@ class WS extends ReconnectingWebSocket
     @send _.extend action: 'subscribeAcc', opts
 
   subscribe: (opts) ->
-    {subtype, market, code, interval} = opts
+    opts.market ?= QotMarket.QotMarket_HK_Security
     @send _.extend action: 'subscribe', opts
 
   unsubscribe: (opts) ->
-    {subtype, market, code, interval} = opts
+    opts.market ?= QotMarket.QotMarket_HK_Security
     @send _.extend action: 'unsubscribe', opts
 
   on: (topic, func) ->

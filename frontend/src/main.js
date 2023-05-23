@@ -12,6 +12,7 @@ import widget from './components/widget.vue'
 import position from './components/position.vue'
 import deal from './components/deal.vue'
 import trade from './components/trade.vue'
+import alert from './components/alert.vue'
 import '@mdi/font/css/materialdesignicons.css'
 
 components.VDataTable = VDataTable
@@ -21,7 +22,8 @@ const routes = [
   {path: '/widget/:view', component: widget},
   {path: '/position', component: position},
   {path: '/deal', component: deal},
-  {path: '/trade', component: trade}
+  {path: '/trade', component: trade},
+  {path: '/alert', component: alert}
 ]
 const router = VueRouter.createRouter({
   history: VueRouter.createWebHashHistory(),

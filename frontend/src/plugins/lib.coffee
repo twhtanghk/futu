@@ -3,8 +3,6 @@ volatility = require 'volatility'
 # extract sublist of input array for every n consecutive elements
 # e.g. subList [1..100], 2 = [[1, 2], [2, 3], ..., [99, 100]]
 subList = (arr, n) ->
-  if n > arr.length
-    throw new Error 'invalid subarray size'
   i = 0
   for j in [n..arr.length]
     arr.slice i++, j

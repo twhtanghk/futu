@@ -1,5 +1,6 @@
 _ = require 'lodash'
 {Model} = require('model').default
+{QotMarket, OrderStatus} = require('../../../backend/futu').default
 
 class Rest extends Model
   constructor: (opts = {}) ->
@@ -7,6 +8,7 @@ class Rest extends Model
 
   getName: (opts) ->
     {market, code} = opts
+    opts.market ?= QotMarket.QotMarket_HK_Security
     [{security, name}, ...] = await @read data: _.extend id: 'name', opts
     if security.code == code
       name
