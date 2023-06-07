@@ -1,10 +1,20 @@
 <template>
   <v-data-table :headers='headers' :items='alert' density='compact' fixed-header='true' height='100%' items-per-page='-1'>
     <template v-slot:item.below='{ item }'>
-      <span :class='{red: item.raw.hitBelow}'>{{ item.raw.below }}</span>
+      <span v-if='item.raw.edit'>
+        <v-text-field type='number' @keyup.enter='update(item.raw)' v-model='item.raw.below'/>
+      </span>
+      <span @click='item.raw.edit=true' v-else :class='{red: item.raw.hitBelow}'>
+        {{ item.raw.below }}
+      </span>
     </template>
     <template v-slot:item.above='{ item }'>
-      <span :class='{green: item.raw.hitAbove}'>{{ item.raw.above }}</span>
+      <span v-if='item.raw.edit'>
+        <v-text-field type='number' @keyup.enter='update(item.raw)' v-model='item.raw.above'/>
+      </span>
+      <span @click='item.raw.edit=true' v-else :class='{green: item.raw.hitAbove}'>
+        {{ item.raw.above}}
+      </span>
     </template>
     <template v-slot:item.action='{ item }'>
       <v-btn density='compact' @click='cancel(item.raw.index)'>
@@ -39,6 +49,7 @@ export default
         for v, k in ret
           v.index = k
           v.name = await @getName v.code
+          v.edit = false
       ret
     write: (alert) ->
       document.cookie = "alert=#{JSON.stringify alert}"
@@ -47,6 +58,9 @@ export default
       @write @alert
     getName: (code) ->
       await api.getName code: code
+    update: (row) ->
+      row.edit = false
+      @write @alert
   beforeMount: ->
     @ws = await ws
     @alert = await @read()
