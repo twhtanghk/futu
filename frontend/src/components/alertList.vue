@@ -52,7 +52,9 @@ export default
           v.edit = false
       ret
     write: (alert) ->
-      document.cookie = "alert=#{JSON.stringify alert}"
+      data = alert.map ({code, above, below}) ->
+        {code, above, below}
+      document.cookie = "alert=#{JSON.stringify data}"
     cancel: (index) ->
       @alert.splice index, 1
       @write @alert
