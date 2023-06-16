@@ -46,9 +46,13 @@ export default
       cookie = parse document.cookie
       if 'alert' of cookie
         ret = JSON.parse cookie.alert
+        code = ret.map ({code}) -> code
+        name = await api.name {code}
         for v, k in ret
+          matched = name.find ({security}) ->
+            security.code == v.code
           v.index = k
-          v.name = await @getName v.code
+          v.name = matched?.name
           v.edit = false
       ret
     write: (alert) ->
@@ -58,8 +62,6 @@ export default
     cancel: (index) ->
       @alert.splice index, 1
       @write @alert
-    getName: (code) ->
-      await api.getName code: code
     update: (row) ->
       row.edit = false
       @write @alert

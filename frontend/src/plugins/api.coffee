@@ -6,10 +6,14 @@ class Rest extends Model
   constructor: (opts = {}) ->
     super _.defaults opts, baseUrl: '/api'
 
-  getName: (opts) ->
+  name: (opts) ->
     {market, code} = opts
     opts.market ?= QotMarket.QotMarket_HK_Security
-    [{security, name}, ...] = await @read data: _.extend id: 'name', opts
+    await @read data: _.extend id: 'name', opts
+
+  getName: (opts) ->
+    {code} = opts
+    [{security, name}, ...] = await @name opts
     if security.code == code
       name
 
