@@ -1,12 +1,11 @@
 <template>
   <v-container>
     <v-row>
-      <v-col md='2'>{{ name }}</v-col>
-      <v-col md='3'><v-select density='compact' :items='marketList' item-title='text' item-value='value' v-model='market'/></v-col>
-      <v-col md='3'><v-select density='compact' :items='dateList' v-model='expiryDate'/></v-col>
-      <v-col md='2'><v-text-field density='compact' v-model='code' @keyup.enter='setCode'/></v-col>
-      <v-col md='1'><v-text-field density='compact' v-model.number='min'/></v-col>
-      <v-col md='1'><v-text-field density='compact' v-model.number='max'/></v-col>
+      <v-col>{{ name }}</v-col>
+      <v-col><v-select density='compact' :items='dateList' v-model='expiryDate'/></v-col>
+      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='setCode'/></v-col>
+      <v-col><v-text-field density='compact' v-model.number='min'/></v-col>
+      <v-col><v-text-field density='compact' v-model.number='max'/></v-col>
     </v-row>
     <v-row no-gutters>
       <v-col v-for='i in optionChain'>

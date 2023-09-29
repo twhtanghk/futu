@@ -2,7 +2,6 @@
   <v-container>
     <v-row>
       <v-col>{{ name }}</v-col>
-      <v-col><v-select density='compact' :items='marketList' item-title='text' item-value='value' v-model='market'/></v-col>
       <v-col><v-text-field density='compact' v-model='code' @keyup.enter='setCode'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
