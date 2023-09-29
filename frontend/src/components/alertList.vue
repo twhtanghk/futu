@@ -47,13 +47,16 @@ export default
       if 'alert' of cookie
         ret = JSON.parse cookie.alert
         code = ret.map ({code}) -> code
-        name = await api.name {code}
-        for v, k in ret
-          matched = name.find ({security}) ->
-            security.code == v.code
-          v.index = k
-          v.name = matched?.name
-          v.edit = false
+        try
+          name = await api.name {code}
+          for v, k in ret
+            matched = name.find ({security}) ->
+              security.code == v.code
+            v.index = k
+            v.name = matched?.name
+            v.edit = false
+        catch err
+          console.log err
       ret
     write: (alert) ->
       data = alert.map ({code, above, below}) ->

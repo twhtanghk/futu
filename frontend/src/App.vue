@@ -3,15 +3,8 @@
 </template>
 
 <script>
-import widget from './components/widget.vue'
-import position from './components/position.vue'
-
 export default {
-  name: 'App',
-  components: {
-    widget,
-    position
-  }
+  name: 'App'
 }
 </script>
 
