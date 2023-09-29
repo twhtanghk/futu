@@ -15,11 +15,8 @@
             <orderBook/>
           </v-col>
           <v-col>
-            <orderBook/>
+            <opt :initCode='[$route.params.code, null, 290, 360]'/>
           </v-col>
-        </v-row>
-        <v-row>
-          <option/>
         </v-row>
         <v-row>
           <trade/>
@@ -38,7 +35,7 @@ import trade from './trade'
 export default
   components:
     chart: chart
-    option: option
+    opt: option
     orderBook: orderBook
     trade: trade
   data: ->

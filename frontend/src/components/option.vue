@@ -12,25 +12,23 @@
       <v-col v-for='i in optionChain'>
         <v-container>
           <v-row>
-            <v-col cols='2'>{{ i.strikeTime }}</v-col>
-            <v-col>
-              <v-expansion-panels v-for='option in i.option'>
-                <v-expansion-panel :title="'call ' + option.call.optionExData.strikePrice">
-                  <v-expansion-panel-text>
-                    <order :code='option.call.basic.security.code'/>
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </v-col>
-            <v-col>
-              <v-expansion-panels v-for='option in i.option'>
-                <v-expansion-panel :title="'put ' + option.put.optionExData.strikePrice">
-                  <v-expansion-panel-text>
-                    <order :code='option.put.basic.security.code'/>
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </v-col>
+            <v-col>{{ i.strikeTime }}</v-col>
+          </v-row>
+          <v-row>
+            <v-expansion-panels v-for='option in i.option'>
+              <v-expansion-panel :title="option.call.optionExData.strikePrice">
+                <v-expansion-panel-text>
+                  <v-row>
+                    <v-col>
+                      <order :code='option.call.basic.security.code'/>
+                    </v-col>
+                    <v-col>
+                      <order :code='option.put.basic.security.code'/>
+                    </v-col>
+                  </v-row>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </v-row>
         </v-container>
       </v-col>
