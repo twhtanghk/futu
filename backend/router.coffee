@@ -15,6 +15,16 @@ module.exports = router
       market: market
       code: i
     await next()
+  .get '/api/quote', (ctx, next) ->
+    {market, code} = ctx.request.body
+    res = await ctx.api.basicQuote {market, code}
+    ctx.response.body =
+      high: res.highPrice
+      low: res.lowPrice
+      open: res.openPrice
+      close: res.curPrice
+      last: res.lastClosePrice
+    await next()
   .get '/api/optionChain', (ctx, next) ->
     {market, code, min, max, beginTime, endTime} = ctx.request.body
     strikeRange = [min, max]

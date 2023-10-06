@@ -17,6 +17,10 @@ class Rest extends Model
     if security.code == code
       name
 
+  getQuote: (opts) ->
+    {market, code} = opts
+    await @read data: _.extend id: 'quote', opts
+
   getHistory: (opts) ->
     {rehabType, klType, security, beginTime, endTime} = opts
     {security, klList} = await @read data: _.extend id: 'candle', opts

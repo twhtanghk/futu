@@ -72,6 +72,9 @@ export default
     [@code, @expiryDate, @min, @max] = @initCode
     @expiryDate ?= @comingMonth()[0]
     @setCode()
+    {close} = await api.getQuote {@market, @code}
+    @min = close * 0.8
+    @max = close * 1.2
   computed:
     strikeParam: ->
       [@expiryDate, @min, @max]

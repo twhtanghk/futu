@@ -12,7 +12,7 @@
       <v-col>
         <v-row>
           <v-col>
-            <orderBook/>
+            <orderBook :initCode='$route.params.code'/>
           </v-col>
           <v-col>
             <opt :initCode='[$route.params.code, null, 290, 360]'/>
