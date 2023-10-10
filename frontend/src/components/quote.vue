@@ -38,6 +38,6 @@ export default
     opt: option
     orderBook: orderBook
     trade: trade
-  data: ->
   beforeMount: ->
+    document.title = @$route.params.code
 </script>
