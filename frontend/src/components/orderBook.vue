@@ -48,6 +48,7 @@ export default
   methods:
     setCode: (event) ->
       @name = await @api.getName {@market, @code}
+      document.title = "#{@code} #{@name}"
       @subscribe()
     subscribe: ->
       if @curr?
