@@ -41,6 +41,7 @@ export default
     chart: null
     klSeries: null
     volSeries: null
+    volumeSeries: null
     code: null
     name: null
     interval: '1'
@@ -51,6 +52,8 @@ export default
     clear: ->
       @candles = []
       @nodata = false
+    color: ({open, close}) ->
+      if open > close then 'red' else 'green' 
     hktz: (time) ->
       time + 8 * 60 * 60 # adjust to HKT+8
     subscribe: ({market, code, interval} = {}) ->
@@ -105,6 +108,10 @@ export default
         @volSeries.setData @candles.map ({time, volatility}) ->
           time: time
           value: volatility.s
+        @volumeSeries.setData @candles.map ({time, volume, open, close}) =>
+          time: time
+          value: volume
+          color: @color {open, close}
       @resize()
   beforeMount: ->
     @ws = await ws
@@ -112,6 +119,10 @@ export default
       if topic == 'candle' and data.code == @code
         data.time = @hktz data.timestamp
         @klSeries.update data
+        @volumeSeries.update
+          time: data.time
+          value: data.volume
+          color: @color data
     @code = @initCode[0]
     @setCode()
   mounted: ->
@@ -125,7 +136,15 @@ export default
       lineWidth: 1
       priceFormat:
         type: 'price'
-      priceScaleId: ''
+      priceScaleId: 'volatility'
+    @volumeSeries = @chart.addHistogramSeries
+      color: 'blue'
+      priceFormat:
+        type: 'volume'
+      priceScaleId: 'volume'
+      scaleMargins:
+        top: 0.7
+        bottom: 0
     @chart.timeScale().applyOptions timeVisible: true
     @chart.timeScale().subscribeVisibleTimeRangeChange =>
       if flag
