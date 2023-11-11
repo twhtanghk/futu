@@ -1,11 +1,27 @@
 from futu import *
+import arrow
 
 class FutuClient:
   def __init__(self):
-    self.client = OpenQuoteContext(host='futu', port=11111)
+    self.client = OpenQuoteContext(host='localhost', port=11111)
 
   def __del__(self):
     self.client.close()
+
+  def historyKL(self, params):
+    code = params['code']
+    end = params.get('end', arrow.now().format('YYYY-MM-DD'))
+    start = params.get('start', arrow.get(end, 'YYYY-MM-DD').shift(months=-3).format('YYYY-MM-DD'))
+    ktype = params.get('ktype', KLType.K_DAY)
+    while True:
+      df = pd.DataFrame()
+      ret, data, page_req_key = self.client.request_history_kline(code, start=start, end=end, ktype=ktype)
+      if ret == RET_OK:
+        df = pd.concat([df, data])
+      else:
+        raise Exception(data)
+      if page_req_key == None:
+        return df
 
   def basic(self, symbol):
     ret, data = self.client.get_stock_basicinfo(Market.HK, SecurityType.STOCK, symbol)
