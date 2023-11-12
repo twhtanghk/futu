@@ -11,7 +11,7 @@ class FutuClient:
   def historyKL(self, params):
     code = params['code']
     end = params.get('end', arrow.now().format('YYYY-MM-DD'))
-    start = params.get('start', arrow.get(end, 'YYYY-MM-DD').shift(months=-3).format('YYYY-MM-DD'))
+    start = params.get('start', arrow.get(end, 'YYYY-MM-DD').shift(months=-6).format('YYYY-MM-DD'))
     ktype = params.get('ktype', KLType.K_DAY)
     while True:
       df = pd.DataFrame()
@@ -81,19 +81,26 @@ class TestFutuClient(unittest.TestCase):
     try:
       client = FutuClient()
       print(client.basic(['HK.00005']).to_string())
-    except:
-      self.fail('unexpected exception')
+    except Exception as err:
+      self.fail(err)
 
   def test_quoteDetails(self):
     try:
       client = FutuClient()
       print(client.quoteDetails(['HK.00005']).to_string())
-    except:
-      self.fail('unexpected exception')
+    except Exception as err:
+      self.fail(err)
 
   def test_quote(self):
     try:
       client = FutuClient()
       print(client.quote(['HK.00005']).to_string())
-    except:
-      self.fail('unexpected exception')
+    except Exception as err:
+      self.fail(err)
+
+  def test_historyKL(self):
+    try:
+      client = FutuClient()
+      print(client.historyKL({'code': 'HK.00700'}).to_string())
+    except Exception as err:
+      self.fail(err)
