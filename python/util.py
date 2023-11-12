@@ -19,10 +19,10 @@ def levels(df):
   mean = np.mean(df['high'] - df['low'])
   for i in range(2, df.shape[0] - 2):
     if isSupport(df, i):
-      if meanDiff(mean, df['close'][i], levels):
+      if meanDiff(mean, df['low'][i], levels):
         levels.append(('support', i, df['low'][i].round(2)))
     elif isResistance(df, i):
-      if meanDiff(mean, df['close'][i], levels):
+      if meanDiff(mean, df['high'][i], levels):
         levels.append(('resistance', i, df['high'][i].round(2)))
   return levels
 
