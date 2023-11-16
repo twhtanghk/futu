@@ -11,6 +11,20 @@ import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 
 global.WebSocket = require 'ws'
 
+marketMap =
+  'hk': QotMarket.QotMarket_HK_Security
+
+freqMap =
+  '1': KLType.KLType_1Min
+  '5': KLType.KLType_5Min
+  '15': KLType.KLType_15Min
+  '30': KLType.KLType_30Min
+  '1h': KLType.KLType_60Min
+  '1d': KLType.KLType_Day
+  '1w': KLType.KLType_Week
+  '1m': KLType.KLType_Month
+  '1y': KLType.KLType_12Month
+
 class Futu extends EventEmitter
   subList: []
   tradeSerialNo: 0
@@ -367,6 +381,7 @@ meanDiff = (mean, price, levels) ->
       return false
   return true
 
+# https://colab.research.google.com/drive/16yWD7FJ-moOc9jjymDgQjLXvW-yPKSf3?usp=sharing#scrollTo=kbcJ8L5nN1B-
 # get list of support and resistance price levels
 levels = (df) ->
   ret = []
@@ -381,6 +396,8 @@ levels = (df) ->
   ret
 
 module.exports = {
+  marketMap
+  freqMap
   Futu
   isSupport
   isResistance
