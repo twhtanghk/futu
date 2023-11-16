@@ -11,21 +11,22 @@ import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 
 global.WebSocket = require 'ws'
 
-marketMap =
-  'hk': QotMarket.QotMarket_HK_Security
-
-freqMap =
-  '1': KLType.KLType_1Min
-  '5': KLType.KLType_5Min
-  '15': KLType.KLType_15Min
-  '30': KLType.KLType_30Min
-  '1h': KLType.KLType_60Min
-  '1d': KLType.KLType_Day
-  '1w': KLType.KLType_Week
-  '1m': KLType.KLType_Month
-  '1y': KLType.KLType_12Month
-
 class Futu extends EventEmitter
+  @marketMap:
+    'hk': QotMarket.QotMarket_HK_Security
+
+  @freqMap:
+    '1': KLType.KLType_1Min
+    '5': KLType.KLType_5Min
+    '15': KLType.KLType_15Min
+    '30': KLType.KLType_30Min
+    '1h': KLType.KLType_60Min
+    '1d': KLType.KLType_Day
+    '1w': KLType.KLType_Week
+    '1m': KLType.KLType_Month
+    '3m': KLType.KLType_Quarter
+    '1y': KLType.KLType_Year
+
   subList: []
   tradeSerialNo: 0
   trdEnv: if process.env.TRDENV? then parseInt process.env.TRDENV else TrdEnv.TrdEnv_Simulate
@@ -396,8 +397,6 @@ levels = (df) ->
   ret
 
 module.exports = {
-  marketMap
-  freqMap
   Futu
   isSupport
   isResistance
