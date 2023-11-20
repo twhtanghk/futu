@@ -263,40 +263,46 @@ class Futu extends EventEmitter
     (@errHandler await @ws.GetOrderList req).orderList
     
   historyOrder: ({beginTime, endTime} = {}) ->
-    beginTime ?= moment()
-      .subtract day: 1
-      .format 'YYYY-MM-DD HH:mm:ss'
-    endTime ?= moment()
-      .format 'YYYY-MM-DD HH:mm:ss'
-    {trdEnv, accID, trdMarketAuthList} = (await @account())
-    req =
-      c2s:
-        header:
-          trdEnv: trdEnv
-          accID: accID
-          trdMarket: trdMarketAuthList[0]
-        filterConditions:
-          beginTime: beginTime
-          endTime: endTime
-    (@errHandler await @ws.GetHistoryOrderList req).orderList
+    loop
+      endTime = if endTime? then beginTime else moment()
+      beginTime = moment endTime
+        .subtract year: 1
+      {trdEnv, accID, trdMarketAuthList} = (await @account())
+      req =
+        c2s:
+          header:
+            trdEnv: trdEnv
+            accID: accID
+            trdMarket: trdMarketAuthList[0]
+          filterConditions:
+            beginTime: beginTime.format 'YYYY-MM-DD HH:mm:ss'
+            endTime: endTime.format 'YYYY-MM-DD HH:mm:ss'
+      ret = (@errHandler await @ws.GetHistoryOrderList req).orderList
+      if ret.length == 0
+        return
+      else
+        yield from ret
 
-  historyDeal: ({beginTime, endTime} = {}) ->
-    beginTime ?= moment()
-      .subtract day: 1
-      .format 'YYYY-MM-DD HH:mm:ss'
-    endTime ?= moment()
-      .format 'YYYY-MM-DD HH:mm:ss'
-    {trdEnv, accID, trdMarketAuthList} = (await @account())
-    req =
-      c2s:
-        header:
-          trdEnv: trdEnv
-          accID: accID
-          trdMarket: trdMarketAuthList[0]
-        filterConditions:
-          beginTime: beginTime
-          endTime: endTime
-    (@errHandler await @ws.GetHistoryOrderFillList req).orderFillList
+  historyDeal: ->
+    loop
+      endTime = if endTime? then beginTime else moment()
+      beginTime = moment endTime
+        .subtract year: 1
+      {trdEnv, accID, trdMarketAuthList} = (await @account())
+      req =
+        c2s:
+          header:
+            trdEnv: trdEnv
+            accID: accID
+            trdMarket: trdMarketAuthList[0]
+          filterConditions:
+            beginTime: beginTime.format 'YYYY-MM-DD HH:mm:ss'
+            endTime: endTime.format 'YYYY-MM-DD HH:mm:ss'
+      ret = (@errHandler await @ws.GetHistoryOrderFillList req).orderFillList
+      if ret.length == 0
+        return
+      else
+        yield from ret
     
   placeOrder: ({trdEnv, trdMarket, trdSide, orderType, code, qty, price, secMarket}) ->
     trdEnv ?= @trdEnv
