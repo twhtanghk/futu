@@ -146,10 +146,13 @@ class Futu extends EventEmitter
     opts = _.defaults {market, placeSetType}, placeSetType: 0
     await @ws.GetPlateSet c2s: opts
 
-  plateSecurity: ({market, code}) ->
+  plateSecurity: ({market, code} = {}) ->
+    market ?= QotMarket.QotMarket_HK_Security
+    code ?= 'HSI Constituent'
     (@errHandler await @ws.GetPlateSecurity
       c2s:
-        plate: {market, code}).staticInfoList
+        plate: {market, code}).staticInfoList.map ({basic}) ->
+          basic.security.code
 
   subInfo: ({isReqAllConn}={}) ->
     await @ws.GetSubInfo c2s: _.defaults {isReqAllConn}, isReqAllConn: true
