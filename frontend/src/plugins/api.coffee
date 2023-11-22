@@ -11,6 +11,9 @@ class Rest extends Model
     opts.market ?= QotMarket.QotMarket_HK_Security
     await @read data: _.extend id: 'name', opts
 
+  level: ({code}) ->
+    await @read data: _.extend id: 'level', {code}
+
   getName: (opts) ->
     {code} = opts
     [{security, name}, ...] = await @name opts

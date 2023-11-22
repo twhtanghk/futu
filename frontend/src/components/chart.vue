@@ -16,7 +16,7 @@
 <script lang='coffee'>
 import moment from 'moment'
 import {default as ws} from '../plugins/ws'
-import {createChart} from 'lightweight-charts'
+import {createChart, LineStyle} from 'lightweight-charts'
 import {default as futu} from '../../../backend/futu'
 import {volSML} from '../plugins/lib'
 {Model} = require('model').default
@@ -39,9 +39,10 @@ export default
     candles: []
     nodata: false
     chart: null
-    klSeries: null
-    volSeries: null
-    volumeSeries: null
+    series:
+      candle: null
+      volatility: null
+      volume: null
     code: null
     name: null
     interval: '1'
@@ -104,22 +105,31 @@ export default
         @candles = [data..., @candles...]
         volSML @candles, 20, 20, 20
         [..., last] = @candles
-        @klSeries.setData @candles
-        @volSeries.setData @candles.map ({time, volatility}) ->
+        @series.candle.setData @candles
+        @series.volatility.setData @candles.map ({time, volatility}) ->
           time: time
           value: volatility.s
-        @volumeSeries.setData @candles.map ({time, volume, open, close}) =>
+        @series.volume.setData @candles.map ({time, volume, open, close}) =>
           time: time
           value: volume
           color: @color {open, close}
+        (await @api.level {@code})
+          .map (level, i) =>
+            @series.candle.createPriceLine
+              color: 'red'
+              lineWidth: 1
+              lineStyle: LineStyle.Dashed
+              price: level
+              axisLabelVisible: true
+              title: "#{level}"
       @resize()
   beforeMount: ->
     @ws = await ws
     @ws.on 'message', ({topic, data}) =>
       if topic == 'candle' and data.code == @code
         data.time = @hktz data.timestamp
-        @klSeries.update data
-        @volumeSeries.update
+        @series.candle.update data
+        @series.volume.update
           time: data.time
           value: data.volume
           color: @color data
@@ -130,14 +140,14 @@ export default
     window.addEventListener 'resize', =>
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
-    @klSeries = @chart.addCandlestickSeries upColor: 'transparent'
-    @volSeries = @chart.addLineSeries 
+    @series.candle = @chart.addCandlestickSeries upColor: 'transparent'
+    @series.volatility = @chart.addLineSeries 
       color: 'blue'
       lineWidth: 1
       priceFormat:
         type: 'price'
       priceScaleId: 'volatility'
-    @volumeSeries = @chart.addHistogramSeries
+    @series.volume = @chart.addHistogramSeries
       color: 'blue'
       priceFormat:
         type: 'volume'
@@ -151,7 +161,7 @@ export default
         return
       flag = true
       logicalRange = @chart.timeScale().getVisibleLogicalRange()
-      barsInfo = @klSeries.barsInLogicalRange logicalRange
+      barsInfo = @series.candle.barsInLogicalRange logicalRange
       [first, ..., last] = @candles
       if barsInfo?.barsBefore < 10
         endTime = moment

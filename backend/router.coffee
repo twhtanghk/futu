@@ -1,8 +1,31 @@
 moment = require 'moment'
 Router = require 'koa-router'
 router = new Router()
+{history} = require 'algotrader/data'
+{ohlc} = require 'algotrader/analysis'
 
 module.exports = router
+  # get support or resistance levels of specifed stock
+  # req.body = {market, code, freq, beginTime, endTime}
+  # res.body = {level: [price1, price2, ...]
+  .get '/api/level', (ctx, next) ->
+    {market, code, freq, beginTime, endTime} = ctx.request.body
+    endTime = moment()
+    beginTime = moment endTime
+      .subtract 6, 'month'
+    df = await history ctx.api,
+      market: market
+      code: code
+      start: beginTime
+      end: endTime
+      freq: freq
+    ctx.response.body = ohlc
+      .levels df
+      .map ([price, idx]) ->
+        price
+      .sort (a, b) ->
+        a - b
+    await next()
   .get '/api/candle', (ctx, next) ->
     {rehabType, klType, security, beginTime, endTime} = ctx.request.body
     ctx.response.body = await ctx.api.historyKL {rehabType, klType, security, beginTime, endTime}
