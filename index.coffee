@@ -133,6 +133,7 @@ class Futu extends EventEmitter
     klList: klList.map (i) ->
       {timestamp, openPrice, highPrice, lowPrice, closePrice, lastClosePrice, volume, turnover, changeRate} = i
       time: timestamp
+      timestamp: timestamp
       open: openPrice
       high: highPrice
       low: lowPrice
@@ -246,7 +247,6 @@ class Futu extends EventEmitter
     
   basicQuote: ({market, code}) ->
     market ?= QotMarket.QotMarket_HK_Security
-    await @subscribe {market, code}
     req =
       c2s:
         securityList: [{market, code}]
