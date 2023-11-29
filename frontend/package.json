@@ -18,6 +18,7 @@
     "model": "https://github.com/twhtanghk/model",
     "moment": "^2.29.4",
     "reconnecting-websocket": "^4.4.0",
+    "sass": "^1.69.5",
     "volatility": "^0.2.1",
     "vue": "^3.2.13",
     "vue-router": "^4.1.6",
@@ -36,8 +37,7 @@
     "lightweight-charts": "^4.1.1",
     "mqtt": "^4.3.7",
     "node-polyfill-webpack-plugin": "^2.0.1",
-    "node-sass": "^8.0.0",
-    "sass-loader": "^13.2.0",
+    "sass-loader": "^13.3.2",
     "vue-cli-plugin-coffee": "~1.0.2"
   },
   "eslintConfig": {

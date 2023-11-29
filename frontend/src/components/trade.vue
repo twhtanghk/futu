@@ -1,8 +1,12 @@
 <template>
   <v-container>
-    <v-row><unlockAcc/></v-row>
-    <v-row><tradeCreate :item='item'/></v-row>
-    <v-row>
+    <v-row style='height: 15vh, width: 100%'>
+      <unlockAcc/>
+    </v-row>
+    <v-row style='height: 15vh, width: 100%'>
+      <tradeCreate :item='item'/>
+    </v-row>
+    <v-row style='height: 70vh, width: 100%, overflow: auto'>
       <tradeFilled/>
     </v-row>
   </v-container>
@@ -31,16 +35,5 @@ export default
 <style lang='scss' scoped>
 html, body {
   overflow: hidden;
-}
-
-.v-container .v-row:not(nth-child(3)) {
-  height: 15vh;
-  width: 100%;
-}
-
-.v-container .v-row:nth-child(3) {
-  height: 70vh;
-  width: 100%;
-  overflow: auto;
 }
 </style>
