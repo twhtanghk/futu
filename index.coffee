@@ -247,6 +247,7 @@ class Futu extends EventEmitter
     
   basicQuote: ({market, code}) ->
     market ?= QotMarket.QotMarket_HK_Security
+    await @subscribe {market, code}
     req =
       c2s:
         securityList: [{market, code}]

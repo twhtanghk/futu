@@ -13,7 +13,8 @@ module.exports = router
     endTime = moment()
     beginTime = moment endTime
       .subtract 6, 'month'
-    df = await history ctx.api,
+    df = await history 
+      broker: ctx.api
       market: market
       code: code
       start: beginTime
