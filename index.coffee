@@ -16,16 +16,16 @@ class Futu extends EventEmitter
     'hk': QotMarket.QotMarket_HK_Security
 
   @freqMap:
-    '1': KLType.KLType_1Min
-    '5': KLType.KLType_5Min
-    '15': KLType.KLType_15Min
-    '30': KLType.KLType_30Min
-    '1h': KLType.KLType_60Min
-    '1d': KLType.KLType_Day
-    '1w': KLType.KLType_Week
-    '1m': KLType.KLType_Month
-    '3m': KLType.KLType_Quarter
-    '1y': KLType.KLType_Year
+    '1': SubType.SubType_1Min
+    '5': SubType.SubType_5Min
+    '15': SubType.SubType_15Min
+    '30': SubType.SubType_30Min
+    '1h': SubType.SubType_60Min
+    '1d': SubType.SubType_Day
+    '1w': SubType.SubType_Week
+    '1m': SubType.SubType_Month
+    '3m': SubType.SubType_Quarter
+    '1y': SubType.SubType_Year
 
   subList: []
   tradeSerialNo: 0

@@ -22,8 +22,8 @@ do ->
     debug await futu.historyKL {security}
     debug await futu.plateSet market: 1
 
-    debug await futu.subscribe ['00700', '00388', '01211', '800000']
-    futu.on '1', debug
+    debug await futu.subscribe code: '00700'
+    futu.on 'candle', debug
     debug await futu.subInfo()
 
     await new Promise (resolve) ->
