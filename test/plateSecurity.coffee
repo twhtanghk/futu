@@ -1,4 +1,4 @@
-{Futu, levels} = require '../index.coffee'
+Futu = require('../index.coffee').default
 
 debug = (obj) ->
   console.error JSON.stringify obj, null, 2
