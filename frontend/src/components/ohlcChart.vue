@@ -110,6 +110,6 @@ export default
 
 <style lang='scss' scoped>
 .chart {
-  height: 40vh;
+  height: 90vh;
 }
 </style>
