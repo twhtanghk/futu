@@ -23,6 +23,10 @@ class WS extends ReconnectingWebSocket
     opts.market ?= QotMarket.QotMarket_HK_Security
     @send _.extend action: 'unsubscribe', opts
 
+  ohlc: (opts) ->
+    opts.market ?= QotMarket.QotMarket_HK_Security
+    @send _.extend action: 'ohlc', opts
+    
   on: (topic, func) ->
     @addEventListener topic, (event) ->
       func JSON.parse event.data

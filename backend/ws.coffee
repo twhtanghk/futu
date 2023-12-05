@@ -1,5 +1,7 @@
 _ = require 'lodash'
+moment = require 'moment'
 Futu = require('../index').default
+{data} = require 'algotrader/data'
 subType = 
   '1': Futu.constant.SubType.SubType_KL_1Min
   '5': Futu.constant.SubType.SubType_KL_5Min
@@ -13,18 +15,28 @@ module.exports = (ctx, msg) ->
         await ctx.api.subscribeAcc()
       when 'subscribe'
         if interval in ['1', '5', '15']
-          subtype = subType[interval]
+          subtype = Futu.subTypeMap[interval]
         await ctx.api.subscribe 
           market: market
           code: code
           subtype: subtype
       when 'unsubscribe'
         if interval in ['1', '5', '15']
-          subtype = subType[interval]
+          subtype = Futu.subTypeMap[interval]
         await ctx.api.unsubscribe 
           market: market
           code: code
           subtype: subtype
+      when 'ohlc'
+        opt =
+          broker: ctx.api
+          market: market
+          code: code
+          beginTime: moment().subtract 2, 'month'
+          freq: interval
+        for await i from data opt
+          i.code = code
+          ctx.websocket.send JSON.stringify topic: 'ohlc', data: i
   catch err
     console.error err
   ctx.api
