@@ -25,7 +25,7 @@
 <script lang='coffee'>
 import {default as ws} from '../plugins/ws'
 import {default as api} from '../plugins/api'
-import {default as futu} from '../../../backend/futu'
+import {default as Futu} from '../../../index'
 
 export default
   props:
@@ -34,19 +34,19 @@ export default
       default:
         '00700'
   data: ->
-    market: futu.QotMarket.QotMarket_HK_Security
+    market: Futu.constant.QotMarket.QotMarket_HK_Security
     ask: []
     bid: []
     active: false
   methods: 
     subscribe: ->
       (await ws).subscribe
-        subtype: futu.SubType.SubType_OrderBook
+        subtype: Futu.constant.SubType.SubType_OrderBook
         market: @market
         code: @code
     unsubscribe: ->
       (await ws).unsubscribe
-        subtype: futu.SubType.SubType_OrderBook
+        subtype: Futu.constant.SubType.SubType_OrderBook
         market: @market
         code: @code
   mounted: ->

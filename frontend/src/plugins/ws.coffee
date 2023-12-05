@@ -1,7 +1,8 @@
 _ = require 'lodash'
 import * as Promise from 'bluebird'
 import ReconnectingWebSocket from 'reconnecting-websocket'
-{QotMarket, OrderStatus} = require('../../../backend/futu').default
+import {default as Futu} from '../../../index'
+{QotMarket, OrderStatus} = Futu
 
 class WS extends ReconnectingWebSocket
   constructor: (url, protocol) ->

@@ -1,9 +1,9 @@
 _ = require 'lodash'
-futu = require('./futu').default
+Futu = require('../index').default
 subType = 
-  '1': futu.SubType.SubType_KL_1Min
-  '5': futu.SubType.SubType_KL_5Min
-  '15': futu.SubType.SubType_KL_15Min
+  '1': Futu.constant.SubType.SubType_KL_1Min
+  '5': Futu.constant.SubType.SubType_KL_5Min
+  '15': Futu.constant.SubType.SubType_KL_15Min
 
 module.exports = (ctx, msg) ->
   {action, subtype, market, code, interval} = msg

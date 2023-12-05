@@ -17,7 +17,7 @@
 import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
-import {default as futu} from '../../../backend/futu'
+import Futu from '../../../index'
 import {volSML} from '../plugins/lib'
 {Model} = require('model').default
 
@@ -46,8 +46,8 @@ export default
     code: null
     name: null
     interval: '1'
-    intervalList: _.map futu.klType, (v, k) -> k
-    market: futu.QotMarket.QotMarket_HK_Security
+    intervalList: _.map Futu.klTypeMap, (v, k) -> k
+    market: Futu.constant.QotMarket.QotMarket_HK_Security
     marketList: require('../plugins/const').default.marketList
   methods:
     clear: ->
@@ -93,7 +93,7 @@ export default
         security:
           market: @market
           code: @code
-        klType: futu.klType[@interval]
+        klType: Futu.klTypeMap[@interval]
         beginTime: beginTime
         endTime: endTime
       {market, code} = security

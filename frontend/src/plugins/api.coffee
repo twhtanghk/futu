@@ -1,6 +1,7 @@
 _ = require 'lodash'
 {Model} = require('model').default
-{QotMarket, OrderStatus} = require('../../../backend/futu').default
+import Futu from '../../../index'
+{QotMarket, OrderStatus} = Futu.constant
 
 class Rest extends Model
   constructor: (opts = {}) ->

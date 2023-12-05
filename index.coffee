@@ -7,9 +7,7 @@ import { ftCmdID } from 'futu-api'
 import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
-{ModifyOrderOp, OrderType, SecurityFirm, TrdMarket, TrdSecMarket, TrdEnv} = require('./backend/futu').default
-
-global.WebSocket = require 'ws'
+{ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide} = Trd_Common
 
 class Futu extends EventEmitter
   @marketMap:
@@ -27,12 +25,45 @@ class Futu extends EventEmitter
     '3m': SubType.SubType_Quarter
     '1y': SubType.SubType_Year
 
+  @klTypeMap:
+    '1': KLType.KLType_1Min
+    '5': KLType.KLType_5Min
+    '15': KLType.KLType_15Min
+    '30': KLType.KLType_30Min
+    '1h': KLType.KLType_60Min
+    '1d': KLType.KLType_Day
+    '1w': KLType.KLType_Week
+    '1m': KLType.KLType_Month
+    '3m': KLType.KLType_Quarter
+    '1y': KLType.KLType_Year
+
+  @constant: {
+    Common
+    KLType
+    ModifyOrderOp
+    OrderStatus
+    OrderType
+    Qot_Common
+    QotMarket
+    RehabType
+    RetType
+    SecurityFirm
+    SubType
+    TradeDateMarket
+    Trd_Common
+    TrdEnv
+    TrdMarket
+    TrdSide
+    TrdSecMarket
+  }
+
   subList: []
   tradeSerialNo: 0
   trdEnv: if process.env.TRDENV? then parseInt process.env.TRDENV else TrdEnv.TrdEnv_Simulate
 
   constructor: ({host, port}) ->
     super()
+    global.WebSocket = require 'ws'
     return do =>
       await new Promise (resolve, reject) =>
         @ws = new ftWebsocket()
@@ -356,61 +387,4 @@ class Futu extends EventEmitter
         pwdMD5: pwdMD5
     @errHandler await @ws.UnlockTrade req
 
-# input time ascending order of ohlc data
-# i.e. [
-#   {date, open, high, low, close}
-#   ...
-# ]
-isSupport = (df, i) ->
-  df[i].low < df[i - 1].low and 
-  df[i].low < df[i + 1].low and
-  df[i + 1].low < df[i + 2].low and
-  df[i - 1].low < df[i - 2].low
-
-# input time ascending order of ohlc data
-# i.e. [
-#   {date, open, high, low, close}
-#   ...
-# ]
-isResistance = (df, i) ->
-  df[i].high > df[i - 1].high and 
-  df[i].high > df[i + 1].high and
-  df[i + 1].high > df[i + 2].high and
-  df[i - 1].high > df[i - 2].high
-
-# mean of price range i.e. high - low
-mean = (df) ->
-  sum = 0
-  for {high, low} in df
-    sum += high - low
-  sum / df.length
-
-# check if price is too close to existng levels
-meanDiff = (mean, price, levels) ->
-  for [y, idx] in levels
-    if Math.abs(price - y) < mean
-      return false
-  return true
-
-# https://colab.research.google.com/drive/16yWD7FJ-moOc9jjymDgQjLXvW-yPKSf3?usp=sharing#scrollTo=kbcJ8L5nN1B-
-# get list of support and resistance price levels
-levels = (df) ->
-  ret = []
-  avg = mean df
-  for i in [2..(df.length - 2)]
-    if isSupport df, i
-      if meanDiff avg, df[i].low, ret
-        ret.push [df[i].low, i]
-    if isResistance df, i
-      if meanDiff avg, df[i].high, ret
-        ret.push [df[i].high, i]
-  ret
-
-module.exports = {
-  Futu
-  isSupport
-  isResistance
-  mean
-  meanDiff
-  levels
-}
+export default Futu

@@ -16,8 +16,8 @@
 import unlockAcc from './unlockAcc'
 import tradeCreate from './tradeCreate'
 import tradeFilled from './tradeFilled'
-import {default as futu} from '../../../backend/futu'
-{TrdSide} = futu
+import {default as Futu} from '../../../index'
+{TrdSide} = Futu.constant
 
 export default
   components: { 

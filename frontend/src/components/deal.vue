@@ -16,12 +16,12 @@
 
 <script lang='coffee'>
 import {default as api} from '../plugins/api'
-import {default as futu} from '../../../backend/futu'
+import {default as Futu} from '../../../index'
 
 export default
   data: ->
     api: require('../plugins/api').default
-    market: futu.QotMarket.QotMarket_HK_Security
+    market: Futu.constant.QotMarket.QotMarket_HK_Security
     sortBy: [{key: 'updateTimestamp', order: 'desc'}]
     headers: [
       {title: 'Action', key: 'trdSide'}

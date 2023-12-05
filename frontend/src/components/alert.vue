@@ -10,8 +10,8 @@
 <script lang='coffee'>
 import alertCreate from './alertCreate'
 import alertList from './alertList'
-import {default as futu} from '../../../backend/futu'
-{TrdSide} = futu
+import {default as Futu} from '../../../index'
+{TrdSide} = Futu.constant
 
 export default
   components: { 

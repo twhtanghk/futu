@@ -27,7 +27,7 @@
 
 <script lang='coffee'>
 import {default as ws} from '../plugins/ws'
-import {default as futu} from '../../../backend/futu'
+import {default as Futu} from '../../../index'
 
 export default
   props:
@@ -40,7 +40,7 @@ export default
     ws: null
     code: null
     name: null
-    market: futu.QotMarket.QotMarket_HK_Security
+    market: Futu.constant.QotMarket.QotMarket_HK_Security
     marketList: require('../plugins/const').default.marketList
     curr: null # last subscribed market and code
     ask: []
@@ -53,12 +53,12 @@ export default
     subscribe: ->
       if @curr?
         @ws.unsubscribe
-          subtype: futu.SubType.SubType_OrderBook
+          subtype: Futu.constant.SubType.SubType_OrderBook
           market: @curr.market
           code: @curr.code
       @curr = {@market, @code}
       @ws.subscribe
-        subtype: futu.SubType.SubType_OrderBook
+        subtype: Futu.constant.SubType.SubType_OrderBook
         market: @market
         code: @code
   beforeMount: ->

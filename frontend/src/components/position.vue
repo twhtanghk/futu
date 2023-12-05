@@ -34,15 +34,15 @@
 
 <script lang='coffee'>
 import {default as api} from '../plugins/api'
-import {default as futu} from '../../../backend/futu'
+import {default as Futu} from '../../../index'
 import tradeCreate from './tradeCreate'
-{TrdSide} = futu
+{TrdSide} = Futu.constant
 
 export default
   components: {tradeCreate}
   data: ->
     api: require('../plugins/api').default
-    market: futu.QotMarket.QotMarket_HK_Security
+    market: Futu.constant.QotMarket.QotMarket_HK_Security
     sortBy: [{key: 'name', order: 'desc'}]
     headers: [
       {title: 'Code', key: 'code'}

@@ -43,7 +43,8 @@ moment = require 'moment'
 ws = require('../plugins/ws').default
 api = require('../plugins/api').default
 trade = require('../plugins/trade').default
-{QotMarket, OrderStatus} = require('../../../backend/futu').default
+import Futu from '../../../index'
+{QotMarket, OrderStatus} = Futu.constant
 
 export default
   data: ->

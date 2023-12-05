@@ -1,4 +1,4 @@
-{Futu} = require '../index'
+Futu = require('../index').default
 Koa = require 'koa'
 logger = require 'koa-logger'
 bodyParser = require 'koa-bodyparser'

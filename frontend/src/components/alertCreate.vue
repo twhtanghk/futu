@@ -13,8 +13,8 @@
 </template>
 
 <script lang='coffee'>
-import {default as futu} from '../../../backend/futu'
-{QotMarket, TrdSide} = futu
+import {default as Futu} from '../../../index'
+{QotMarket, TrdSide} = Futu.constant
 api = require('../plugins/api').default
 import {parse} from 'cookie'
 
