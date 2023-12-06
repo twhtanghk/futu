@@ -152,6 +152,7 @@ export default
       priceFormat:
         type: 'volume'
       priceScaleId: 'volume'
+    @series.volume.priceScale().applyOptions
       scaleMargins:
         top: 0.7
         bottom: 0

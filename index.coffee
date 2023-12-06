@@ -12,6 +12,7 @@ import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 class Futu extends EventEmitter
   @marketMap:
     'hk': QotMarket.QotMarket_HK_Security
+    'us': QotMarket.QotMarket_US_Security
 
   @subTypeMap:
     'Basic': SubType.SubType_Basic
@@ -81,19 +82,18 @@ class Futu extends EventEmitter
               @emit 'orderBook', 
                 {market, code, orderBookAskList, orderBookBidList}
             when ftCmdID.QotUpdateKL.cmd
-              {security, klList} = s2c
+              {klType, security, klList} = s2c
               {market, code} = security
               [q, ...] = klList
-              {lastClosePrice} = await @basicQuote {code}
               @emit 'candle',
                 market: market
                 code: code
+                freq: _.invertBy(Futu.klTypeMap)[klType]
                 timestamp: q.timestamp
                 high: q.highPrice
                 low: q.lowPrice
                 open: q.openPrice
                 close: q.closePrice
-                lastClose: lastClosePrice
                 volume: q.volume.low
                 turnover: q.turnover
             when ftCmdID.TrdUpdateOrder.cmd
@@ -166,14 +166,13 @@ class Futu extends EventEmitter
     {security, klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
     security: security
     klList: klList.map (i) ->
-      {timestamp, openPrice, highPrice, lowPrice, closePrice, lastClosePrice, volume, turnover, changeRate} = i
+      {timestamp, openPrice, highPrice, lowPrice, closePrice, volume, turnover, changeRate} = i
       time: timestamp
       timestamp: timestamp
       open: openPrice
       high: highPrice
       low: lowPrice
       close: closePrice
-      lastClose: lastClosePrice
       volume: volume.low
       turnover: turnover
       changeRate: changeRate
@@ -199,10 +198,12 @@ class Futu extends EventEmitter
         accID
     @errHandler await @ws.SubAccPush c2s: {accIDList}
 
-  subscribe: ({market, code, subtype}) ->
-    market ?= QotMarket.QotMarket_HK_Security
-    subtype ?= SubType.SubType_KL_1Min
-    @subList.push {market, code, subtype}
+  subscribe: ({market, code, freq}) ->
+    market ?= 'hk'
+    market = Futu.marketMap[market]
+    freq ?= '1'
+    subtype = Futu.subTypeMap[freq]
+    @subList.push {market, code, freq}
     @errHandler await @ws.Sub
       c2s:
         securityList: [ {market, code} ]
@@ -210,19 +211,19 @@ class Futu extends EventEmitter
         isSubOrUnSub: true
         isRegOrUnRegPush: true
 
-  unsubscribe: ({market, code, subtype}) ->
-    subtype ?= SubType.SubType_KL_1Min
+  unsubscribe: ({market, code, freq}) ->
+    market ?= 'hk'
+    market = Futu.marketMap[market]
+    freq ?= '1'
+    subtype = Futu.subTypeMap[freq]
     @subList = @subList.filter (i) ->
-      not (i.market == market and i.code == code and i.subtype == subtype)
-    try
-      @errHandler await @ws.Sub
-        c2s:
-          securityList: [ {market, code} ]
-          subTypeList: [subtype]
-          isSubOrUnSub: false
-          isUnsubAll: false
-    catch e
-      throw e
+      not (i.market == market and i.code == code and i.freq == freq)
+    @errHandler await @ws.Sub
+      c2s:
+        securityList: [ {market, code} ]
+        subTypeList: [subtype]
+        isSubOrUnSub: false
+        isUnsubAll: false
 
   optionChain: ({code, strikeRange, beginTime, endTime}) ->
     beginTime ?= moment()

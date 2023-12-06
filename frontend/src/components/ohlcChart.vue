@@ -44,7 +44,7 @@ export default
     code: null
     name: null
     interval: '1'
-    intervalList: _.map Futu.subTypeMap, (v, k) -> k
+    intervalList: _.map Futu.klTypeMap, (v, k) -> k
   methods:
     color: ({open, close}) ->
       if open > close then 'red' else 'green' 
@@ -62,18 +62,65 @@ export default
       @series.candle.setData []
       @series.volatility.setData []
       @series.volume.setData []
+    getHistory:  ({beginTime, endTime} = {}) ->
+      if beginTime?
+        beginTime = beginTime
+          .format 'YYYY-MM-DD'
+      if endTime?
+        endTime = endTime
+          .format 'YYYY-MM-DD'
+      {security, klList} = await @api.getHistory
+        security:
+          market: Futu.marketMap['hk']
+          code: @$route.params.code
+        klType: Futu.klTypeMap[@interval]
+        beginTime: beginTime
+        endTime: endTime
+      {market, code} = security
+      if code == @$route.params.code
+        data = klList
+          .map (i) =>
+            i.time = @hktz i.time
+            i
+        data = data.concat @series.candle.data()
+        data = data.sort (a, b) -> a.time - b.time
+        data = _.uniq data, (a) -> a.time
+        data = data.filter ({open, high, low, close}) ->
+          open? and high? and low? and close?
+        console.log data
+        @series.candle.setData data
+        volData = klList
+          .map ({time, volume, open, close}) =>
+            time: time
+            value: volume
+            color: @color {open, close}
+          .concat @series.volume.data()
+        volData = volData.sort (a, b) -> a.time - b.time
+        volData = _.uniq volData, (a) -> a.time
+        volData = volData.filter ({value}) -> value?
+        console.log volData
+        @series.volume.setData volData
+        (await @api.level {code: @$route.params.code})
+          .map (level, i) =>
+            @series.candle.createPriceLine
+              color: 'red'
+              lineWidth: 1
+              lineStyle: LineStyle.Dashed
+              price: level
+              axisLabelVisible: true
+              title: "#{level}"
+      @resize()
   beforeMount: ->
     @ws = await ws
     @ws.on 'message', ({topic, data}) =>
       if topic == 'ohlc' and data.code == @$route.params.code
-        data.time = @hktz data.timestamp
+        data.time = data.timestamp
         @series.candle.update data
         @series.volume.update
           time: data.time
           value: data.volume
           color: @color data
   mounted: ->
-    flag = false
     window.addEventListener 'resize', =>
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
@@ -85,20 +132,30 @@ export default
         type: 'price'
       priceScaleId: 'volatility'
     @series.volume = @chart.addHistogramSeries
-      color: 'blue'
       priceFormat:
         type: 'volume'
       priceScaleId: 'volume'
+    @series.volume.priceScale().applyOptions
       scaleMargins:
         top: 0.7
         bottom: 0
     @chart.timeScale().applyOptions timeVisible: true
+    calling = false
     @chart.timeScale().subscribeVisibleTimeRangeChange =>
-      if flag
+      if calling
         return
-      flag = true
-      logicalRange = @chart.timeScale().getVisibleLogicalRange()
-      barsInfo = @series.candle.barsInLogicalRange logicalRange
+      calling = true
+      try
+        ret = @series.candle
+          .barsInLogicalRange @chart.timeScale().getVisibleLogicalRange()
+        if ret?
+          {barsBefore, from, to} = ret
+          if barsBefore < 50
+            await @getHistory
+              beginTime: moment.unix(from).subtract 3, 'month'
+              endTime: moment.unix(from).subtract 1, 'day'
+      finally
+        calling = false
   unmounted: ->
     @chart?.remove()
     @chart = null
