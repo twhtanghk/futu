@@ -18,7 +18,6 @@ import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
 import Futu from '../../../index'
-import {volSML} from '../plugins/lib'
 {Model} = require('model').default
 
 export default
@@ -55,6 +54,11 @@ export default
         market: 'hk'
         code: @$route.params.code
         interval: @interval
+    unsubscribe: (interval) ->
+      @ws.unsubscribe
+        market: 'hk'
+        code: @$route.params.code
+        interval: interval
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
       @chart?.resize offsetWidth, offsetHeight 
@@ -82,12 +86,7 @@ export default
           .map (i) =>
             i.time = @hktz i.time
             i
-        data = data.concat @series.candle.data()
-        data = data.sort (a, b) -> a.time - b.time
-        data = _.uniq data, (a) -> a.time
-        data = data.filter ({open, high, low, close}) ->
-          open? and high? and low? and close?
-        console.log data
+          .concat @series.candle.data()
         @series.candle.setData data
         volData = klList
           .map ({time, volume, open, close}) =>
@@ -95,10 +94,6 @@ export default
             value: volume
             color: @color {open, close}
           .concat @series.volume.data()
-        volData = volData.sort (a, b) -> a.time - b.time
-        volData = _.uniq volData, (a) -> a.time
-        volData = volData.filter ({value}) -> value?
-        console.log volData
         @series.volume.setData volData
         (await @api.level {code: @$route.params.code})
           .map (level, i) =>
@@ -114,12 +109,13 @@ export default
     @ws = await ws
     @ws.on 'message', ({topic, data}) =>
       if topic == 'ohlc' and data.code == @$route.params.code
-        data.time = data.timestamp
+        data.time = @hktz data.timestamp
         @series.candle.update data
         @series.volume.update
           time: data.time
           value: data.volume
           color: @color data
+    @ohlc()
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
@@ -146,14 +142,13 @@ export default
         return
       calling = true
       try
-        ret = @series.candle
+        barsInfo = @series.candle
           .barsInLogicalRange @chart.timeScale().getVisibleLogicalRange()
-        if ret?
-          {barsBefore, from, to} = ret
-          if barsBefore < 50
-            await @getHistory
-              beginTime: moment.unix(from).subtract 3, 'month'
-              endTime: moment.unix(from).subtract 1, 'day'
+        if barsInfo?.barsBefore < 10
+          [first, ...] = @series.candle.data()
+          await @getHistory
+            beginTime: moment.unix(first.time).subtract 3, 'month'
+            endTime: moment.unix(first.time).subtract 1, 'day'
       finally
         calling = false
   unmounted: ->
@@ -162,6 +157,7 @@ export default
   watch:
     interval: (newVal, oldVal) ->
       @clear()
+      @unsubscribe oldVal
       @ohlc()
 </script>
 

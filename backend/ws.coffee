@@ -8,12 +8,13 @@ subType =
   '15': Futu.constant.SubType.SubType_KL_15Min
 
 module.exports = (ctx, msg) ->
-  {action, subtype, market, code, interval} = msg
+  {action} = msg
   try
     switch action
       when 'subscribeAcc'
         await ctx.api.subscribeAcc()
       when 'subscribe'
+        {subtype, market, code, interval} = msg
         if interval in ['1', '5', '15']
           subtype = Futu.subTypeMap[interval]
         await ctx.api.subscribe 
@@ -21,6 +22,7 @@ module.exports = (ctx, msg) ->
           code: code
           subtype: subtype
       when 'unsubscribe'
+        {subtype, market, code, interval} = msg
         if interval in ['1', '5', '15']
           subtype = Futu.subTypeMap[interval]
         await ctx.api.unsubscribe 
@@ -28,11 +30,24 @@ module.exports = (ctx, msg) ->
           code: code
           subtype: subtype
       when 'ohlc'
+        {market, code, interval, beginTime} = msg
         opt =
           broker: ctx.api
           market: market
           code: code
-          beginTime: moment().subtract 2, 'month'
+          beginTime: do ->
+            elapsed =
+              '1': day: 1
+              '5': day: 1
+              '15': day: 1
+              '30': day: 3
+              '1h': day: 3
+              '1d': year: 1
+              '1w': year: 10
+              '1m': year: 30
+              '3m': year: 30
+              '1y': year: 60
+            moment().subtract elapsed[interval]
           freq: interval
         for await i from data opt
           i.code = code
