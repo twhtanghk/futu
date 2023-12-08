@@ -15,22 +15,21 @@ module.exports = (ctx, msg) ->
         await ctx.api.subscribeAcc()
       when 'subscribe'
         {subtype, market, code, interval} = msg
-        if interval in ['1', '5', '15']
+        if interval of (k for k, v of Futu.klTypeMap)
           subtype = Futu.subTypeMap[interval]
         await ctx.api.subscribe 
           market: market
           code: code
           subtype: subtype
       when 'unsubscribe'
-        {subtype, market, code, interval} = msg
-        if interval in ['1', '5', '15']
-          subtype = Futu.subTypeMap[interval]
+        {market, code, interval} = msg
         await ctx.api.unsubscribe 
           market: market
           code: code
-          subtype: subtype
+          subtype: Futu.subTypeMap[interval]
       when 'ohlc'
         {market, code, interval, beginTime} = msg
+        console.log msg
         opt =
           broker: ctx.api
           market: market

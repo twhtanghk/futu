@@ -86,9 +86,9 @@ class Futu extends EventEmitter
               {market, code} = security
               [q, ...] = klList
               @emit 'candle',
-                market: market
+                market: _.invert(Futu.marketMap)[market]
                 code: code
-                freq: _.invertBy(Futu.klTypeMap)[klType]
+                freq: _.invert(Futu.klTypeMap)[klType]
                 timestamp: q.timestamp
                 high: q.highPrice
                 low: q.lowPrice
@@ -198,12 +198,10 @@ class Futu extends EventEmitter
         accID
     @errHandler await @ws.SubAccPush c2s: {accIDList}
 
-  subscribe: ({market, code, freq}) ->
+  subscribe: ({market, code, subtype}) ->
     market ?= 'hk'
     market = Futu.marketMap[market]
-    freq ?= '1'
-    subtype = Futu.subTypeMap[freq]
-    @subList.push {market, code, freq}
+    @subList.push {market, code, subtype}
     @errHandler await @ws.Sub
       c2s:
         securityList: [ {market, code} ]

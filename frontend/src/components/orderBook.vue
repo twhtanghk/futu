@@ -54,12 +54,12 @@ export default
       if @curr?
         @ws.unsubscribe
           subtype: Futu.constant.SubType.SubType_OrderBook
-          market: @curr.market
+          market: 'hk'
           code: @curr.code
       @curr = {@market, @code}
       @ws.subscribe
         subtype: Futu.constant.SubType.SubType_OrderBook
-        market: @market
+        market: 'hk'
         code: @code
   beforeMount: ->
     @ws = (await ws)
