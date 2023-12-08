@@ -53,7 +53,7 @@ export default
     min: null
     max: null
     optionChain: []
-    market: Futu.constant.QotMarket.QotMarket_HK_Security
+    market: 'hk'
     marketList: require('../plugins/const').default.marketList
     expiryDate: @comingMonth()[0]
     dateList: @comingMonth()

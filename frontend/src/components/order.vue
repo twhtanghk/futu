@@ -34,7 +34,7 @@ export default
       default:
         '00700'
   data: ->
-    market: Futu.constant.QotMarket.QotMarket_HK_Security
+    market: 'hk'
     ask: []
     bid: []
     active: false
@@ -55,7 +55,7 @@ export default
       .on 'message', (msg) =>
         {topic, data} = msg
         {market, code, orderBookAskList, orderBookBidList} = data
-        if topic == 'orderBook' and market == @market and code == @code
+        if topic == 'orderBook' and market == Futu.marketMap[@market] and code == @code
           @ask = orderBookAskList
           @bid = orderBookBidList
   unmounted: ->
