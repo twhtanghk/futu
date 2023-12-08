@@ -15,6 +15,7 @@ import trade from './components/trade.vue'
 import alert from './components/alert.vue'
 import quote from './components/quote.vue'
 import ohlcChart from './components/ohlcChart.vue'
+import constituent from './components/constituent.vue'
 import '@mdi/font/css/materialdesignicons.css'
 
 components.VDataTable = VDataTable
@@ -27,7 +28,8 @@ const routes = [
   {path: '/trade', component: trade},
   {path: '/alert', component: alert},
   {path: '/quote/:code', component: quote},
-  {path: '/ohlc/:code', component: ohlcChart}
+  {path: '/ohlc/:code', component: ohlcChart},
+  {path: '/constituent', component: constituent}
 ]
 const router = VueRouter.createRouter({
   history: VueRouter.createWebHashHistory(),

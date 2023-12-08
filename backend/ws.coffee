@@ -2,6 +2,8 @@ _ = require 'lodash'
 moment = require 'moment'
 Futu = require('../index').default
 {data} = require 'algotrader/data'
+{filterByStdev} = require 'algotrader/strategy'
+
 subType = 
   '1': Futu.constant.SubType.SubType_KL_1Min
   '5': Futu.constant.SubType.SubType_KL_5Min
@@ -29,7 +31,6 @@ module.exports = (ctx, msg) ->
           subtype: Futu.subTypeMap[interval]
       when 'ohlc'
         {market, code, interval, beginTime} = msg
-        console.log msg
         opt =
           broker: ctx.api
           market: market
@@ -51,6 +52,16 @@ module.exports = (ctx, msg) ->
         for await i from data opt
           i.code = code
           ctx.websocket.send JSON.stringify topic: 'ohlc', data: i
+      when 'constituent'
+        {action, idx, beginTime, chunkSize, n} = msg
+        opts =
+          broker: ctx.api
+          idx: idx
+          beginTime: beginTime
+          chunkSize: chunkSize
+          n: n
+        data = await filterByStdev opts
+        ctx.websocket.send JSON.stringify topic: 'constituent', data: data
   catch err
     console.error err
   ctx.api
