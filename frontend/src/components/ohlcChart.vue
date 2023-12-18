@@ -1,7 +1,9 @@
 <template>
   <v-container>
     <v-row>
-      <v-col>{{ name }}</v-col>
+      <v-col>
+        <v-select density='compact' :items="['levelVol', 'priceVol']" v-model="selectedStrategy"/>
+      </v-col>
       <v-col><v-text-field density='compact' v-model='$route.params.code'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
@@ -19,6 +21,8 @@ import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
 import Futu from '../../../index'
 {Model} = require('model').default
+import {default as strategy} from 'algotrader/strategy'
+import fromEmitter from '@async-generators/from-emitter'
 
 export default
   props:
@@ -34,6 +38,7 @@ export default
             color: 'white'
   data: ->
     api: require('../plugins/api').default
+    selectedStrategy: 'priceVol'
     ws: null
     chart: null
     series:
@@ -107,15 +112,26 @@ export default
       @resize()
   beforeMount: ->
     @ws = await ws
-    @ws.on 'message', ({topic, data}) =>
-      if topic == 'ohlc' and data.code == @$route.params.code
-        data.time = @hktz data.timestamp
-        @series.candle.update data
-        @series.volume.update
-          time: data.time
-          value: data.volume
-          color: @color data
+    socket = @ws
     @ohlc()
+    df = ->
+      for await i from fromEmitter socket, onNext: 'message'
+        {topic, data} = JSON.parse i.data
+        yield {topic, data}
+    predicate = (chunk) =>
+      [i, ...] = chunk
+      {topic, data} = i
+      topic == 'ohlc' and data.code == @$route.params.code
+    filtered = ->
+      for await {topic, data} from strategy.filter df, predicate
+        yield data
+    for await i from filtered()
+      i.time = @hktz i.timestamp
+      @series.candle.update i
+      @series.volume.update
+        time: i.time
+        value: i.volume
+        color: @color i
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()

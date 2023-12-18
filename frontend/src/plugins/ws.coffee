@@ -43,6 +43,9 @@ class WS extends ReconnectingWebSocket
       func JSON.parse event.data
     @
 
+  addListener: (event, handler) ->
+    @addEventListener event, handler
+
 export default new Promise (resolve, reject) ->
   ws = new WS "ws://#{location.host}"
   ws.addEventListener 'error', console.error
