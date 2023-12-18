@@ -2,6 +2,11 @@
   <v-container>
     <v-row>
       <v-data-table :sort-by='sortBy' :headers='headers' :items='item' :items-per-page='-1' density='compact'>
+        <template v-slot:item.code='{ item }'>
+          <a :href="link(item.raw.code)" target='_blank'>
+            {{ item.raw.code }}
+          </a>
+        </template>
         <template v-slot:item.close='{ item }'>
           {{ item.raw.close.toFixed(2) }}
         </template>
@@ -35,6 +40,9 @@ export default
       {title: 'Volume (trend)', key: 'volume.trend'}
       {title: 'Time', key: 'time'}
     ]
+  methods:
+    link: (code) ->
+      "#/quote/#{code}"
   mounted: ->
     (await ws)
       .constituent()
