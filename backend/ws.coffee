@@ -2,7 +2,7 @@ _ = require 'lodash'
 moment = require 'moment'
 Futu = require('../index').default
 {data} = require('algotrader/data').default
-{filterByStdev} = require 'algotrader/strategy'
+{filterByStdev} = require('algotrader/strategy').default
 
 subType = 
   '1': Futu.constant.SubType.SubType_KL_1Min

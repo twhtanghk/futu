@@ -1,8 +1,8 @@
 moment = require 'moment'
 Router = require 'koa-router'
 router = new Router()
-{history} = require 'algotrader/data'
-{ohlc} = require 'algotrader/analysis'
+{history} = require('algotrader/data').default
+{ohlc} = require('algotrader/analysis').default
 
 module.exports = router
   # get support or resistance levels of specifed stock
