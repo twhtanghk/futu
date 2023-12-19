@@ -20,6 +20,7 @@
     "moment": "^2.29.4",
     "reconnecting-websocket": "^4.4.0",
     "sass": "^1.69.5",
+    "stats-lite": "^2.2.0",
     "volatility": "^0.2.1",
     "vue": "^3.2.13",
     "vue-router": "^4.1.6",

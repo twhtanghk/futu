@@ -38,7 +38,7 @@ export default
             color: 'white'
   data: ->
     api: require('../plugins/api').default
-    selectedStrategy: 'priceVol'
+    selectedStrategy: 'levelVol'
     ws: null
     chart: null
     series:
@@ -125,13 +125,24 @@ export default
     filtered = ->
       for await {topic, data} from strategy.filter df, predicate
         yield data
-    for await i from filtered()
+    markers = []
+    s = strategy[@selectedStrategy]
+    for await i from s -> yield from await strategy.indicator filtered
       i.time = @hktz i.timestamp
       @series.candle.update i
       @series.volume.update
         time: i.time
         value: i.volume
         color: @color i
+      if 'entryExit' of i
+        {side, plPrice} = i.entryExit
+        markers.push
+          time: i.time
+          position: if side == 'buy' then 'belowBar' else 'aboveBar'
+          color: if side == 'buy' then 'blue' else 'red'
+          shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
+          text: "#{side} #{plPrice}"
+        @series.candle.setMarkers markers
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
@@ -175,6 +186,8 @@ export default
       @clear()
       @unsubscribe oldVal
       @ohlc()
+    selectedStrategy: (newVal, oldVal) ->
+      @series.candle.setMarkers []
 </script>
 
 <style lang='scss' scoped>
