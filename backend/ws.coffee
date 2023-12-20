@@ -4,11 +4,6 @@ Futu = require('../index').default
 {data} = require('algotrader/data').default
 {filterByStdev} = require('algotrader/strategy').default
 
-subType = 
-  '1': Futu.constant.SubType.SubType_KL_1Min
-  '5': Futu.constant.SubType.SubType_KL_5Min
-  '15': Futu.constant.SubType.SubType_KL_15Min
-
 module.exports = (ctx, msg) ->
   {action} = msg
   try
