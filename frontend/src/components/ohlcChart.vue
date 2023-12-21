@@ -22,6 +22,7 @@ import {createChart, LineStyle} from 'lightweight-charts'
 import Futu from '../../../index'
 {Model} = require('model').default
 import {default as strategy} from 'algotrader/strategy'
+import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
 
 export default
@@ -69,6 +70,7 @@ export default
       @chart?.resize offsetWidth, offsetHeight 
     clear: ->
       @series.candle.setData []
+      @series.candle.setMarkers []
       @series.volatility.setData []
       @series.volume.setData []
     getHistory:  ({beginTime, endTime} = {}) ->
@@ -110,39 +112,41 @@ export default
               axisLabelVisible: true
               title: "#{level}"
       @resize()
-  beforeMount: ->
-    @ws = await ws
-    socket = @ws
-    @ohlc()
-    df = ->
-      for await i from fromEmitter socket, onNext: 'message'
-        {topic, data} = JSON.parse i.data
-        yield {topic, data}
-    predicate = (chunk) =>
-      [i, ...] = chunk
-      {topic, data} = i
-      topic == 'ohlc' and data.code == @$route.params.code
-    filtered = ->
-      for await {topic, data} from strategy.filter df, predicate
-        yield data
-    markers = []
-    s = strategy[@selectedStrategy]
-    for await i from s -> yield from await strategy.indicator filtered
-      i.time = @hktz i.timestamp
-      @series.candle.update i
-      @series.volume.update
-        time: i.time
-        value: i.volume
-        color: @color i
-      if 'entryExit' of i
-        {side, plPrice} = i.entryExit
-        markers.push
+    redraw: ->
+      @ws = await ws
+      socket = @ws
+      @ohlc()
+      # keep watch for socket if message emitted
+      df = ->
+        for await i from fromEmitter socket, onNext: 'message'
+          {topic, data} = JSON.parse i.data
+          yield {topic, data}
+      # filter those targeted code only
+      code = ({topic, data}) =>
+        topic == 'ohlc' and data.code == @$route.params.code
+      # get ohlc data only
+      ohlc = ({topic, data}) ->
+        data
+      markers = []
+      s = strategy[@selectedStrategy]
+      for await i from s generator.map (generator.filter df, code), ohlc
+        i.time = @hktz i.timestamp
+        @series.candle.update i
+        @series.volume.update
           time: i.time
-          position: if side == 'buy' then 'belowBar' else 'aboveBar'
-          color: if side == 'buy' then 'blue' else 'red'
-          shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
-          text: "#{side} #{plPrice}"
-        @series.candle.setMarkers markers
+          value: i.volume
+          color: @color i
+        if 'entryExit' of i
+          {side, plPrice} = i.entryExit
+          markers.push
+            time: i.time
+            position: if side == 'buy' then 'belowBar' else 'aboveBar'
+            color: if side == 'buy' then 'blue' else 'red'
+            shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
+            text: "#{side} #{plPrice}"
+          @series.candle.setMarkers markers
+  beforeMount: ->
+    @redraw()
   mounted: ->
     window.addEventListener 'resize', =>
       @resize()
@@ -185,7 +189,7 @@ export default
     interval: (newVal, oldVal) ->
       @clear()
       @unsubscribe oldVal
-      @ohlc()
+      @redraw()
     selectedStrategy: (newVal, oldVal) ->
       @series.candle.setMarkers []
 </script>

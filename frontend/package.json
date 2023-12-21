@@ -10,10 +10,12 @@
   "dependencies": {
     "@async-generators/from-emitter": "^0.3.0",
     "@mdi/font": "^7.1.96",
+    "algotrader": "https://github.com/twhtanghk/algotrader",
     "bluebird": "^3.7.2",
     "cookie": "^0.5.0",
     "core-js": "^3.8.3",
     "futu-api": "^7.0.3208",
+    "generator": "https://github.com/twhtanghk/generator",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "model": "https://github.com/twhtanghk/model",
