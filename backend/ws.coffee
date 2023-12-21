@@ -4,6 +4,8 @@ Futu = require('../index').default
 {data} = require('algotrader/data').default
 {filterByStdev} = require('algotrader/strategy').default
 
+pageApi = {}
+
 module.exports = (ctx, msg) ->
   {action} = msg
   try
@@ -25,9 +27,11 @@ module.exports = (ctx, msg) ->
           code: code
           subtype: Futu.subTypeMap[interval]
       when 'ohlc'
-        {market, code, interval, beginTime} = msg
+        {url, market, code, interval, beginTime} = msg
+        pageApi[url] ?= {}
+        pageApi[url].broker = await new Futu host: 'localhost', port: 33333
         opt =
-          broker: ctx.api
+          broker: pageApi[url].broker
           market: market
           code: code
           beginTime: do ->
@@ -44,7 +48,10 @@ module.exports = (ctx, msg) ->
               '1y': year: 60
             moment().subtract elapsed[interval]
           freq: interval
-        for await i from data opt
+        pageApi[url].destroy?()
+        {g, destroy} = await data opt
+        pageApi[url].destroy = destroy
+        for await i from g()
           i.code = code
           ctx.websocket.send JSON.stringify topic: 'ohlc', data: i
       when 'constituent'

@@ -25,7 +25,9 @@ class WS extends ReconnectingWebSocket
 
   ohlc: (opts) ->
     opts.market ?= 'hk'
-    @send _.extend action: 'ohlc', opts
+    @send _.extend opts,
+      url: document.URL
+      action: 'ohlc'
     
   # loop for all constituent stocks of specified index
   # get dataSize of ohlc data
