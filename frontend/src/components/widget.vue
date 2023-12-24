@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row no-gutters>
+    <v-row class='row' no-gutters>
       <v-col>
         <component
           :is='$route.params.view'
@@ -16,7 +16,7 @@
         />
       </v-col>
     </v-row>
-    <v-row no-gutters>
+    <v-row class='row' no-gutters>
       <v-col>
         <component
           :is='$route.params.view'
@@ -36,6 +36,7 @@
 </template>
 
 <script lang='coffee'>
+import ohlcChart from './ohlcChart'
 import chart from './chart'
 import option from './option'
 import orderBook from './orderBook'
@@ -43,6 +44,7 @@ import {parse} from 'cookie'
 
 export default
   components:
+    ohlcChart: ohlcChart
     chart: chart
     option: option
     orderBook: orderBook
@@ -64,3 +66,9 @@ export default
         document.cookie = "codes=#{JSON.stringify newCodes}"
       deep: true
 </script>
+
+<style lang='scss' scoped>
+.row {
+  height: 40vh;
+}
+</style>

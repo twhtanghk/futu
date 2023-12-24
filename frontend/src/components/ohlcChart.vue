@@ -4,7 +4,7 @@
       <v-col>
         <v-select density='compact' :items="['levelVol', 'priceVol']" v-model="selectedStrategy"/>
       </v-col>
-      <v-col><v-text-field density='compact' v-model='$route.params.code'/></v-col>
+      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
     <v-row no-gutters>
@@ -27,8 +27,8 @@ import fromEmitter from '@async-generators/from-emitter'
 
 export default
   props:
-    freq:
-      type: String
+    initCode:
+      type: Array
     chartOptions:
       type: Object
       default:
@@ -58,12 +58,12 @@ export default
     ohlc: ->
       @ws.ohlc
         market: 'hk'
-        code: @$route.params.code
+        code: @code
         interval: @interval
     unsubscribe: (interval) ->
       @ws.unsubscribe
         market: 'hk'
-        code: @$route.params.code
+        code: @code
         interval: interval
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
@@ -83,12 +83,12 @@ export default
       {security, klList} = await @api.getHistory
         security:
           market: Futu.marketMap['hk']
-          code: @$route.params.code
+          code: @code
         klType: Futu.klTypeMap[@interval]
         beginTime: beginTime
         endTime: endTime
       {market, code} = security
-      if code == @$route.params.code
+      if code == @code
         data = klList
           .map (i) =>
             i.time = @hktz i.time
@@ -102,7 +102,7 @@ export default
             color: @color {open, close}
           .concat @series.volume.data()
         @series.volume.setData volData
-        (await @api.level {code: @$route.params.code})
+        (await @api.level {code: @code})
           .map (level, i) =>
             @series.candle.createPriceLine
               color: 'red'
@@ -123,13 +123,14 @@ export default
           yield {topic, data}
       # filter those targeted code only
       code = ({topic, data}) =>
-        topic == 'ohlc' and data.code == @$route.params.code
+        topic == 'ohlc' and data.code == @code
       # get ohlc data only
       ohlc = ({topic, data}) ->
         data
       markers = []
+      #
       s = strategy[@selectedStrategy]
-      for await i from s generator.map (generator.filter df, code), ohlc
+      for await i from s strategy.indicator (generator.map (generator.filter df, code), ohlc)
         i.time = @hktz i.timestamp
         @series.candle.update i
         @series.volume.update
@@ -146,6 +147,7 @@ export default
             text: "#{side} #{plPrice}"
           @series.candle.setMarkers markers
   beforeMount: ->
+    @code = @initCode?[0] || @$route.params.code
     @redraw()
   mounted: ->
     window.addEventListener 'resize', =>
