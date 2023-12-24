@@ -8,7 +8,7 @@
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
     <v-row no-gutters>
-      <v-col cols='18'>
+      <v-col>
         <div class='chart' ref='curr'/>
       </v-col>
     </v-row>
@@ -32,6 +32,7 @@ export default
     chartOptions:
       type: Object
       default:
+        autoSize: true
         layout:
           textColor: 'black'
           background:
