@@ -29,18 +29,18 @@ module.exports = (ctx, msg) ->
       when 'ohlc'
         {url, market, code, interval, beginTime} = msg
         pageApi[url] ?= {}
-        pageApi[url].broker = await new Futu host: 'localhost', port: 33333
+        pageApi[url].broker ?= await new Futu host: 'localhost', port: 33333
         opt =
           broker: pageApi[url].broker
           market: market
           code: code
           beginTime: do ->
             elapsed =
-              '1': day: 1
-              '5': day: 1
-              '15': day: 1
-              '30': day: 3
-              '1h': day: 3
+              '1': week: 1
+              '5': week: 1
+              '15': week: 1
+              '30': week: 1
+              '1h': week: 1
               '1d': year: 1
               '1w': year: 10
               '1m': year: 30
