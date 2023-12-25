@@ -4,7 +4,7 @@
       <v-col>
         <v-select density='compact' :items="['levelVol', 'priceVol']" v-model="selectedStrategy"/>
       </v-col>
-      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); redraw();'/></v-col>
+      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); ohlc(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
     <v-row no-gutters>
@@ -56,11 +56,27 @@ export default
       if open > close then 'red' else 'green' 
     hktz: (time) ->
       time + 8 * 60 * 60 # adjust to HKT+8
+    # request for ohlc data
     ohlc: ->
+      @ws = await ws
       @ws.ohlc
         market: 'hk'
         code: @code
         interval: @interval
+    # create generator to keep watch for socket if message emitted
+    getData: ->
+      socket = @ws
+      df = ->
+        for await i from fromEmitter socket, onNext: 'message'
+          {topic, data} = JSON.parse i.data
+          yield {topic, data}
+      # filter those targeted code only
+      code = ({topic, data}) =>
+        topic == 'ohlc' and data.code == @code
+      # get ohlc data only
+      ohlc = ({topic, data}) ->
+        data
+      generator.map (generator.filter df, code), ohlc
     unsubscribe: (interval) ->
       @ws.unsubscribe
         market: 'hk'
@@ -113,42 +129,37 @@ export default
               axisLabelVisible: true
               title: "#{level}"
       @resize()
+    # draw candle stick chart
     redraw: ->
-      @ws = await ws
-      socket = @ws
-      @ohlc()
-      # keep watch for socket if message emitted
-      df = ->
-        for await i from fromEmitter socket, onNext: 'message'
-          {topic, data} = JSON.parse i.data
-          yield {topic, data}
-      # filter those targeted code only
-      code = ({topic, data}) =>
-        topic == 'ohlc' and data.code == @code
-      # get ohlc data only
-      ohlc = ({topic, data}) ->
-        data
-      markers = []
-      #
-      s = strategy[@selectedStrategy]
-      for await i from s strategy.indicator (generator.map (generator.filter df, code), ohlc)
-        i.time = @hktz i.timestamp
-        @series.candle.update i
-        @series.volume.update
-          time: i.time
-          value: i.volume
-          color: @color i
-        if 'entryExit' of i
-          {side, plPrice} = i.entryExit
-          markers.push
+      g = @getData()
+      do =>
+        for await i from g()
+          i.time = @hktz i.timestamp
+          @series.candle.update i
+          @series.volume.update
             time: i.time
-            position: if side == 'buy' then 'belowBar' else 'aboveBar'
-            color: if side == 'buy' then 'blue' else 'red'
-            shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
-            text: "#{side} #{plPrice}"
-          @series.candle.setMarkers markers
+            value: i.volume
+            color: @color i
+      @redrawMarker()
+    # use selected strategy to show entryExit markers
+    redrawMarker: ->
+      markers = []
+      g = @getData()
+      s = strategy[@selectedStrategy]
+      do =>
+        for await i from s strategy.indicator g
+          if 'entryExit' of i
+            {side, plPrice} = i.entryExit
+            markers.push
+              time: i.time
+              position: if side == 'buy' then 'belowBar' else 'aboveBar'
+              color: if side == 'buy' then 'blue' else 'red'
+              shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
+              text: "#{side} #{plPrice}"
+            @series.candle.setMarkers markers
   beforeMount: ->
     @code = @initCode?[0] || @$route.params.code
+    await @ohlc()
     @redraw()
   mounted: ->
     window.addEventListener 'resize', =>
@@ -192,9 +203,12 @@ export default
     interval: (newVal, oldVal) ->
       @clear()
       @unsubscribe oldVal
+      await @ohlc()
       @redraw()
     selectedStrategy: (newVal, oldVal) ->
-      @series.candle.setMarkers []
+      @clear()
+      await @ohlc()
+      @redraw()
 </script>
 
 <style lang='scss' scoped>
