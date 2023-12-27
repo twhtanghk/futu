@@ -1,36 +1,13 @@
 <template>
-  <v-container>
-    <v-row class='row' no-gutters>
-      <v-col>
-        <component
-          :is='$route.params.view'
-          :initCode='codes[0]'
-          @update:initCode='codes[0] = $event'
-        />
-      </v-col>
-      <v-col>
-        <component
-          :is='$route.params.view'
-          :initCode='codes[1]'
-          @update:initCode='codes[1] = $event'
-        />
-      </v-col>
-    </v-row>
-    <v-row class='row' no-gutters>
-      <v-col>
-        <component
-          :is='$route.params.view'
-          :initCode='codes[2]'
-          @update:initCode='codes[2] = $event'
-        />
-      </v-col>
-      <v-col>
-        <component
-          :is='$route.params.view'
-          :initCode='codes[3]'
-          @update:initCode='codes[3] = $event'
-        />
-      </v-col>
+  <v-container class='d-flex' style='height: 100%'>
+    <v-row no-gutters>
+      <component
+        v-for='i in codes'
+        :is='$route.params.view'
+        :initCode='i'
+        @update:initCode='i = $event'
+        style='flex: 0 0 50%; height: 50%'
+      />
     </v-row>
   </v-container>
 </template>
@@ -66,9 +43,3 @@ export default
         document.cookie = "codes=#{JSON.stringify newCodes}"
       deep: true
 </script>
-
-<style lang='scss' scoped>
-.row {
-  height: 40vh;
-}
-</style>
