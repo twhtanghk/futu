@@ -1,15 +1,15 @@
 <template>
-  <v-container>
-    <v-row>
+  <v-container class='d-flex flex-column' style='height: 100%'>
+    <v-row class='flex-grow-0'>
       <v-col>
         <v-select density='compact' :items="['levelVol', 'priceVol']" v-model="selectedStrategy"/>
       </v-col>
       <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); ohlc(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
-    <v-row no-gutters>
+    <v-row no-gutters class='flex-grow-1'>
       <v-col>
-        <div class='chart' ref='curr'/>
+        <div style='height: 100%' ref='curr'/>
       </v-col>
     </v-row>
   </v-container>
@@ -210,9 +210,3 @@ export default
       await @ohlc()
       @redraw()
 </script>
-
-<style lang='scss' scoped>
-.chart {
-  height: 90vh;
-}
-</style>

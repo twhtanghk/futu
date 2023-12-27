@@ -10,6 +10,10 @@ export default {
 
 <style>
 body {
+  height: 100vh;
   margin: 0;
+}
+#app {
+  height: 100%;
 }
 </style>
