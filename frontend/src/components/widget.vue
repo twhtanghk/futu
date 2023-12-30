@@ -6,7 +6,7 @@
         :is='$route.params.view'
         :initCode='i'
         @update:initCode='i = $event'
-        style='flex: 0 0 50%; height: 50%'
+        :class='$vuetify.display.mdAndDown ? "col" : "col2"'
       />
     </v-row>
   </v-container>
@@ -43,3 +43,17 @@ export default
         document.cookie = "codes=#{JSON.stringify newCodes}"
       deep: true
 </script>
+
+<style lang='scss' scoped>
+.col2 {
+  flex: 1 1 50%;
+  height: 50%;
+  width: 50%;
+}
+
+.col {
+  flex: 1 1 100%;
+  min-height: 300px;
+  width: 100%
+}
+</style>

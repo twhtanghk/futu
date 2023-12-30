@@ -1,5 +1,5 @@
 <template>
-  <v-container class='d-flex flex-column' style='height: 100%'>
+  <v-container class='d-flex flex-column'>
     <v-row class='flex-grow-0'>
       <v-col>
         <v-select density='compact' :items="['levelVol', 'priceVol']" v-model="selectedStrategy"/>
