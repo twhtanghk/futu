@@ -54,6 +54,6 @@ export default
 .col {
   flex: 1 1 100%;
   min-height: 300px;
-  width: 100%
+  width: 100%;
 }
 </style>
