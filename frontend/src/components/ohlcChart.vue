@@ -2,7 +2,7 @@
   <v-container class='d-flex flex-column'>
     <v-row class='flex-grow-0'>
       <v-col>
-        <v-select density='compact' :items="['levelVol', 'priceVol']" v-model="selectedStrategy"/>
+        <v-select density='compact' :items="['meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy"/>
       </v-col>
       <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); ohlc(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
