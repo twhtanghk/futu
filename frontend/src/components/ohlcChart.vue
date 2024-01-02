@@ -151,7 +151,7 @@ export default
           if 'entryExit' of i
             {side, plPrice} = i.entryExit
             markers.push
-              time: i.time
+              time: @hktz i.time
               position: if side == 'buy' then 'belowBar' else 'aboveBar'
               color: if side == 'buy' then 'blue' else 'red'
               shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
