@@ -7,6 +7,7 @@ Futu = require('../index').default
 pageApi = {}
 
 module.exports = (ctx, msg) ->
+  console.log "<-- ws #{JSON.stringify msg}"
   {action} = msg
   try
     switch action
