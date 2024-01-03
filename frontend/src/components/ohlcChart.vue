@@ -40,7 +40,7 @@ export default
             color: 'white'
   data: ->
     api: require('../plugins/api').default
-    selectedStrategy: 'levelVol'
+    selectedStrategy: 'meanReversion'
     ws: null
     chart: null
     series:
@@ -99,7 +99,7 @@ export default
           .format 'YYYY-MM-DD'
       {security, klList} = await @api.getHistory
         security:
-          market: Futu.marketMap['hk']
+          market: 'hk'
           code: @code
         klType: Futu.klTypeMap[@interval]
         beginTime: beginTime
