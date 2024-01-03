@@ -64,4 +64,3 @@ export default
               'volume.trend': last['volume.trend']
               time: last['time']
 </script>
-      @name = await @api.getName {@market, @code}

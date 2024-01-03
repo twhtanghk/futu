@@ -9,7 +9,7 @@ class Rest extends Model
 
   name: (opts) ->
     {market, code} = opts
-    opts.market ?= QotMarket.QotMarket_HK_Security
+    opts.market ?= 'hk'
     await @read data: _.extend id: 'name', opts
 
   level: ({code}) ->
