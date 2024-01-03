@@ -1,7 +1,7 @@
 _ = require 'lodash'
 moment = require 'moment'
 Futu = require('../index').default
-{data} = require('algotrader/data').default
+{data, freqDuration} = require('algotrader/data').default
 {filterByStdev} = require('algotrader/strategy').default
 
 pageApi = {}
@@ -35,19 +35,7 @@ module.exports = (ctx, msg) ->
           broker: pageApi[url].broker
           market: market
           code: code
-          beginTime: do ->
-            elapsed =
-              '1': week: 1
-              '5': week: 1
-              '15': week: 1
-              '30': week: 1
-              '1h': week: 1
-              '1d': year: 1
-              '1w': year: 10
-              '1m': year: 30
-              '3m': year: 30
-              '1y': year: 60
-            moment().subtract elapsed[interval]
+          beginTime: moment().subtract freqDuration[interval]
           freq: interval
         pageApi[url].destroy?()
         {g, destroy} = await data opt

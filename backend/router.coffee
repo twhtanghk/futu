@@ -1,4 +1,5 @@
 moment = require 'moment'
+Futu = require('../index').default
 Router = require 'koa-router'
 router = new Router()
 {history} = require('algotrader/data').default
@@ -29,6 +30,7 @@ module.exports = router
     await next()
   .get '/api/candle', (ctx, next) ->
     {rehabType, klType, security, beginTime, endTime} = ctx.request.body
+    security.market = Futu.marketMap[security.market]
     ctx.response.body = await ctx.api.historyKL {rehabType, klType, security, beginTime, endTime}
     await next()
   .get '/api/name', (ctx, next) ->
@@ -36,7 +38,7 @@ module.exports = router
     if not Array.isArray code
       code = [code]
     ctx.response.body = await ctx.api.marketState code.map (i) ->
-      market: market
+      market: Futu.marketMap[market]
       code: i
     await next()
   .get '/api/quote', (ctx, next) ->
@@ -95,4 +97,18 @@ module.exports = router
     {pwdMD5} = ctx.request.body
     await ctx.api.unlock {pwdMD5}
     ctx.response.body = {}
+    await next()
+  # via algotrader interface
+  .get '/api/history', (ctx, next) ->
+    {market, code, start, end, freq} = ctx.request.body
+    market ?= 'hk'
+    end = if end? then moment(end) else moment()
+    start = if start? then moment(start) else moment(end).subtract freqDuration[freq]
+    ctx.response.body = await history 
+      broker: ctx.api
+      market: market
+      code: code
+      start: start
+      end: end
+      freq: freq
     await next()
