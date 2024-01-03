@@ -29,6 +29,9 @@ class Rest extends Model
     {rehabType, klType, security, beginTime, endTime} = opts
     {security, klList} = await @read data: _.extend id: 'candle', opts
         
+  history: (opts) ->
+    await @read data: _.extend id: 'history', opts
+
   getOptionChain: (opts) ->
     {market, code, min, max, beginTime, endTime} = opts
     await @read data: _.extend id: 'optionChain', opts

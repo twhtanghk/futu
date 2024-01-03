@@ -91,43 +91,34 @@ export default
       @series.volatility.setData []
       @series.volume.setData []
     getHistory:  ({beginTime, endTime} = {}) ->
-      if beginTime?
-        beginTime = beginTime
-          .format 'YYYY-MM-DD'
-      if endTime?
-        endTime = endTime
-          .format 'YYYY-MM-DD'
-      {security, klList} = await @api.getHistory
-        security:
-          market: 'hk'
-          code: @code
-        klType: Futu.klTypeMap[@interval]
-        beginTime: beginTime
-        endTime: endTime
-      {market, code} = security
-      if code == @code
-        data = klList
-          .map (i) =>
-            i.time = @hktz i.time
-            i
-          .concat @series.candle.data()
-        @series.candle.setData data
-        volData = klList
-          .map ({time, volume, open, close}) =>
-            time: time
-            value: volume
-            color: @color {open, close}
-          .concat @series.volume.data()
-        @series.volume.setData volData
-        (await @api.level {code: @code})
-          .map (level, i) =>
-            @series.candle.createPriceLine
-              color: 'red'
-              lineWidth: 1
-              lineStyle: LineStyle.Dashed
-              price: level
-              axisLabelVisible: true
-              title: "#{level}"
+      klList = await @api.history
+        market: 'hk'
+        code: @code
+        start: beginTime
+        end: endTime
+        freq: @interval
+      data = klList
+        .map (i) =>
+          i.time = @hktz i.time
+          i
+        .concat @series.candle.data()
+      @series.candle.setData data
+      volData = klList
+        .map ({time, volume, open, close}) =>
+          time: time
+          value: volume
+          color: @color {open, close}
+        .concat @series.volume.data()
+      @series.volume.setData volData
+      (await @api.level {code: @code})
+        .map (level, i) =>
+          @series.candle.createPriceLine
+            color: 'red'
+            lineWidth: 1
+            lineStyle: LineStyle.Dashed
+            price: level
+            axisLabelVisible: true
+            title: "#{level}"
       @resize()
     # draw candle stick chart
     redraw: ->
@@ -192,8 +183,8 @@ export default
         if barsInfo?.barsBefore < 10
           [first, ...] = @series.candle.data()
           await @getHistory
-            beginTime: moment.unix(first.time).subtract 3, 'month'
-            endTime: moment.unix(first.time).subtract 1, 'day'
+            beginTime: moment.unix(first.time).subtract month: 3
+            endTime: moment.unix(first.time).subtract day: 1
       finally
         calling = false
   unmounted: ->

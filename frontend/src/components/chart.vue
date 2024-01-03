@@ -47,8 +47,7 @@ export default
     name: null
     interval: '1'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
-    market: Futu.constant.QotMarket.QotMarket_HK_Security
-    marketList: require('../plugins/const').default.marketList
+    market: 'hk'
   methods:
     clear: ->
       @candles = []
