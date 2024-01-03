@@ -41,13 +41,12 @@ export default
     code: null
     name: null
     market: Futu.constant.QotMarket.QotMarket_HK_Security
-    marketList: require('../plugins/const').default.marketList
     curr: null # last subscribed market and code
     ask: []
     bid: []
   methods:
     setCode: (event) ->
-      @name = await @api.getName {@market, @code}
+      @name = await @api.getName {market: 'hk', code: @code}
       document.title = "#{@code} #{@name}"
       @subscribe()
     subscribe: ->
