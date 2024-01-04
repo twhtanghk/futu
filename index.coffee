@@ -205,7 +205,7 @@ class Futu extends EventEmitter
     @errHandler await @ws.Sub
       c2s:
         securityList: [ {market, code} ]
-        subTypeList: [subtype, SubType.SubType_Basic]
+        subTypeList: [subtype]
         isSubOrUnSub: true
         isRegOrUnRegPush: true
 
@@ -280,8 +280,8 @@ class Futu extends EventEmitter
     (@errHandler await @ws.GetPositionList req).positionList
     
   basicQuote: ({market, code}) ->
-    market ?= QotMarket.QotMarket_HK_Security
-    await @subscribe {market, code}
+    market ?= 'hk'
+    await @subscribe {market, code, subtype: SubType.SubType_Basic}
     req =
       c2s:
         securityList: [{market, code}]
