@@ -4,33 +4,42 @@ Futu = require('../index').default
 {data, freqDuration} = require('algotrader/data').default
 {filterByStdev} = require('algotrader/strategy').default
 
+# {url: {broker, destroy}, ...}
+# keep record of broker and destroy based on page url
 pageApi = {}
 
 module.exports = (ctx, msg) ->
   console.log "<-- ws #{JSON.stringify msg}"
-  {action} = msg
+  {action, url} = msg
+  pageApi[url] ?= {}
+  pageApi[url].broker ?= await new Futu host: 'localhost', port: 33333
   try
     switch action
       when 'subscribeAcc'
-        await ctx.api.subscribeAcc()
+        await pageApi[url].broker.subscribeAcc()
       when 'subscribe'
         {subtype, market, code, interval} = msg
         if interval of (k for k, v of Futu.klTypeMap)
           subtype = Futu.subTypeMap[interval]
-        await ctx.api.subscribe 
+        await pageApi[url].broker.subscribe 
           market: market
           code: code
           subtype: subtype
+        pageApi[url].broker
+          .on 'candle', (data) ->
+            ctx.websocket.send JSON.stringify topic: 'candle', data: data
+          .on 'orderBook', (data) ->
+            ctx.websocket.send JSON.stringify topic: 'orderBook', data: data
+          .on 'trdUpdate', (data) ->
+            ctx.websocket.send JSON.stringify topic: 'trdUpdate', data: data
       when 'unsubscribe'
         {market, code, interval} = msg
-        await ctx.api.unsubscribe 
+        await pageApi[url].broker.unsubscribe 
           market: market
           code: code
           subtype: Futu.subTypeMap[interval]
       when 'ohlc'
-        {url, market, code, interval, beginTime} = msg
-        pageApi[url] ?= {}
-        pageApi[url].broker ?= await new Futu host: 'localhost', port: 33333
+        {market, code, interval, beginTime} = msg
         opt =
           broker: pageApi[url].broker
           market: market
@@ -55,10 +64,3 @@ module.exports = (ctx, msg) ->
         ctx.websocket.send JSON.stringify topic: 'constituent', data: data
   catch err
     console.error err
-  ctx.api
-    .on 'candle', (data) ->
-      ctx.websocket.send JSON.stringify topic: 'candle', data: data
-    .on 'orderBook', (data) ->
-      ctx.websocket.send JSON.stringify topic: 'orderBook', data: data
-    .on 'trdUpdate', (data) ->
-      ctx.websocket.send JSON.stringify topic: 'trdUpdate', data: data
