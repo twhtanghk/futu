@@ -30,7 +30,7 @@ export default
       {text: 'SellShort', value: TrdSide.TrdSide_SellShort}
       {text: 'BuyBack', value: TrdSide.TrdSide_BuyBack}
     ]
-    market: QotMarket.QotMarket_HK_Security
+    market: 'hk'
     name: null
   methods:
     getName: ->
