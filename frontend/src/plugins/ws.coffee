@@ -9,7 +9,7 @@ class WS extends ReconnectingWebSocket
     super url, protocol
 
   send: (obj) ->
-    super JSON.stringify obj
+    super JSON.stringify _.extend url: document.URL, obj
     @
 
   subscribeAcc: (opts) ->
@@ -25,9 +25,7 @@ class WS extends ReconnectingWebSocket
 
   ohlc: (opts) ->
     opts.market ?= 'hk'
-    @send _.extend opts,
-      url: document.URL
-      action: 'ohlc'
+    @send _.extend action: 'ohlc', opts
     
   # loop for all constituent stocks of specified index
   # get dataSize of ohlc data
