@@ -1,4 +1,5 @@
-{Futu} = require '../index.coffee'
+import moment from 'moment'
+Futu = require('../index.coffee').default
 import {Qot_Common} from 'futu-api/proto'
 {KLType, QotMarket} = Qot_Common
 
@@ -10,11 +11,10 @@ do ->
     futu = await new Futu host: 'localhost', port: 33333
 
     debug await futu.historyKL
-      security:
-        market: QotMarket.QotMarket_HK_Security
-        code: '00700'
-      beginTime: '2023-02-01'
-      endTime: '2023-02-02'
-      klType: KLType.KLType_10Min
+      market: 'hk'
+      code: '00700'
+      start: moment '2023-02-01'
+      end: moment '2023-02-02'
+      freq: '5'
   catch err
     console.error err

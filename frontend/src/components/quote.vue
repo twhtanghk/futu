@@ -1,8 +1,8 @@
 <template>
   <v-container class='d-flex flex-wrap' sytle='height: 100%'>
     <div :class='$vuetify.display.mdAndDown ? "col" : "col2"'>
-      <chart :initCode='["800000", null, null, null]'/>
-      <chart :initCode='[$route.params.code, null, null, null]'/>
+      <ohlcChart :initCode='["800000", null, null, null]'/>
+      <ohlcChart :initCode='[$route.params.code, null, null, null]'/>
     </div>
     <div :class='$vuetify.display.mdAndDown ? "col" : "col2"'>
       <orderBook :initCode='$route.params.code'/>
@@ -13,14 +13,14 @@
 </template>
 
 <script lang='coffee'>
-import chart from './chart'
+import ohlcChart from './ohlcChart'
 import option from './option'
 import orderBook from './orderBook'
 import trade from './trade'
 
 export default
   components:
-    chart: chart
+    ohlcChart: ohlcChart
     opt: option
     orderBook: orderBook
     trade: trade

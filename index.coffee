@@ -1,4 +1,5 @@
 _  = require 'lodash'
+import {Readable} from 'stream'
 import {Promise} from 'bluebird'
 import {EventEmitter} from 'events'
 import moment from 'moment'
@@ -8,8 +9,9 @@ import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
 {ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide} = Trd_Common
+{Broker, freqDuration} = require('algotrader/data').default
 
-class Futu extends EventEmitter
+class Futu extends Broker
   @marketMap:
     'hk': QotMarket.QotMarket_HK_Security
     'us': QotMarket.QotMarket_US_Security
@@ -66,8 +68,10 @@ class Futu extends EventEmitter
   tradeSerialNo: 0
   trdEnv: if process.env.TRDENV? then parseInt process.env.TRDENV else TrdEnv.TrdEnv_Simulate
 
-  constructor: ({host, port}) ->
+  constructor: ({host, port} = {}) ->
     super()
+    host ?= 'localhost'
+    port ?= 33333
     global.WebSocket = require 'ws'
     return do =>
       await new Promise (resolve, reject) =>
@@ -139,35 +143,19 @@ class Futu extends EventEmitter
     [..., last] = await @tradeDate()
     last
     
-  historyKL: ({rehabType, klType, security, beginTime, endTime}) ->
-    rehabType ?= RehabType.RehabType_Forward
-    klType ?= KLType.KLType_1Min
-    endTime ?= moment()
-      .add days: 1
+  historyKL: ({market, code, start, end, freq}) ->
+    security =
+      market: Futu.marketMap[market]
+      code: code
+    rehabType = RehabType.RehabType_Forward
+    klType = Futu.klTypeMap[freq]
+    beginTime = (start || moment().subtract freqDuration[freq])
+      .format 'YYYY-MM-DD'
+    endTime = (end || moment())
       .format 'YYYY-MM-DD' 
-    switch klType
-      when KLType.KLType_1Min, KLType.KLType_5Min, KLType.KLType_15Min
-        beginTime ?= moment
-          .unix (await @lastTradeDate()).timestamp
-          .subtract day: 1
-          .format 'YYYY-MM-DD'
-      when KLType.KLType_30Min, KLType.KLType_60Min, KLType.KLType_Day
-        beginTime ?= moment()
-          .subtract month: 1
-          .format 'YYYY-MM-DD' 
-      when KLType.KLType_Week, KLType.KLType_Month
-        beginTime ?= moment()
-          .subtract month: 24
-          .format 'YYYY-MM-DD' 
-      when KLType.KLType_Year
-        beginTime ?= moment()
-          .subtract year: 30
-          .format 'YYYY-MM-DD' 
-    {security, klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
-    security: security
-    klList: klList.map (i) ->
+    {klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
+    klList.map (i) ->
       {timestamp, openPrice, highPrice, lowPrice, closePrice, volume, turnover, changeRate} = i
-      time: timestamp
       timestamp: timestamp
       open: openPrice
       high: highPrice
@@ -176,6 +164,20 @@ class Futu extends EventEmitter
       volume: volume.low
       turnover: turnover
       changeRate: changeRate
+
+  streamKL: ({market, code, freq}) ->
+    ret = new Readable
+      objectMode: true
+      read: ->
+        @pause()
+      destroy: =>
+        await @unsubscribe {market, code, freq}
+    @subscribe {market, code, subtype: Futu.subTypeMap[freq]}
+    @on 'candle', (data) ->
+      if market == data.market and code == data.code
+        ret.resume()
+        ret.push data
+    ret
 
   plateSet: ({market, placeSetType}={}) ->
     opts = _.defaults {market, placeSetType}, placeSetType: 0

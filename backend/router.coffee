@@ -2,7 +2,7 @@ moment = require 'moment'
 Futu = require('../index').default
 Router = require 'koa-router'
 router = new Router()
-{history} = require('algotrader/data').default
+{freqDuration} = require('algotrader/data').default
 {ohlc} = require('algotrader/analysis').default
 
 module.exports = router
@@ -11,11 +11,12 @@ module.exports = router
   # res.body = {level: [price1, price2, ...]
   .get '/api/level', (ctx, next) ->
     {market, code, freq, beginTime, endTime} = ctx.request.body
+    market ?= 'hk'
     endTime = moment()
     beginTime = moment endTime
       .subtract 6, 'month'
-    df = await history 
-      broker: ctx.api
+    freq ?= '1d'
+    df = await ctx.api.historyKL
       market: market
       code: code
       start: beginTime
@@ -31,7 +32,10 @@ module.exports = router
   .get '/api/candle', (ctx, next) ->
     {rehabType, klType, security, beginTime, endTime} = ctx.request.body
     security.market = Futu.marketMap[security.market]
-    ctx.response.body = await ctx.api.historyKL {rehabType, klType, security, beginTime, endTime}
+    ctx.response.body = await ctx.api.historyKL 
+      market: security.market
+      code: security.code
+      freq: klType
     await next()
   .get '/api/name', (ctx, next) ->
     {market, code} = ctx.request.body
@@ -104,8 +108,7 @@ module.exports = router
     market ?= 'hk'
     end = if end? then moment(end) else moment()
     start = if start? then moment(start) else moment(end).subtract freqDuration[freq]
-    ctx.response.body = await history 
-      broker: ctx.api
+    ctx.response.body = await ctx.api.historyKL
       market: market
       code: code
       start: start

@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/twhtanghk/futu#readme",
   "dependencies": {
-    "algotrader": "https://github.com/twhtanghk/algotrader",
+    "algotrader": "github:twhtanghk/algotrader",
     "bluebird": "^3.7.2",
     "coffeescript": "^2.5.1",
     "esm": "^3.2.25",

@@ -1,7 +1,7 @@
 _ = require 'lodash'
 moment = require 'moment'
 Futu = require('../index').default
-{data, freqDuration} = require('algotrader/data').default
+{freqDuration} = require('algotrader/data').default
 {filterByStdev} = require('algotrader/strategy').default
 
 # {url: {broker, destroy}, ...}
@@ -41,13 +41,12 @@ module.exports = (ctx, msg) ->
       when 'ohlc'
         {market, code, interval, beginTime} = msg
         opt =
-          broker: pageApi[url].broker
           market: market
           code: code
-          beginTime: moment().subtract freqDuration[interval]
+          start: moment().subtract freqDuration[interval]
           freq: interval
         pageApi[url].destroy?()
-        {g, destroy} = await data opt
+        {g, destroy} = await pageApi[url].broker.dataKL opt
         pageApi[url].destroy = destroy
         for await i from g()
           i.code = code

@@ -7,7 +7,7 @@
       <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); ohlc(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
-    <v-row no-gutters class='flex-grow-1'>
+    <v-row no-gutters class='flex-grow-1' style='height: 50vh'>
       <v-col>
         <div style='height: 100%' ref='curr'/>
       </v-col>
@@ -138,7 +138,7 @@ export default
       g = @getData()
       s = strategy[@selectedStrategy]
       do =>
-        for await i from s strategy.indicator g
+        for await i from s strategy.indicator generator.uniqBy g, 'timestamp'
           if 'entryExit' of i
             {side, plPrice} = i.entryExit
             markers.push

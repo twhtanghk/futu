@@ -30,7 +30,9 @@ class Rest extends Model
     {security, klList} = await @read data: _.extend id: 'candle', opts
         
   history: (opts) ->
-    await @read data: _.extend id: 'history', opts
+    (await @read data: _.extend id: 'history', opts).map (i) ->
+      i.time = i.timestamp
+      i
 
   getOptionChain: (opts) ->
     {market, code, min, max, beginTime, endTime} = opts
