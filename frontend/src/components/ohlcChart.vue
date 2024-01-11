@@ -1,5 +1,5 @@
 <template>
-  <v-container class='d-flex flex-column'>
+  <v-container class='d-flex flex-column' style='height:100%'>
     <v-row class='flex-grow-0'>
       <v-col>
         <v-select density='compact' :items="['meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy"/>
@@ -7,7 +7,7 @@
       <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); ohlc(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
-    <v-row no-gutters class='flex-grow-1' style='height: 50vh'>
+    <v-row no-gutters class='flex-grow-1'>
       <v-col>
         <div style='height: 100%' ref='curr'/>
       </v-col>
@@ -75,6 +75,7 @@ export default
         topic == 'ohlc' and data.code == @code
       # get ohlc data only
       ohlc = ({topic, data}) ->
+        data.time = data.timestamp
         data
       generator.map (generator.filter df, code), ohlc
     unsubscribe: (interval) ->
