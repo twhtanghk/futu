@@ -152,7 +152,7 @@ class Futu extends Broker
     beginTime = (start || moment().subtract freqDuration[freq])
       .format 'YYYY-MM-DD'
     endTime = (end || moment())
-      .format 'YYYY-MM-DD' 
+      .format 'YYYY-MM-DD HH:mm:ss' 
     {klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
     klList.map (i) ->
       {timestamp, openPrice, highPrice, lowPrice, closePrice, volume, turnover, changeRate} = i
