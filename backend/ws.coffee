@@ -4,28 +4,22 @@ Futu = require('../index').default
 {freqDuration} = require('algotrader/data').default
 {filterByStdev} = require('algotrader/strategy').default
 
-# {url: {broker, destroy}, ...}
-# keep record of broker and destroy based on page url
-pageApi = {}
-
 module.exports = (ctx, msg) ->
   console.log "<-- ws #{JSON.stringify msg}"
   {action, url} = msg
-  pageApi[url] ?= {}
-  pageApi[url].broker ?= await new Futu host: 'localhost', port: 33333
   try
     switch action
       when 'subscribeAcc'
-        await pageApi[url].broker.subscribeAcc()
+        await ctx.websocket.broker.subscribeAcc()
       when 'subscribe'
         {subtype, market, code, interval} = msg
         if interval of (k for k, v of Futu.klTypeMap)
           subtype = Futu.subTypeMap[interval]
-        await pageApi[url].broker.subscribe 
+        await ctx.websocket.broker.subscribe 
           market: market
           code: code
           subtype: subtype
-        pageApi[url].broker
+        ctx.websocket.broker
           .on 'candle', (data) ->
             ctx.websocket.send JSON.stringify topic: 'candle', data: data
           .on 'orderBook', (data) ->
@@ -34,10 +28,10 @@ module.exports = (ctx, msg) ->
             ctx.websocket.send JSON.stringify topic: 'trdUpdate', data: data
       when 'unsubscribe'
         {market, code, interval} = msg
-        await pageApi[url].broker.unsubscribe 
+        await ctx.websocket.broker.unsubscribe 
           market: market
           code: code
-          subtype: Futu.subTypeMap[interval]
+          freq: interval
       when 'ohlc'
         {market, code, interval, beginTime} = msg
         opt =
@@ -45,9 +39,7 @@ module.exports = (ctx, msg) ->
           code: code
           start: moment().subtract freqDuration[interval]
           freq: interval
-        pageApi[url].destroy?()
-        {g, destroy} = await pageApi[url].broker.dataKL opt
-        pageApi[url].destroy = destroy
+        {g, destroy} = await ctx.websocket.broker.dataKL opt
         for await i from g()
           i.code = code
           ctx.websocket.send JSON.stringify topic: 'ohlc', data: i

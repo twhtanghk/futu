@@ -22,6 +22,8 @@ app
   .use serve 'dist'
   .on 'error', console.error
   .listen parseInt(process.env.PORT) || 3000
+app.ws.server.on 'connection', (socket, req) ->
+  socket.broker = await new Futu()
 app.ws.use (ctx) ->
   ctx.websocket
     .on 'message', (msg) ->
