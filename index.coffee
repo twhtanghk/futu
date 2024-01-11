@@ -172,7 +172,7 @@ class Futu extends Broker
         @pause()
       destroy: =>
         await @unsubscribe {market, code, freq}
-    @subscribe {market, code, subtype: Futu.subTypeMap[freq]}
+    await @subscribe {market, code, subtype: Futu.subTypeMap[freq]}
     @on 'candle', (data) ->
       if market == data.market and code == data.code
         ret.resume()

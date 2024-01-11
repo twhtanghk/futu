@@ -39,7 +39,7 @@ module.exports = (ctx, msg) ->
           code: code
           start: moment().subtract freqDuration[interval]
           freq: interval
-        {g, destroy} = await ctx.websocket.broker.dataKL opt
+        {g, destroy} = await ctx.websocket.broker[market].dataKL opt
         for await i from g()
           i.code = code
           ctx.websocket.send JSON.stringify topic: 'ohlc', data: i

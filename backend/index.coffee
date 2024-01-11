@@ -1,4 +1,5 @@
 Futu = require('../index').default
+Binance = require('binance').default
 Koa = require 'koa'
 logger = require 'koa-logger'
 bodyParser = require 'koa-bodyparser'
@@ -23,7 +24,9 @@ app
   .on 'error', console.error
   .listen parseInt(process.env.PORT) || 3000
 app.ws.server.on 'connection', (socket, req) ->
-  socket.broker = await new Futu()
+  socket.broker =
+    hk: await new Futu()
+    crypto: await new Binance()
 app.ws.use (ctx) ->
   ctx.websocket
     .on 'message', (msg) ->

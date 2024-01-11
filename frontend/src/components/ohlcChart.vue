@@ -4,6 +4,9 @@
       <v-col>
         <v-select density='compact' :items="['meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy"/>
       </v-col>
+      <v-col>
+        <v-select density='compact' :items="['hk', 'crypto']" v-model="selectedMarket"/>
+      </v-col>
       <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); ohlc(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
     </v-row>
@@ -41,6 +44,7 @@ export default
   data: ->
     api: require('../plugins/api').default
     selectedStrategy: 'meanReversion'
+    selectedMarket: 'hk'
     ws: null
     chart: null
     series:
@@ -60,7 +64,7 @@ export default
     ohlc: ->
       @ws = await ws
       @ws.ohlc
-        market: 'hk'
+        market: @selectedMarket
         code: @code
         interval: @interval
     # create generator to keep watch for socket if message emitted

@@ -1,8 +1,8 @@
 <template>
   <v-container class='d-flex flex-wrap' sytle='height: 100%'>
     <div :class='$vuetify.display.mdAndDown ? "col" : "col2"'>
-      <ohlcChart :initCode='["800000", null, null, null]'/>
-      <ohlcChart :initCode='[$route.params.code, null, null, null]'/>
+      <ohlcChart :initCode='["800000", null, null, null]' style='height: 50vh'/>
+      <ohlcChart :initCode='[$route.params.code, null, null, null]' style='height:50vh'/>
     </div>
     <div :class='$vuetify.display.mdAndDown ? "col" : "col2"'>
       <orderBook :initCode='$route.params.code'/>
