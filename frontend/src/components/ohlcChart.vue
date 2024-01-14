@@ -24,9 +24,11 @@ import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
 import Futu from '../../../index'
 {Model} = require('model').default
+{freqDuration} = require('algotrader/data').default
 import {default as strategy} from 'algotrader/strategy'
 import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
+import {uniqBy} from 'lodash'
 
 export default
   props:
@@ -74,9 +76,12 @@ export default
         for await i from fromEmitter socket, onNext: 'message'
           {topic, data} = JSON.parse i.data
           yield {topic, data}
-      # filter those targeted code only
+      # filter those targeted market, code, and freq only
       code = ({topic, data}) =>
-        topic == 'ohlc' and data.code == @code
+        topic == 'ohlc' and
+        data.market == @selectedMarket and
+        data.code == @code and
+        data.freq == @interval
       # get ohlc data only
       ohlc = ({topic, data}) ->
         data.time = data.timestamp
@@ -84,7 +89,7 @@ export default
       generator.map (generator.filter df, code), ohlc
     unsubscribe: (interval) ->
       @ws.unsubscribe
-        market: 'hk'
+        market: @selectedMarket
         code: @code
         interval: interval
     resize: ->
@@ -97,7 +102,7 @@ export default
       @series.volume.setData []
     getHistory:  ({beginTime, endTime} = {}) ->
       klList = await @api.history
-        market: 'hk'
+        market: @selectedMarket
         code: @code
         start: beginTime
         end: endTime
@@ -115,7 +120,7 @@ export default
           color: @color {open, close}
         .concat @series.volume.data()
       @series.volume.setData volData
-      (await @api.level {code: @code})
+      (await @api.level {market: @selectedMarket, code: @code})
         .map (level, i) =>
           @series.candle.createPriceLine
             color: 'red'
@@ -152,7 +157,7 @@ export default
               color: if side == 'buy' then 'blue' else 'red'
               shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
               text: "#{side} #{plPrice}"
-            @series.candle.setMarkers markers
+            @series.candle.setMarkers uniqBy markers, 'time'
   beforeMount: ->
     @code = @initCode?[0] || @$route.params.code
     await @ohlc()
@@ -188,8 +193,14 @@ export default
         if barsInfo?.barsBefore < 10
           [first, ...] = @series.candle.data()
           await @getHistory
-            beginTime: moment.unix(first.time).subtract month: 3
-            endTime: moment.unix(first.time).subtract day: 1
+            beginTime: 
+              moment
+                .unix first.time - 8 * 60 * 60
+                .subtract freqDuration[@interval].dataFetched
+            endTime:
+              moment
+                .unix first.time - 8 * 60 * 60
+                .subtract freqDuration[@interval].duration
       finally
         calling = false
   unmounted: ->

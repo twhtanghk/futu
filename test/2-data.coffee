@@ -7,8 +7,8 @@ do ->
     {g, destory} = await broker.dataKL
       market: 'hk'
       code: '00700'
-      start: moment().subtract day: 1
-      freq: 1
+      start: moment().subtract week: 1
+      freq: '1'
     for await i from g()
       console.log i
   catch err

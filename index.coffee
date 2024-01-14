@@ -156,6 +156,9 @@ class Futu extends Broker
     {klList} = @errHandler await @ws.RequestHistoryKL c2s: {rehabType, klType, security, beginTime, endTime}
     klList.map (i) ->
       {timestamp, openPrice, highPrice, lowPrice, closePrice, volume, turnover, changeRate} = i
+      market: market
+      code: code
+      freq: freq
       timestamp: timestamp
       open: openPrice
       high: highPrice
@@ -174,7 +177,7 @@ class Futu extends Broker
         await @unsubscribe {market, code, freq}
     await @subscribe {market, code, subtype: Futu.subTypeMap[freq]}
     @on 'candle', (data) ->
-      if market == data.market and code == data.code
+      if market == data.market and code == data.code and freq == data.freq
         ret.resume()
         ret.push data
     ret

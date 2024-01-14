@@ -1,6 +1,6 @@
 <template>
   <v-container class='d-flex' style='height: 100%'>
-    <v-row no-gutters>
+    <v-row no-gutters style='height: 50vh'>
       <component
         v-for='i in codes'
         :is='$route.params.view'
