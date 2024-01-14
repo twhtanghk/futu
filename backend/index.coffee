@@ -12,7 +12,9 @@ ws = require 'koa-websocket'
 app = ws new Koa()
 app.keys = process.env.KEYS?.split(',') || ['keep it secret']
 do ->
-  app.context.api = await new Futu host: 'localhost', port: 33333
+  app.context.api =
+    hk: await new Futu()
+    crypto: await new Binance()
 app
   .use logger()
   .use bodyParser()

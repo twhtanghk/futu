@@ -15,11 +15,11 @@ module.exports = (ctx, msg) ->
         {subtype, market, code, interval} = msg
         if interval of (k for k, v of Futu.klTypeMap)
           subtype = Futu.subTypeMap[interval]
-        await ctx.websocket.broker.subscribe 
+        await ctx.websocket.broker[market].subscribe 
           market: market
           code: code
           subtype: subtype
-        ctx.websocket.broker
+        ctx.websocket.broker[market]
           .on 'candle', (data) ->
             ctx.websocket.send JSON.stringify topic: 'candle', data: data
           .on 'orderBook', (data) ->
@@ -28,7 +28,7 @@ module.exports = (ctx, msg) ->
             ctx.websocket.send JSON.stringify topic: 'trdUpdate', data: data
       when 'unsubscribe'
         {market, code, interval} = msg
-        await ctx.websocket.broker.unsubscribe 
+        await ctx.websocket.broker[market].unsubscribe 
           market: market
           code: code
           freq: interval
@@ -37,7 +37,7 @@ module.exports = (ctx, msg) ->
         opt =
           market: market
           code: code
-          start: moment().subtract freqDuration[interval]
+          start: moment().subtract freqDuration[interval].dataFetched
           freq: interval
         {g, destroy} = await ctx.websocket.broker[market].dataKL opt
         for await i from g()
@@ -46,7 +46,7 @@ module.exports = (ctx, msg) ->
       when 'constituent'
         {action, idx, beginTime, chunkSize, n} = msg
         opts =
-          broker: ctx.api
+          broker: ctx.api['hk']
           idx: idx
           beginTime: beginTime
           chunkSize: chunkSize

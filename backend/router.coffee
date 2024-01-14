@@ -16,7 +16,7 @@ module.exports = router
     beginTime = moment endTime
       .subtract 6, 'month'
     freq ?= '1d'
-    df = await ctx.api.historyKL
+    df = await ctx.api[market].historyKL
       market: market
       code: code
       start: beginTime
@@ -32,7 +32,7 @@ module.exports = router
   .get '/api/candle', (ctx, next) ->
     {rehabType, klType, security, beginTime, endTime} = ctx.request.body
     security.market = Futu.marketMap[security.market]
-    ctx.response.body = await ctx.api.historyKL 
+    ctx.response.body = await ctx.api[security.market].historyKL 
       market: security.market
       code: security.code
       freq: klType
@@ -41,13 +41,13 @@ module.exports = router
     {market, code} = ctx.request.body
     if not Array.isArray code
       code = [code]
-    ctx.response.body = await ctx.api.marketState code.map (i) ->
+    ctx.response.body = await ctx.api[market].marketState code.map (i) ->
       market: Futu.marketMap[market]
       code: i
     await next()
   .get '/api/quote', (ctx, next) ->
     {market, code} = ctx.request.body
-    res = await ctx.api.basicQuote {market, code}
+    res = await ctx.api[market].basicQuote {market, code}
     ctx.response.body =
       high: res.highPrice
       low: res.lowPrice
@@ -59,23 +59,27 @@ module.exports = router
     {market, code, min, max, beginTime, endTime} = ctx.request.body
     strikeRange = [min, max]
     opts = {market, code, strikeRange, beginTime, endTime}
-    ctx.response.body = await ctx.api.optionChain opts
+    ctx.response.body = await ctx.api[market].optionChain opts
     await next()
   .get '/api/position', (ctx, next) ->
-    ctx.response.body = await ctx.api.position()
+    market = 'hk'
+    ctx.response.body = await ctx.api[market].position()
     await next()
   .get '/api/order', (ctx, next) ->
-    ctx.response.body = await ctx.api.orderList()
+    market = 'hk'
+    ctx.response.body = await ctx.api[market].orderList()
     await next()
   .get '/api/deal', (ctx, next) ->
-    ctx.response.body = await ctx.api.historyDeal()
+    market = 'hk'
+    ctx.response.body = await ctx.api[market].historyDeal()
     await next()
   .post '/api/trade', (ctx, next) ->
-    {trdSide, code, qty, price} = ctx.request.body
-    ctx.response.body = await ctx.api.placeOrder {trdSide, code, qty, price}
+    {market, trdSide, code, qty, price} = ctx.request.body
+    ctx.response.body = await ctx.api[market].placeOrder {trdSide, code, qty, price}
     await next()
   .get '/api/trade', (ctx, next) ->
-    {endTime, page} = ctx.request.body
+    {market, endTime, page} = ctx.request.body
+    market ?= 'hk'
     page ?= 20
     endTime = if endTime? then moment(endTime, 'YYYY-MM-DD HH:mm:ss') else moment()
     elapsed = 5
@@ -88,18 +92,20 @@ module.exports = router
     nextPage = ->
       beginTime = moment endTime
         .subtract day: elapsed++
-      res = await ctx.api.historyOrder
+      res = await ctx.api[market].historyOrder
         beginTime: beginTime.format 'YYYY-MM-DD HH:mm:ss'
         endTime: endTime.format 'YYYY-MM-DD HH:mm:ss'
       await test nextPage
     ctx.response.body = await test nextPage
     await next()
   .del '/api/trade/:id', (ctx, next) ->
-    ctx.response.body = await ctx.api.cancelOrder id: ctx.request.params.id
+    market = 'hk'
+    ctx.response.body = await ctx.api[market].cancelOrder id: ctx.request.params.id
     await next()
   .put '/api/trade/unlock', (ctx, next) ->
-    {pwdMD5} = ctx.request.body
-    await ctx.api.unlock {pwdMD5}
+    {market, pwdMD5} = ctx.request.body
+    market ?= 'hk'
+    await ctx.api[market].unlock {pwdMD5}
     ctx.response.body = {}
     await next()
   # via algotrader interface
@@ -107,8 +113,8 @@ module.exports = router
     {market, code, start, end, freq} = ctx.request.body
     market ?= 'hk'
     end = if end? then moment(end) else moment()
-    start = if start? then moment(start) else moment(end).subtract freqDuration[freq]
-    ctx.response.body = await ctx.api.historyKL
+    start = if start? then moment(start) else moment(end).subtract freqDuration[freq].dataFetched
+    ctx.response.body = await ctx.api[market].historyKL
       market: market
       code: code
       start: start
