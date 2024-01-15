@@ -1002,6 +1002,11 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@fortawesome/fontawesome-free@^6.5.1":
+  version "6.5.1"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-6.5.1.tgz#55cc8410abf1003b726324661ce5b0d1c10de258"
+  integrity sha512-CNy5vSwN3fsUStPRLX7fUYojyuzoEMSXPl7zSLJ8TgtRfjv24LOnOWKT2zYwaHZCJGkdyRnTmstR0P+Ah503Gw==
+
 "@hapi/hoek@^9.0.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"
@@ -3774,7 +3779,6 @@ futu-api@^7.0.3208:
 
 "generator@https://github.com/twhtanghk/generator":
   version "0.0.1"
-  uid ee041148d94ef50ab2fb3c69e36ae403f58b56ec
   resolved "https://github.com/twhtanghk/generator#ee041148d94ef50ab2fb3c69e36ae403f58b56ec"
   dependencies:
     coffeescript "^2.7.0"

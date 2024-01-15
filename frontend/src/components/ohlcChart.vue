@@ -2,7 +2,40 @@
   <v-container class='d-flex flex-column' style='height:100%'>
     <v-row class='flex-grow-0'>
       <v-col>
-        <v-select density='compact' :items="['meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy"/>
+        <v-select density='compact' :items="['meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true'/>
+        <v-dialog v-model='dialog' width='auto' transition='dailog-top-transition'>
+          <v-card :title='selectedStrategy'>
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols='12'>
+                    <v-text-field label='chunk size' required>
+                      {{settings.meanReversion.chunkSize}}
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols='12'>
+                    <v-text-field label='n (stdev)' required>
+                      {{settings.meanReversion.n}}
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols='12'>
+                    <v-text-field label='profit ratio' required>
+                      {{settings.meanReversion.plRatio[0]}}
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols='12'>
+                    <v-text-field label='loss ratio' required>
+                      {{settings.meanReversion.plRatio[1]}}
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" block @click="dialog = false">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
       <v-col>
         <v-select density='compact' :items="['hk', 'crypto']" v-model="selectedMarket"/>
@@ -44,6 +77,12 @@ export default
             type: 'solid'
             color: 'white'
   data: ->
+    dialog: false
+    settings:
+      meanReversion:
+        chunkSize: 60
+        n: 2
+        plRatio: [0.01, 0.005]
     api: require('../plugins/api').default
     selectedStrategy: 'meanReversion'
     selectedMarket: 'hk'
@@ -146,7 +185,8 @@ export default
     redrawMarker: ->
       markers = []
       g = @getData()
-      s = strategy[@selectedStrategy]
+      s = (df) =>
+        strategy[@selectedStrategy] df, @settings[@selectedStrategy]
       do =>
         for await i from s strategy.indicator generator.uniqBy g, 'timestamp'
           if 'entryExit' of i

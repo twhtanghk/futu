@@ -2,7 +2,9 @@ import { createApp } from 'vue'
 import App from './App.vue'
 
 import 'vuetify/styles'
+import '@fortawesome/fontawesome-free/css/all.css'
 import {createVuetify} from 'vuetify'
+import {aliases, fa} from 'vuetify/iconsets/fa'
 import {VDataTable} from 'vuetify/labs/VDataTable'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -19,7 +21,16 @@ import constituent from './components/constituent.vue'
 import '@mdi/font/css/materialdesignicons.css'
 
 components.VDataTable = VDataTable
-const vuetify = createVuetify({components, directives, blueprint: md2})
+const vuetify = createVuetify({
+  components,
+  directives,
+  blueprint: md2,
+  icons: {
+    defaultSet: 'fa',
+    aliases,
+    sets: {fa}
+  }
+})
 const routes = [
   {path: '/', redirect: '/widget/chart'},
   {path: '/widget/:view', component: widget},
