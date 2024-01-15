@@ -9,24 +9,16 @@
               <v-container>
                 <v-row>
                   <v-col cols='12'>
-                    <v-text-field label='chunk size' required>
-                      {{settings.meanReversion.chunkSize}}
-                    </v-text-field>
+                    <v-text-field label='chunk size' required v-model.number='settings.meanReversion.chunkSize' type='number'/>
                   </v-col>
                   <v-col cols='12'>
-                    <v-text-field label='n (stdev)' required>
-                      {{settings.meanReversion.n}}
-                    </v-text-field>
+                    <v-text-field label='n (stdev)' required v-model.number='settings.meanReversion.n' type='number'/>
                   </v-col>
                   <v-col cols='12'>
-                    <v-text-field label='profit ratio' required>
-                      {{settings.meanReversion.plRatio[0]}}
-                    </v-text-field>
+                    <v-text-field label='profit ratio' required v-model.number='settings.meanReversion.plRatio[0]' type='number'/>
                   </v-col>
                   <v-col cols='12'>
-                    <v-text-field label='loss ratio' required>
-                      {{settings.meanReversion.plRatio[1]}}
-                    </v-text-field>
+                    <v-text-field label='loss ratio' required v-model.number='settings.meanReversion.plRatio[1]' type='number'/>
                   </v-col>
                 </v-row>
               </v-container>
