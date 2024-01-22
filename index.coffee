@@ -8,8 +8,41 @@ import { ftCmdID } from 'futu-api'
 import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
-{ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide} = Trd_Common
+{ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide, TimeInForce} = Trd_Common
 {Broker, freqDuration} = AlgoTrader = require('algotrader/data').default
+
+class Order extends AlgoTrader.Order
+  @TIMEINFORCE: 
+    DAY: TimeInForce.TimeInForce_DAY
+    GTC: TimeInForce.TimeInForce_GTC
+  @STATUS:
+    unsubmitted: OrderStatus.OrderStatus_Unsubmitted
+    unknown: OrderStatus.OrderStatus_Unknown
+    waitingSubmit: OrderStatus.OrderStatus_WaitingSubmit
+    submitting: OrderStatus.OrderStatus_Submitting
+    submitFailed: OrderStatus.OrderStatus_SubmitFailed
+    timeout: OrderStatus.OrderStatus_TimeOut
+    submitted: OrderStatus.OrderStatus_Submitted
+    filledPart: OrderStatus.OrderStatus_Filled_Part
+    filledAll: OrderStatus.OrderStatus_Filled_All
+    cancellingPart: OrderStatus.OrderStatus_Cancelling_Part
+    cancellingAll: OrderStatus.OrderStatus_Cancelling_All
+    cancelledPart: OrderStatus.OrderStatus_Cancelled_Part
+    cancelledAll: OrderStatus.OrderStatus_Cancelled_All
+    failed: OrderStatus.OrderStatus_Failed
+    disabled: OrderStatus.OrderStatus_Disabled
+    deleted: OrderStatus.OrderStatus_Deleted
+    fillCancelled: OrderStatus.OrderStatus_FillCancelled
+
+  constructor: (opts) ->
+    super opts
+    @name = opts.name
+    @fillQty = opts.fillQty
+    @fillAvgPrice = opts.fillAvgPrice
+    @timeInForce = (_.invert Order.TIMEINFORCE)[opts.timeInForce]
+    @createTime = opts.createTimestamp * 1000
+    @updateTime = opts.updateTimestamp * 1000
+    @status = (_.invert Order.STATUS)[opts.orderStatus]
 
 class Account extends AlgoTrader.Account
   constructor: (opts) ->
@@ -31,6 +64,23 @@ class Account extends AlgoTrader.Account
           accID: @id
           trdMarket: @market[0]
     (@broker.errHandler await @broker.ws.GetPositionList req).positionList
+
+  historyOrder: ({start, end}) ->
+    end ?= moment()
+    req =
+      c2s:
+        header:
+          trdEnv: @trdEnv
+          accID: @id
+          trdMarket: @market[0]
+        filterConditions:
+          beginTime: start.format 'YYYY-MM-DD HH:mm:ss'
+          endTime: end.format 'YYYY-MM-DD HH:mm:ss'
+    (@broker.errHandler await @broker.ws.GetHistoryOrderList req)
+      .orderList
+      .map (opts) ->
+        opts.quantity = opts.qty
+        new Order opts
 
 class Futu extends Broker
   @marketMap:
