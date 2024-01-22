@@ -9,7 +9,28 @@ import {Common, Qot_Common, Trd_Common} from 'futu-api/proto'
 {TradeDateMarket, SubType, RehabType, KLType, QotMarket} = Qot_Common
 {RetType} = Common
 {ModifyOrderOp, OrderType, OrderStatus, SecurityFirm, TrdEnv, TrdMarket, TrdSecMarket, TrdSide} = Trd_Common
-{Broker, freqDuration} = require('algotrader/data').default
+{Broker, freqDuration} = AlgoTrader = require('algotrader/data').default
+
+class Account extends AlgoTrader.Account
+  constructor: (opts) ->
+    super()
+    {broker, trdEnv, accID, trdMarketAuthList, accType, cardNum, securityFirm} = opts
+    @broker = broker
+    @id = accID
+    @trdEnv = trdEnv
+    @market = trdMarketAuthList
+    @type = accType
+    @cardNum = cardNum
+    @securityFirm = securityFirm
+
+  position: ->
+    req =
+      c2s:
+        header:
+          trdEnv: @trdEnv
+          accID: @id
+          trdMarket: @market[0]
+    (@broker.errHandler await @broker.ws.GetPositionList req).positionList
 
 class Futu extends Broker
   @marketMap:
@@ -394,5 +415,15 @@ class Futu extends Broker
         securityFirm: SecurityFirm.SecurityFirm_FutuSecurities
         pwdMD5: pwdMD5
     @errHandler await @ws.UnlockTrade req
+
+  accounts: ->
+    (@errHandler await @ws.GetAccList c2s: userID: 0)
+      .accList
+      .filter ({trdEnv, trdMarketAuthList}) ->
+        # real account and hk in market list
+        trdEnv == 1 and 1 in trdMarketAuthList
+      .map (acc) =>
+        acc.broker = @
+        new Account acc
 
 export default Futu

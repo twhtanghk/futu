@@ -1,12 +1,12 @@
-{Futu} = require '../index'
+Futu = require('../index').default
 
 debug = (obj) ->
   console.error JSON.stringify obj, null, 2
 
 do ->
   try 
-    futu = await new Futu host: 'localhost', port: 33333
+    futu = await new Futu()
 
-    debug await futu.position()
+    debug await (await futu.accounts())[0].position()
   catch err
     console.error err
