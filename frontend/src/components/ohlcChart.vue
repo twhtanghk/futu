@@ -2,12 +2,23 @@
   <v-container class='d-flex flex-column' style='height:100%'>
     <v-row class='flex-grow-0'>
       <v-col>
-        <v-select density='compact' :items="['meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true'/>
+        <v-select density='compact' :items="['gridTrend', 'meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true'/>
         <v-dialog v-model='dialog' width='auto' transition='dailog-top-transition'>
-          <v-card :title='selectedStrategy'>
+          <v-card :title='title()'>
             <v-card-text>
               <v-container>
-                <v-row>
+                <v-row v-if="selectedStrategy == 'gridTrend'">
+                  <v-col cols='12'>
+                    <v-text-field label='low' required v-model.number='settings.gridTrend.low' type='number'/>
+                  </v-col>
+                  <v-col cols='12'>
+                    <v-text-field label='high' required v-model.number='settings.gridTrend.high' type='number'/>
+                  </v-col>
+                  <v-col cols='12'>
+                    <v-text-field label='grid size' required v-model.number='settings.gridTrend.gridSize' type='number'/>
+                  </v-col>
+                </v-row>
+                <v-row v-if="selectedStrategy == 'meanReversion'">
                   <v-col cols='12'>
                     <v-text-field label='chunk size' required v-model.number='settings.meanReversion.chunkSize' type='number'/>
                   </v-col>
@@ -75,6 +86,11 @@ export default
         chunkSize: 60
         n: 2
         plRatio: [0.01, 0.005]
+      gridTrend:
+        low: 0
+        high: 0
+        gridSize: 3
+        stopLoss: 0.005
     api: require('../plugins/api').default
     selectedStrategy: 'meanReversion'
     selectedMarket: 'hk'
@@ -89,6 +105,13 @@ export default
     interval: '1'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
   methods:
+    title: ->
+      switch @selectedStrategy 
+        when 'meanReversion' 
+          @selectedStrategy
+        when 'gridTrend'
+          {low, high, gridSize, stopLoss} = @settings.gridTrend
+          "#{@selectedStrategy} #{i for i in [low..high] by (high - low) / gridSize}" 
     color: ({open, close}) ->
       if open > close then 'red' else 'green' 
     hktz: (time) ->
@@ -104,9 +127,10 @@ export default
     getData: ->
       socket = @ws
       df = ->
-        for await i from fromEmitter socket, onNext: 'message'
-          {topic, data} = JSON.parse i.data
-          yield {topic, data}
+        fromEmitter socket, onNext: 'message'
+      # parse websocket message into {topic, data}
+      parsed = generator.map df, (i) ->
+        JSON.parse i.data
       # filter those targeted market, code, and freq only
       code = ({topic, data}) =>
         topic == 'ohlc' and
@@ -117,7 +141,7 @@ export default
       ohlc = ({topic, data}) ->
         data.time = data.timestamp
         data
-      generator.map (generator.filter df, code), ohlc
+      generator.map (generator.filter parsed, code), ohlc
     unsubscribe: (interval) ->
       @ws.unsubscribe
         market: @selectedMarket
@@ -188,7 +212,7 @@ export default
               position: if side == 'buy' then 'belowBar' else 'aboveBar'
               color: if side == 'buy' then 'blue' else 'red'
               shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
-              text: "#{side} #{plPrice}"
+              text: "#{i.entryExit.strategy} #{side} #{plPrice}"
             @series.candle.setMarkers uniqBy markers, 'time'
   beforeMount: ->
     @code = @initCode?[0] || @$route.params.code
@@ -242,10 +266,6 @@ export default
     interval: (newVal, oldVal) ->
       @clear()
       @unsubscribe oldVal
-      await @ohlc()
-      @redraw()
-    selectedStrategy: (newVal, oldVal) ->
-      @clear()
       await @ohlc()
       @redraw()
 </script>
