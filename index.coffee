@@ -360,7 +360,7 @@ class Futu extends Broker
     await @subscribe {market, code, subtype: SubType.SubType_Basic}
     req =
       c2s:
-        securityList: [{market, code}]
+        securityList: [{market: Futu.marketMap[market], code: code}]
     [ret, ...] = (@errHandler await @ws.GetBasicQot req).basicQotList
     ret
       
