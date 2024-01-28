@@ -17,6 +17,7 @@ import trade from './components/trade.vue'
 import alert from './components/alert.vue'
 import quote from './components/quote.vue'
 import ohlcChart from './components/ohlcChart.vue'
+import rxOhlc from './components/rxOhlc.vue'
 import constituent from './components/constituent.vue'
 import '@mdi/font/css/materialdesignicons.css'
 
@@ -40,6 +41,7 @@ const routes = [
   {path: '/alert', component: alert},
   {path: '/quote/:code', component: quote},
   {path: '/ohlc/:code', component: ohlcChart},
+  {path: '/rxOhlc/:code', component: rxOhlc},
   {path: '/constituent', component: constituent}
 ]
 const router = VueRouter.createRouter({

@@ -40,7 +40,7 @@ export default
     ws: null
     code: null
     name: null
-    market: Futu.constant.QotMarket.QotMarket_HK_Security
+    market: 'hk'
     curr: null # last subscribed market and code
     ask: []
     bid: []
@@ -51,23 +51,21 @@ export default
       @subscribe()
     subscribe: ->
       if @curr?
-        @ws.unsubscribe
-          subtype: Futu.constant.SubType.SubType_OrderBook
+        @ws.orderBook
           market: 'hk'
           code: @curr.code
       @curr = {@market, @code}
-      @ws.subscribe
-        subtype: Futu.constant.SubType.SubType_OrderBook
+      @ws.orderBook
         market: 'hk'
         code: @code
   beforeMount: ->
     @ws = (await ws)
       .on 'message', (msg) =>
         {topic, data} = msg
-        {market, code, orderBookAskList, orderBookBidList} = data
+        {market, code, ask, bid} = data
         if topic == 'orderBook' and market == @market and code == @code
-          @ask = orderBookAskList
-          @bid = orderBookBidList
+          @ask = ask
+          @bid = bid
     @code = @initCode
     @setCode()
 </script>

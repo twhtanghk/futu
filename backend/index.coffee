@@ -1,4 +1,4 @@
-Futu = require('../index').default
+Futu = require('rxfutu').default
 Binance = require('binance').default
 Koa = require 'koa'
 logger = require 'koa-logger'

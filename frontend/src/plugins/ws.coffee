@@ -23,6 +23,9 @@ class WS extends ReconnectingWebSocket
     opts.market ?= QotMarket.QotMarket_HK_Security
     @send _.extend action: 'unsubscribe', opts
 
+  orderBook: (opts) ->
+    @send _.extend action: 'orderBook', opts
+
   ohlc: (opts) ->
     opts.market ?= 'hk'
     @send _.extend action: 'ohlc', opts
