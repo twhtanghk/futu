@@ -1,6 +1,6 @@
 _ = require 'lodash'
 {Model} = require('model').default
-import Futu from '../../../index'
+import Futu from 'rxfutu'
 {QotMarket, OrderStatus} = Futu.constant
 
 class Rest extends Model

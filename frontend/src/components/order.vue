@@ -25,7 +25,8 @@
 <script lang='coffee'>
 import {default as ws} from '../plugins/ws'
 import {default as api} from '../plugins/api'
-import {default as Futu} from '../../../index'
+import {default as Futu} from 'rxfutu'
+import {filter} from 'rxjs'
 
 export default
   props:
@@ -39,24 +40,23 @@ export default
     bid: []
     active: false
   methods: 
-    subscribe: ->
-      (await ws).orderBook
-        market: @market
-        code: @code
     unsubscribe: ->
       (await ws).unsubscribe
         subtype: Futu.constant.SubType.SubType_OrderBook
         market: @market
         code: @code
   mounted: ->
-    @subscribe()
-    (await ws)
-      .on 'message', (msg) =>
-        {topic, data} = msg
-        {market, code, orderBookAskList, orderBookBidList} = data
-        if topic == 'orderBook' and market == Futu.marketMap[@market] and code == @code
-          @ask = orderBookAskList
-          @bid = orderBookBidList
+    ws
+      .orderBook {@market, @code}
+      .pipe filter ({topic, data}) =>
+        {market, code} = data
+        topic == 'orderBook' and
+        market == @market and
+        code == @code
+      .subscribe ({topic, data}) =>
+        {market, code, ask, bid} = data
+        @ask = ask
+        @bid = bid
   unmounted: ->
     @unsubscribe()
 </script>

@@ -10,7 +10,7 @@
 <script lang='coffee'>
 import alertCreate from './alertCreate'
 import alertList from './alertList'
-import {default as Futu} from '../../../index'
+import {default as Futu} from 'rxfutu'
 {TrdSide} = Futu.constant
 
 export default

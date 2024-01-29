@@ -59,7 +59,7 @@ import {map, filter} from 'rxjs'
 import {WebSocketSubject} from 'rxjs/webSocket'
 import moment from 'moment'
 import {createChart, LineStyle} from 'lightweight-charts'
-import Futu from '../../../index'
+import Futu from 'rxfutu'
 {Model} = require('model').default
 {freqDuration} = require('algotrader/data').default
 import {default as strategy} from 'algotrader/strategy'

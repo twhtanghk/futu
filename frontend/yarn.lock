@@ -1970,13 +1970,25 @@ ajv@^8.0.0, ajv@^8.0.1, ajv@^8.8.0:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"algotrader@https://github.com/twhtanghk/algotrader":
+"algotrader@file:../../../../tmp/algotrader":
   version "0.0.1"
-  resolved "https://github.com/twhtanghk/algotrader#38cc6a8ad525088259e4df2ce3aed0e4256c200c"
   dependencies:
     "@async-generators/from-emitter" "^0.3.0"
     bluebird "^3.7.2"
     generator "github:twhtanghk/generator"
+    moment "^2.30.1"
+    rxfutu "file:../../../local/share/.cache/yarn/v6/npm-algotrader-0.0.1-06bf3052-4fb9-4b07-b864-525af6e497a6-1706543293240/node_modules/rxfutu"
+    rxjs "^7.8.1"
+    stats-lite "^2.2.0"
+
+"algotrader@github:twhtanghk/algotrader":
+  version "0.0.1"
+  resolved "https://codeload.github.com/twhtanghk/algotrader/tar.gz/e9c6116e31488d429d170d1046ddb27131033fb4"
+  dependencies:
+    "@async-generators/from-emitter" "^0.3.0"
+    bluebird "^3.7.2"
+    generator "github:twhtanghk/generator"
+    rxjs "^7.8.1"
     stats-lite "^2.2.0"
 
 ansi-colors@^4.1.1:
@@ -3769,6 +3781,15 @@ futu-api@^7.0.3208:
     long "^4.0.0"
     protobufjs "^6.8.8"
 
+futu-api@^8.0.4008:
+  version "8.0.4008"
+  resolved "https://registry.yarnpkg.com/futu-api/-/futu-api-8.0.4008.tgz#d7155545314d4c779acfc6ee7bb7c461e8e1212a"
+  integrity sha512-ydHv/gy+fn+hR8xMcE/c8FwBNfCZAkb1TcHlR0dnKTP9S2GlNbWq9dgL2m8DAmY/8+9cchBKePBGuMRaVJYt2g==
+  dependencies:
+    bytebuffer "^5.0.1"
+    long "^4.0.0"
+    protobufjs "^6.8.8"
+
 "generator@github:twhtanghk/generator":
   version "0.0.1"
   resolved "https://codeload.github.com/twhtanghk/generator/tar.gz/ee041148d94ef50ab2fb3c69e36ae403f58b56ec"
@@ -4621,10 +4642,20 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
+long@^5.2.3:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
+  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
+
 long@~3:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/long/-/long-3.2.0.tgz#d821b7138ca1cb581c172990ef14db200b5c474b"
   integrity sha512-ZYvPPOMqUwPoDsbJaR10iQJYnMuZhRTvHYl62ErLIEX7RgFlziSBUUvrt3OVfc47QlHHpzPZYP17g3Fv7oeJkg==
+
+lossless-json@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/lossless-json/-/lossless-json-4.0.1.tgz#d45229e3abb213a0235812780ca894ea8c5b2c6b"
+  integrity sha512-l0L+ppmgPDnb+JGxNLndPtJZGNf6+ZmVaQzoxQm3u6TXmhdnsA+YtdVR8DjzZd/em58686CQhOFDPewfJ4l7MA==
 
 lower-case@^2.0.2:
   version "2.0.2"
@@ -4833,6 +4864,11 @@ moment@^2.29.4:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
   integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
+
+moment@^2.30.1:
+  version "2.30.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.30.1.tgz#f8c91c07b7a786e30c59926df530b4eac96974ae"
+  integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
 
 mqtt-packet@^6.8.0:
   version "6.10.0"
@@ -5984,6 +6020,19 @@ run-parallel@^1.1.9:
   dependencies:
     queue-microtask "^1.2.2"
 
+"rxfutu@file:../../../../tmp/rxfutu":
+  version "0.0.1"
+  dependencies:
+    algotrader "github:twhtanghk/algotrader"
+    bluebird "^3.7.2"
+    coffeescript "^2.7.0"
+    esm "^3.2.25"
+    futu-api "^8.0.4008"
+    lodash "^4.17.21"
+    moment "^2.30.1"
+    rxjs "^7.8.1"
+    ws "^8.16.0"
+
 rxjs@^7.8.1:
   version "7.8.1"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
@@ -7074,6 +7123,11 @@ ws@^7.3.1, ws@^7.5.5:
   version "7.5.9"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.9.tgz#54fa7db29f4c7cec68b1ddd3a89de099942bb591"
   integrity sha512-F+P9Jil7UiSKSkppIiD94dN07AwvFixvLIj1Og1Rl9GGMuNipJnV9JzjD6XuqmAeiswGvUmNLjr5cFuXwNS77Q==
+
+ws@^8.16.0:
+  version "8.16.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.16.0.tgz#d1cd774f36fbc07165066a60e40323eab6446fd4"
+  integrity sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==
 
 ws@^8.4.2:
   version "8.12.0"

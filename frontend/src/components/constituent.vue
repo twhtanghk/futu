@@ -46,21 +46,20 @@ export default
   mounted: ->
     (await ws)
       .constituent()
-      .on 'message', (msg) =>
+      .subscribe (msg) =>
         {topic, data} = msg
         if topic == 'constituent'
-          data.map ({code, last}) =>
-            @item.push 
-              code: code
-              name: await api.getName {code}
-              delta: (last['close'] - last['close.mean']) / last['close.stdev']
-              close: last['close']
-              'close.mean': last['close.mean']
-              'close.stdev': last['close.stdev']
-              'close.trend': last['close.trend']
-              volume: last['volume']
-              'volume.mean': last['volume.mean']
-              'volume.stdev': last['volume.stdev']
-              'volume.trend': last['volume.trend']
-              time: last['time']
+          @item.push 
+            code: data.code
+            name: await api.getName {code: data.code}
+            delta: (data['close'] - data['close.mean']) / data['close.stdev']
+            close: data['close']
+            'close.mean': data['close.mean']
+            'close.stdev': data['close.stdev']
+            'close.trend': data['close.trend']
+            volume: data['volume']
+            'volume.mean': data['volume.mean']
+            'volume.stdev': data['volume.stdev']
+            'volume.trend': data['volume.trend']
+            time: data['timestamp']
 </script>

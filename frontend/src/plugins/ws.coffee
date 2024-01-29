@@ -1,34 +1,38 @@
 _ = require 'lodash'
 import * as Promise from 'bluebird'
-import ReconnectingWebSocket from 'reconnecting-websocket'
-import {default as Futu} from '../../../index'
+import {default as Futu} from 'rxfutu'
+import {WebSocketSubject} from 'rxjs/webSocket'
 {QotMarket, OrderStatus} = Futu
 
-class WS extends ReconnectingWebSocket
-  constructor: (url, protocol) ->
-    super url, protocol
+class WS extends WebSocketSubject
+  constructor: (url) ->
+    super url, deserializer: ({data}) -> JSON.parse data
 
-  send: (obj) ->
-    super JSON.stringify _.extend url: document.URL, obj
+  next: (opts) ->
+    super JSON.stringify _.extend url: document.URL, opts
     @
 
   subscribeAcc: (opts) ->
-    @send _.extend action: 'subscribeAcc', opts
+    @next _.extend action: 'subscribeAcc', opts
 
-  subscribe: (opts) ->
-    opts.market ?= QotMarket.QotMarket_HK_Security
-    @send _.extend action: 'subscribe', opts
+  subKL: (opts) ->
+    opts.market ?= 'hk'
+    @next _.extend action: 'subKL', opts
 
-  unsubscribe: (opts) ->
-    opts.market ?= QotMarket.QotMarket_HK_Security
-    @send _.extend action: 'unsubscribe', opts
+  unsubKL: (opts) ->
+    opts.market ?= 'hk'
+    @next _.extend action: 'unsubKL', opts
 
   orderBook: (opts) ->
-    @send _.extend action: 'orderBook', opts
+    @next _.extend action: 'orderBook', opts
+
+  unsubOrderBook: (opts) ->
+    opts.market ?= 'hk'
+    @next _.extend action: 'unsubOrderBook', opts
 
   ohlc: (opts) ->
     opts.market ?= 'hk'
-    @send _.extend action: 'ohlc', opts
+    @next _.extend action: 'ohlc', opts
     
   # loop for all constituent stocks of specified index
   # get dataSize of ohlc data
@@ -39,18 +43,6 @@ class WS extends ReconnectingWebSocket
     opts.dataSize ?= month: 6
     opts.chunkSize ?= 20
     opts.n ?= 2
-    @send _.extend action: 'constituent', opts
+    @next _.extend action: 'constituent', opts
 
-  on: (topic, func) ->
-    @addEventListener topic, (event) ->
-      func JSON.parse event.data
-    @
-
-  addListener: (event, handler) ->
-    @addEventListener event, handler
-
-export default new Promise (resolve, reject) ->
-  ws = new WS "ws://#{location.host}"
-  ws.addEventListener 'error', console.error
-  ws.addEventListener 'open', ->
-    resolve ws
+export default new WS "ws://#{location.host}"

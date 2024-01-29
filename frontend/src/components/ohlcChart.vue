@@ -58,13 +58,15 @@
 import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
-import Futu from '../../../index'
+import {filter, map} from 'rxjs'
+import Futu from 'rxfutu'
 {Model} = require('model').default
 {freqDuration} = require('algotrader/data').default
-import {default as strategy} from 'algotrader/strategy'
+import {default as strategy} from 'algotrader/rxStrategy'
 import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
 import {uniqBy} from 'lodash'
+import Long from 'long'
 
 export default
   props:
@@ -94,7 +96,6 @@ export default
     api: require('../plugins/api').default
     selectedStrategy: 'meanReversion'
     selectedMarket: 'hk'
-    ws: null
     chart: null
     series:
       candle: null
@@ -118,34 +119,26 @@ export default
       time + 8 * 60 * 60 # adjust to HKT+8
     # request for ohlc data
     ohlc: ->
-      @ws = await ws
-      @ws.ohlc
-        market: @selectedMarket
-        code: @code
-        interval: @interval
-    # create generator to keep watch for socket if message emitted
-    getData: ->
-      socket = @ws
-      df = ->
-        fromEmitter socket, onNext: 'message'
-      # parse websocket message into {topic, data}
-      parsed = generator.map df, (i) ->
-        JSON.parse i.data
-      # filter those targeted market, code, and freq only
-      code = ({topic, data}) =>
-        topic == 'ohlc' and
-        data.market == @selectedMarket and
-        data.code == @code and
-        data.freq == @interval
-      # get ohlc data only
-      ohlc = ({topic, data}) ->
-        data.time = data.timestamp
-        data
-      generator.map (generator.filter parsed, code), ohlc
-    unsubscribe: (interval) ->
-      @ws.unsubscribe
-        market: @selectedMarket
-        code: @code
+      ws
+        .ohlc
+          market: @selectedMarket
+          code: @code
+          interval: @interval
+        .pipe filter ({topic, data}) =>
+          {market, code, freq} = data
+          topic == 'ohlc' and
+          market == @selectedMarket and
+          code == @code and
+          freq == @interval
+        .pipe map ({topic, data}) =>
+          data.volume = new Long data.volume.low, data.volume.high, data.volume.unsigned
+          data.time = @hktz data.timestamp
+          data
+        .pipe strategy.indicator()
+    unsubKL: ({market, code, interval}) ->
+      ws.unsubKL
+        market: market
+        code: code
         interval: interval
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
@@ -187,20 +180,17 @@ export default
       @resize()
     # draw candle stick chart
     redraw: ->
-      g = @getData()
-      do =>
-        for await i from g()
-          i.time = @hktz i.timestamp
+      ret = (await @ohlc())
+      ret
+        .subscribe (i) =>
           @series.candle.update i
           @series.volume.update
             time: i.time
             value: i.volume
             color: @color i
-      @redrawMarker()
     # use selected strategy to show entryExit markers
     redrawMarker: ->
       markers = []
-      g = @getData()
       s = (df) =>
         strategy[@selectedStrategy] df, @settings[@selectedStrategy]
       do =>
@@ -216,7 +206,6 @@ export default
             @series.candle.setMarkers uniqBy markers, 'time'
   beforeMount: ->
     @code = @initCode?[0] || @$route.params.code
-    await @ohlc()
     @redraw()
   mounted: ->
     window.addEventListener 'resize', =>
@@ -260,12 +249,12 @@ export default
       finally
         calling = false
   unmounted: ->
+    @unsubKL {market: @selectedMarket, @code, @interval}
     @chart?.remove()
     @chart = null
   watch:
     interval: (newVal, oldVal) ->
       @clear()
-      @unsubscribe oldVal
-      await @ohlc()
-      @redraw()
+      @unsubKL {market: @selectedMarket, @code, interval: oldVal}
+      await @redraw()
 </script>

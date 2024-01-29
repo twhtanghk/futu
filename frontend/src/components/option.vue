@@ -38,7 +38,7 @@
 <script lang='coffee'>
 import moment from 'moment'
 import {default as api} from '../plugins/api'
-import {default as Futu} from '../../../index'
+import {default as Futu} from 'rxfutu'
 import order from './order'
 
 export default
@@ -54,7 +54,6 @@ export default
     max: null
     optionChain: []
     market: 'hk'
-    marketList: require('../plugins/const').default.marketList
     expiryDate: @comingMonth()[0]
     dateList: @comingMonth()
   methods:

@@ -14,7 +14,7 @@
 </template>
 
 <script lang='coffee'>
-import {default as Futu} from '../../../index'
+import {default as Futu} from 'rxfutu'
 {QotMarket, TrdSide} = Futu.constant
 api = require('../plugins/api').default
 trade = require('../plugins/trade').default

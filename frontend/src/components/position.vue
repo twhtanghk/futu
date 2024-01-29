@@ -34,7 +34,7 @@
 
 <script lang='coffee'>
 import {default as api} from '../plugins/api'
-import {default as Futu} from '../../../index'
+import {default as Futu} from 'rxfutu'
 import tradeCreate from './tradeCreate'
 {TrdSide} = Futu.constant
 

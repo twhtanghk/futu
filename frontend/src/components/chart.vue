@@ -17,7 +17,7 @@
 import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
-import Futu from '../../../index'
+import Futu from 'rxfutu'
 import {volSML} from '../plugins/lib'
 {Model} = require('model').default
 
