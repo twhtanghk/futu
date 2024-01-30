@@ -64,7 +64,7 @@ module.exports = router
     await next()
   .get '/api/position', (ctx, next) ->
     market = 'hk'
-    ctx.response.body = await ctx.api[market].position()
+    ctx.response.body = await (await ctx.api[market].accounts())[0].position()
     await next()
   .get '/api/order', (ctx, next) ->
     market = 'hk'

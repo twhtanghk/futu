@@ -66,7 +66,6 @@ import {default as strategy} from 'algotrader/rxStrategy'
 import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
 import {uniqBy} from 'lodash'
-import Long from 'long'
 
 export default
   props:
@@ -131,7 +130,6 @@ export default
           code == @code and
           freq == @interval
         .pipe map ({topic, data}) =>
-          data.volume = new Long data.volume.low, data.volume.high, data.volume.unsigned
           data.time = @hktz data.timestamp
           data
         .pipe strategy.indicator()
@@ -212,6 +210,10 @@ export default
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
     @series.candle = @chart.addCandlestickSeries upColor: 'transparent'
+    @series.candle.priceScale().applyOptions
+      scaleMargins:
+        top: 0
+        bottom: 0.3
     @series.volatility = @chart.addLineSeries 
       color: 'blue'
       lineWidth: 1

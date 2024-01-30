@@ -2,9 +2,10 @@ _ = require 'lodash'
 moment = require 'moment'
 Futu = require('rxfutu').default
 {freqDuration} = require('algotrader/data').default
-{filterByStdev} = require('algotrader/strategy').default
+{filterByStdev} = require('algotrader/rxStrategy').default
 
 module.exports = (ctx, msg) ->
+  msg = JSON.parse msg
   console.log "<-- ws #{JSON.stringify msg}"
   {action, url} = msg
   try
@@ -18,12 +19,17 @@ module.exports = (ctx, msg) ->
           code: code)
           .subscribe (i) ->
             ctx.websocket.send JSON.stringify topic: 'orderBook', data: i
-      when 'unsubscribe'
+      when 'unsubKL'
         {market, code, interval} = msg
         await ctx.websocket.broker[market].unsubKL
           market: market
           code: code
           freq: interval
+      when 'unsubOrderBook'
+        {market, code} = msg
+        await ctx.websocket.broker[market].unsubOrderBook
+          market: market
+          code: code
       when 'ohlc'
         {market, code, interval, beginTime} = msg
         opt =
@@ -42,7 +48,8 @@ module.exports = (ctx, msg) ->
           beginTime: beginTime
           chunkSize: chunkSize
           n: n
-        data = await filterByStdev opts
-        ctx.websocket.send JSON.stringify topic: 'constituent', data: data
+        (await filterByStdev opts).map (df) ->
+          df.subscribe (data) ->
+            ctx.websocket.send JSON.stringify topic: 'constituent', data: data
   catch err
     console.error err
