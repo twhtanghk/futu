@@ -20,23 +20,23 @@ module.exports = (ctx, msg) ->
           .subscribe (i) ->
             ctx.websocket.send JSON.stringify topic: 'orderBook', data: i
       when 'unsubKL'
-        {market, code, interval} = msg
+        {market, code, freq} = msg
         await ctx.websocket.broker[market].unsubKL
           market: market
           code: code
-          freq: interval
+          freq: freq
       when 'unsubOrderBook'
         {market, code} = msg
         await ctx.websocket.broker[market].unsubOrderBook
           market: market
           code: code
       when 'ohlc'
-        {market, code, interval, beginTime} = msg
+        {market, code, freq, beginTime} = msg
         opt =
           market: market
           code: code
-          start: moment().subtract freqDuration[interval].dataFetched
-          freq: interval
+          start: moment().subtract freqDuration[freq].dataFetched
+          freq: freq
         df = await ctx.websocket.broker[market].dataKL opt
         df.subscribe (i) ->
           ctx.websocket.send JSON.stringify topic: 'ohlc', data: i
