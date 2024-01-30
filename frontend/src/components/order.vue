@@ -41,7 +41,7 @@ export default
     active: false
   methods: 
     unsubscribe: ->
-      (await ws).unsubscribe
+      ws.unsubOrderBook
         subtype: Futu.constant.SubType.SubType_OrderBook
         market: @market
         code: @code

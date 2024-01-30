@@ -41,10 +41,10 @@
         </v-dialog>
       </v-col>
       <v-col>
-        <v-select density='compact' :items="['hk', 'crypto']" v-model="selectedMarket"/>
+        <v-select density='compact' :items="['hk', 'crypto']" v-model="market"/>
       </v-col>
-      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); ohlc(); redraw();'/></v-col>
-      <v-col><v-select density='compact' :items='intervalList' v-model='interval'/></v-col>
+      <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); redraw();'/></v-col>
+      <v-col><v-select density='compact' :items='intervalList' v-model='freq'/></v-col>
     </v-row>
     <v-row no-gutters class='flex-grow-1'>
       <v-col>
@@ -94,7 +94,7 @@ export default
         stopLoss: 0.005
     api: require('../plugins/api').default
     selectedStrategy: 'meanReversion'
-    selectedMarket: 'hk'
+    market: 'hk'
     chart: null
     series:
       candle: null
@@ -102,8 +102,9 @@ export default
       volume: null
     code: null
     name: null
-    interval: '1'
+    freq: '1'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
+    lastOpts: null
   methods:
     title: ->
       switch @selectedStrategy 
@@ -118,26 +119,29 @@ export default
       time + 8 * 60 * 60 # adjust to HKT+8
     # request for ohlc data
     ohlc: ->
+      if lastOpts?
+        @unsubKL lastOpts
+      lastOpts = {@market, @code, @freq}
       ws
         .ohlc
-          market: @selectedMarket
+          market: @market
           code: @code
-          interval: @interval
+          freq: @freq
         .pipe filter ({topic, data}) =>
           {market, code, freq} = data
           topic == 'ohlc' and
-          market == @selectedMarket and
+          market == @market and
           code == @code and
-          freq == @interval
+          freq == @freq
         .pipe map ({topic, data}) =>
           data.time = @hktz data.timestamp
           data
         .pipe strategy.indicator()
-    unsubKL: ({market, code, interval}) ->
+    unsubKL: ({market, code, freq}) ->
       ws.unsubKL
         market: market
         code: code
-        interval: interval
+        freq: freq
     resize: ->
       {offsetWidth, offsetHeight} = @$refs.curr
       @chart?.resize offsetWidth, offsetHeight 
@@ -148,11 +152,11 @@ export default
       @series.volume.setData []
     getHistory:  ({beginTime, endTime} = {}) ->
       klList = await @api.history
-        market: @selectedMarket
+        market: @market
         code: @code
         start: beginTime
         end: endTime
-        freq: @interval
+        freq: @freq
       data = klList
         .map (i) =>
           i.time = @hktz i.time
@@ -166,7 +170,7 @@ export default
           color: @color {open, close}
         .concat @series.volume.data()
       @series.volume.setData volData
-      (await @api.level {market: @selectedMarket, code: @code})
+      (await @api.level {market: @market, code: @code})
         .map (level, i) =>
           @series.candle.createPriceLine
             color: 'red'
@@ -243,20 +247,19 @@ export default
             beginTime: 
               moment
                 .unix first.time - 8 * 60 * 60
-                .subtract freqDuration[@interval].dataFetched
+                .subtract freqDuration[@freq].dataFetched
             endTime:
               moment
                 .unix first.time - 8 * 60 * 60
-                .subtract freqDuration[@interval].duration
+                .subtract freqDuration[@freq].duration
       finally
         calling = false
   unmounted: ->
-    @unsubKL {market: @selectedMarket, @code, @interval}
+    @unsubKL {@market, @code, @freq}
     @chart?.remove()
     @chart = null
   watch:
-    interval: (newVal, oldVal) ->
+    freq: (newVal, oldVal) ->
       @clear()
-      @unsubKL {market: @selectedMarket, @code, interval: oldVal}
       await @redraw()
 </script>
