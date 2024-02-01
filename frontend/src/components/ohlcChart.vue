@@ -58,7 +58,7 @@
 import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
-import {filter, map} from 'rxjs'
+import {tap, filter, map} from 'rxjs'
 import Futu from 'rxfutu'
 {Model} = require('model').default
 {freqDuration} = require('algotrader/data').default
@@ -182,30 +182,26 @@ export default
       @resize()
     # draw candle stick chart
     redraw: ->
-      ret = (await @ohlc())
-      ret
-        .subscribe (i) =>
+      markers = []
+      (await @ohlc())
+        .pipe tap (i) =>
           @series.candle.update i
           @series.volume.update
             time: i.time
             value: i.volume
             color: @color i
-    # use selected strategy to show entryExit markers
-    redrawMarker: ->
-      markers = []
-      s = (df) =>
-        strategy[@selectedStrategy] df, @settings[@selectedStrategy]
-      do =>
-        for await i from s strategy.indicator generator.uniqBy g, 'timestamp'
+        # use selected strategy to show entryExit markers
+        .pipe strategy[@selectedStrategy] @settings[@selectedStrategy]
+        .subscribe (i) =>
           if 'entryExit' of i
             {side, plPrice} = i.entryExit
             markers.push
-              time: @hktz i.time
+              time: i.time
               position: if side == 'buy' then 'belowBar' else 'aboveBar'
               color: if side == 'buy' then 'blue' else 'red'
               shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
               text: "#{i.entryExit.strategy} #{side} #{plPrice}"
-            @series.candle.setMarkers uniqBy markers, 'time'
+            @series.candle.setMarkers markers
   beforeMount: ->
     @code = @initCode?[0] || @$route.params.code
     @redraw()
@@ -260,6 +256,9 @@ export default
     @chart = null
   watch:
     freq: (newVal, oldVal) ->
+      @clear()
+      await @redraw()
+    selectedStrategy: (newVal, oldVal) ->
       @clear()
       await @redraw()
 </script>
