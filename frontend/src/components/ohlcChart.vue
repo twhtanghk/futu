@@ -1,5 +1,8 @@
 <template>
   <v-container class='d-flex flex-column' style='height:100%'>
+    <v-tooltip activator='parent' location='top' v-if='meanBar != null'>
+      Mean({{code}}, high - low): {{meanBar[0]}}, {{meanBar[1]}}%
+    </v-tooltip>
     <v-row class='flex-grow-0'>
       <v-col>
         <v-select density='compact' :items="['gridTrend', 'meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true'/>
@@ -58,7 +61,7 @@
 import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
-import {tap, filter, map} from 'rxjs'
+import {bufferCount, tap, filter, map} from 'rxjs'
 import Futu from 'rxfutu'
 {Model} = require('model').default
 {freqDuration} = require('algotrader/data').default
@@ -66,6 +69,7 @@ import {default as strategy} from 'algotrader/rxStrategy'
 import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
 import {uniqBy} from 'lodash'
+{meanBar} = require('algotrader/analysis').default.ohlc
 
 export default
   props:
@@ -105,6 +109,7 @@ export default
     freq: '1'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
     lastOpts: null
+    meanBar: null
   methods:
     title: ->
       switch @selectedStrategy 
@@ -136,6 +141,7 @@ export default
         .pipe map ({topic, data}) =>
           data.time = @hktz data.timestamp
           data
+        .pipe meanBar()
         .pipe strategy.indicator()
     unsubKL: ({market, code, freq}) ->
       ws.unsubKL
@@ -190,9 +196,15 @@ export default
             time: i.time
             value: i.volume
             color: @color i
-        # use selected strategy to show entryExit markers
+        # remove duplicate and use selected strategy to show entryExit markers
+        .pipe bufferCount 2, 1
+        .pipe filter ([prev, curr]) ->
+          prev.time != curr.time
+        .pipe map ([prev, curr]) ->
+          prev
         .pipe strategy[@selectedStrategy] @settings[@selectedStrategy]
         .subscribe (i) =>
+          @meanBar = i.meanBar
           if 'entryExit' of i
             {side, plPrice} = i.entryExit
             markers.push
