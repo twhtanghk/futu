@@ -5,20 +5,20 @@
     </v-tooltip>
     <v-row class='flex-grow-0'>
       <v-col>
-        <v-select density='compact' :items="['gridTrend', 'meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true'/>
+        <v-select density='compact' :items="['gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true'/>
         <v-dialog v-model='dialog' width='auto' transition='dailog-top-transition'>
           <v-card :title='title()'>
             <v-card-text>
               <v-container>
-                <v-row v-if="selectedStrategy == 'gridTrend'">
+                <v-row v-if="selectedStrategy.match(/^grid.*/)">
                   <v-col cols='12'>
-                    <v-text-field label='low' required v-model.number='settings.gridTrend.low' type='number'/>
+                    <v-text-field label='low' required v-model.number='settings[selectedStrategy].low' type='number'/>
                   </v-col>
                   <v-col cols='12'>
-                    <v-text-field label='high' required v-model.number='settings.gridTrend.high' type='number'/>
+                    <v-text-field label='high' required v-model.number='settings[selectedStrategy].high' type='number'/>
                   </v-col>
                   <v-col cols='12'>
-                    <v-text-field label='grid size' required v-model.number='settings.gridTrend.gridSize' type='number'/>
+                    <v-text-field label='grid size' required v-model.number='settings[selectedStrategy].gridSize' type='number'/>
                   </v-col>
                 </v-row>
                 <v-row v-if="selectedStrategy == 'meanReversion'">
@@ -91,6 +91,11 @@ export default
         chunkSize: 60
         n: 2
         plRatio: [0.01, 0.005]
+      gridRange:
+        low: 0
+        high: 0
+        gridSize: 3
+        stopLoss: 0.005
       gridTrend:
         low: 0
         high: 0
@@ -116,8 +121,8 @@ export default
       switch @selectedStrategy 
         when 'meanReversion' 
           @selectedStrategy
-        when 'gridTrend'
-          {low, high, gridSize, stopLoss} = @settings.gridTrend
+        when 'gridRange', 'gridTrend'
+          {low, high, gridSize, stopLoss} = @settings[@selectedStrategy]
           "#{@selectedStrategy} #{i for i in [low..high] by (high - low) / gridSize}" 
     color: ({open, close}) ->
       if open > close then 'red' else 'green' 

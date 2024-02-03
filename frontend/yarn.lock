@@ -2156,7 +2156,7 @@ ajv@^8.0.0, ajv@^8.0.1, ajv@^8.8.0:
 
 "algotrader@https://github.com/twhtanghk/algotrader":
   version "0.0.1"
-  resolved "https://github.com/twhtanghk/algotrader#d4198930b4a06e4d53d185e9bf41950252ad34d5"
+  resolved "https://github.com/twhtanghk/algotrader#a0d4c6b59e728261ef652a30e5e43e196131cd8c"
   dependencies:
     "@async-generators/from-emitter" "^0.3.0"
     bluebird "^3.7.2"
