@@ -195,6 +195,9 @@ export default
       @subscription = (await @ohlc())
         .pipe tap (i) =>
           @series.candle.update i
+          @series.volatility.update
+            time: i.time
+            value: i['close.volatility']
           @series.volume.update
             time: i.time
             value: i.volume
