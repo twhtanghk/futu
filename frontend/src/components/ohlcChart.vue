@@ -108,6 +108,7 @@ export default
     name: null
     freq: '1'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
+    subscription: null
     lastOpts: null
     meanBar: null
   methods:
@@ -124,9 +125,11 @@ export default
       time + 8 * 60 * 60 # adjust to HKT+8
     # request for ohlc data
     ohlc: ->
-      if lastOpts?
-        @unsubKL lastOpts
-      lastOpts = {@market, @code, @freq}
+      if @subscription?
+        @subscription.unsubscribe()
+      if @lastOpts?
+        @unsubKL @lastOpts
+      @lastOpts = {@market, @code, @freq}
       ws
         .ohlc
           market: @market
@@ -189,7 +192,7 @@ export default
     # draw candle stick chart
     redraw: ->
       markers = []
-      (await @ohlc())
+      @subscription = (await @ohlc())
         .pipe tap (i) =>
           @series.candle.update i
           @series.volume.update
