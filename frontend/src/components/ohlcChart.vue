@@ -69,7 +69,7 @@ import {default as strategy} from 'algotrader/rxStrategy'
 import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
 import {uniqBy} from 'lodash'
-{meanBar} = require('algotrader/analysis').default.ohlc
+{meanBar, skipDup} = require('algotrader/analysis').default.ohlc
 
 export default
   props:
@@ -144,8 +144,6 @@ export default
         .pipe map ({topic, data}) =>
           data.time = @hktz data.timestamp
           data
-        .pipe meanBar()
-        .pipe strategy.indicator()
     unsubKL: ({market, code, freq}) ->
       ws.unsubKL
         market: market
@@ -195,21 +193,20 @@ export default
       @subscription = (await @ohlc())
         .pipe tap (i) =>
           @series.candle.update i
-          @series.volatility.update
-            time: i.time
-            value: i['close.volatility']
           @series.volume.update
             time: i.time
             value: i.volume
             color: @color i
-        # remove duplicate and use selected strategy to show entryExit markers
-        .pipe bufferCount 2, 1
-        .pipe filter ([prev, curr]) ->
-          prev.time != curr.time
-        .pipe map ([prev, curr]) ->
-          prev
+        # skip duplicate
+        .pipe skipDup()
+        .pipe meanBar()
+        .pipe strategy.indicator()
+        # use selected strategy to show entryExit markers
         .pipe strategy[@selectedStrategy] @settings[@selectedStrategy]
         .subscribe (i) =>
+          @series.volatility.update
+            time: i.time
+            value: i['close.volatility']
           @meanBar = i.meanBar
           if 'entryExit' of i
             {side, plPrice} = i.entryExit
