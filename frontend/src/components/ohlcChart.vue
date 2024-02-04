@@ -5,23 +5,26 @@
     </v-tooltip>
     <v-row class='flex-grow-0'>
       <v-col>
-        <v-select density='compact' :items="['gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol']" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true'/>
+        <v-select density='compact' :items="strategyList" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true' multiple/>
         <v-dialog v-model='dialog' width='auto' transition='dailog-top-transition'>
-          <v-card :title='title()'>
+          <v-card :title='currStrategy'>
+            <template v-slot:title>
+              <v-select density='compact' :items="strategyList" v-model="currStrategy"/>
+            </template>
             <v-card-text>
               <v-container>
-                <v-row v-if="selectedStrategy.match(/^grid.*/)">
+                <v-row v-if="currStrategy.match(/^grid.*/)">
                   <v-col cols='12'>
-                    <v-text-field label='low' required v-model.number='settings[selectedStrategy].low' type='number'/>
+                    <v-text-field label='low' required v-model.number='settings[currStrategy].low' type='number'/>
                   </v-col>
                   <v-col cols='12'>
-                    <v-text-field label='high' required v-model.number='settings[selectedStrategy].high' type='number'/>
+                    <v-text-field label='high' required v-model.number='settings[currStrategy].high' type='number'/>
                   </v-col>
                   <v-col cols='12'>
-                    <v-text-field label='grid size' required v-model.number='settings[selectedStrategy].gridSize' type='number'/>
+                    <v-text-field label='grid size' required v-model.number='settings[currStrategy].gridSize' type='number'/>
                   </v-col>
                 </v-row>
-                <v-row v-if="selectedStrategy == 'meanReversion'">
+                <v-row v-if="currStrategy == 'meanReversion'">
                   <v-col cols='12'>
                     <v-text-field label='chunk size' required v-model.number='settings.meanReversion.chunkSize' type='number'/>
                   </v-col>
@@ -87,6 +90,8 @@ export default
   data: ->
     dialog: false
     settings:
+      levels:
+        arr: null
       meanReversion:
         chunkSize: 60
         n: 2
@@ -102,7 +107,9 @@ export default
         gridSize: 3
         stopLoss: 0.005
     api: require('../plugins/api').default
-    selectedStrategy: 'meanReversion'
+    selectedStrategy: ['meanReversion']
+    currStrategy: 'levels'
+    strategyList: ['levels', 'gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol']
     market: 'hk'
     chart: null
     series:
@@ -117,13 +124,6 @@ export default
     lastOpts: null
     meanBar: null
   methods:
-    title: ->
-      switch @selectedStrategy 
-        when 'meanReversion' 
-          @selectedStrategy
-        when 'gridRange', 'gridTrend'
-          {low, high, gridSize, stopLoss} = @settings[@selectedStrategy]
-          "#{@selectedStrategy} #{i for i in [low..high] by (high - low) / gridSize}" 
     color: ({open, close}) ->
       if open > close then 'red' else 'green' 
     hktz: (time) ->
@@ -182,7 +182,7 @@ export default
           color: @color {open, close}
         .concat @series.volume.data()
       @series.volume.setData volData
-      (await @api.level {market: @market, code: @code})
+      @settings.levels.arr = (await @api.level {market: @market, code: @code})
         .map (level, i) =>
           @series.candle.createPriceLine
             color: 'red'
@@ -191,6 +191,7 @@ export default
             price: level
             axisLabelVisible: true
             title: "#{level}"
+          level
       @resize()
     # draw candle stick chart
     redraw: ->
@@ -207,7 +208,12 @@ export default
         .pipe meanBar()
         .pipe strategy.indicator()
         # use selected strategy to show entryExit markers
-        .pipe strategy[@selectedStrategy] @settings[@selectedStrategy]
+        .pipe (obs) =>
+          ret = obs
+          for s in @selectedStrategy
+            ret = (strategy[s] @settings[s]) ret
+          ret
+        .pipe tap (x) -> console.log x
         .subscribe (i) =>
           @series.volatility.update
             time: i.time
