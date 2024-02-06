@@ -2,7 +2,6 @@ _ = require 'lodash'
 import * as Promise from 'bluebird'
 import {default as Futu} from 'rxfutu'
 import {WebSocketSubject} from 'rxjs/webSocket'
-{QotMarket, OrderStatus} = Futu
 
 class WS extends WebSocketSubject
   constructor: (url) ->
@@ -12,8 +11,9 @@ class WS extends WebSocketSubject
     super JSON.stringify _.extend url: document.URL, opts
     @
 
-  subscribeAcc: (opts) ->
-    @next _.extend action: 'subscribeAcc', opts
+  subMarket: (opts) ->
+    opts.market ?= 'hk'
+    @next _.extend action: 'subMarket', opts
 
   subKL: (opts) ->
     opts.market ?= 'hk'

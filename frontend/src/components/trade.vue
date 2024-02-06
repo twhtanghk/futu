@@ -7,7 +7,7 @@
       <tradeCreate :item='item'/>
     </v-row>
     <v-row style='height: 70vh, width: 100%, overflow: auto'>
-      <!--tradeFilled/-->
+      <tradeFilled/>
     </v-row>
   </v-container>
 </template>

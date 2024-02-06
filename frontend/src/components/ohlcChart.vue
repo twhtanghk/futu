@@ -213,7 +213,6 @@ export default
           for s in @selectedStrategy
             ret = (strategy[s] @settings[s]) ret
           ret
-        .pipe tap (x) -> console.log x
         .subscribe (i) =>
           @series.volatility.update
             time: i.time
