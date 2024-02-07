@@ -79,8 +79,4 @@ export default
               .remove @orderList, id: data.id
               .push data
       .subscribe (x) -> return
-  watch:
-    market: (curr, prev) ->
-      ws
-        .unsubMarket {market: prev}
 </script>

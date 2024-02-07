@@ -7,7 +7,7 @@
       <tradeCreate :market='market' @update:market='market = $event'/>
     </v-row>
     <v-row>
-      <tradeFilled :market:'market'/>
+      <tradeFilled :market='market'/>
     </v-row>
   </v-container>
 </template>
