@@ -15,9 +15,6 @@ class WS extends WebSocketSubject
     opts.market ?= 'hk'
     @next _.extend action: 'subMarket', opts
 
-  unsubMarket: (opts) ->
-    @next _.extend action: 'unsubMarket', opts
-
   subKL: (opts) ->
     opts.market ?= 'hk'
     @next _.extend action: 'subKL', opts
