@@ -1,18 +1,13 @@
 <template>
   <v-data-table :sort-by='sortBy' :headers='headers' :items='orderList' density='compact' fixed-header='true' height='100%' items-per-page='-1'>
-    <template v-slot:item.trdSide='{ item }'>
-      <v-chip :color="item.raw.side == 'sell' ? 'green' : 'red'">
-        {{trdSide(item.raw.side)}}
-      </v-chip>
-    </template>
     <template v-slot:item.id='{ item }'>
       {{item.raw.id}}
     </template>
     <template v-slot:item.status='{ item }'>
-      {{status(item.raw.status)}}
+      {{item.raw.status}}
     </template>
     <template v-slot:item.type='{ item }'>
-      {{type(item.raw.type)}}
+      {{item.raw.type}}
     </template>
     <template v-slot:item.qty='{ item }'>
       {{item.raw.fillQty}} / {{item.raw.qty}}
@@ -27,7 +22,7 @@
       {{new Date(1000 * item.raw.updateTime).toLocaleString()}}
     </template>
     <template v-slot:item.action='{ item }'>
-      <v-btn density='compact' @click='cancel(item.raw)'>
+      <v-btn v-if="item.raw.status == 'submitted'" density='compact' @click='cancel(item.raw)'>
         Cancel
       </v-btn>
     </template>
@@ -45,12 +40,12 @@ import {default as ws} from '../plugins/ws'
 import {filter, map} from 'rxjs'
 api = require('../plugins/api').default
 trade = require('../plugins/trade').default
-{Order} = require('algotrader/rxData').default
 
 export default
+  props:
+    market: String
   data: ->
-    market: 'hk'
-    sortBy: [{key: 'updateTimestamp', order: 'desc'}]
+    sortBy: [{key: 'updateTime', order: 'desc'}]
     headers: [
       {title: 'Order ID', key: 'id'}
       {title: 'Side', key: 'side'}
@@ -66,12 +61,8 @@ export default
     ]
     orderList: []
   methods:
-    status: (x) ->
-      x
-    type: (x) ->
-      x
-    cancel: ({orderID}) ->
-      await trade.delete data: id: orderID
+    cancel: ({id}) ->
+      await trade.delete data: id
   mounted: ->
     ws
       .subMarket {@market}
@@ -80,10 +71,16 @@ export default
       .pipe map ({topic, data}) =>
         switch topic
           when 'orderList'
-            @orderList.push new Order data
+            @orderList.push data
           when 'orderCreate'
-            @orderList.push new Order data
-          when 'orderUpdate', 'orderDelete'
-            console.log 'update order'
+            @orderList.push data
+          when 'orderUpdate', 'orderCancel'
+            @orderList = _
+              .remove @orderList, id: data.id
+              .push data
       .subscribe (x) -> return
+  watch:
+    market: (curr, prev) ->
+      ws
+        .unsubMarket {market: prev}
 </script>

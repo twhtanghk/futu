@@ -1,13 +1,13 @@
 <template>
   <v-container>
-    <v-row style='height: 15vh, width: 100%'>
+    <v-row>
       <unlockAcc/>
     </v-row>
-    <v-row style='height: 15vh, width: 100%'>
-      <tradeCreate :item='item'/>
+    <v-row>
+      <tradeCreate :market='market' @update:market='market = $event'/>
     </v-row>
-    <v-row style='height: 70vh, width: 100%, overflow: auto'>
-      <tradeFilled/>
+    <v-row>
+      <tradeFilled :market:'market'/>
     </v-row>
   </v-container>
 </template>
@@ -16,8 +16,6 @@
 import unlockAcc from './unlockAcc'
 import tradeCreate from './tradeCreate'
 import tradeFilled from './tradeFilled'
-import {default as Futu} from 'rxfutu'
-{TrdSide} = Futu.constant
 
 export default
   components: { 
@@ -26,14 +24,5 @@ export default
     tradeFilled
   }
   data: ->
-    item:
-      trdSide: TrdSide.TrdSide_Buy
-      code: '00700'
-      qty: 1
+    market: 'hk'
 </script>
-
-<style lang='scss' scoped>
-html, body {
-  overflow: hidden;
-}
-</style>

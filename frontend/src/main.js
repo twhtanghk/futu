@@ -12,14 +12,11 @@ import {md2} from 'vuetify/blueprints'
 import * as VueRouter from 'vue-router'
 import widget from './components/widget.vue'
 import position from './components/position.vue'
-import deal from './components/deal.vue'
 import trade from './components/trade.vue'
 import alert from './components/alert.vue'
 import quote from './components/quote.vue'
 import ohlcChart from './components/ohlcChart.vue'
-import rxOhlc from './components/rxOhlc.vue'
 import constituent from './components/constituent.vue'
-import '@mdi/font/css/materialdesignicons.css'
 
 components.VDataTable = VDataTable
 const vuetify = createVuetify({
@@ -36,12 +33,10 @@ const routes = [
   {path: '/', redirect: '/widget/chart'},
   {path: '/widget/:view', component: widget},
   {path: '/position', component: position},
-  {path: '/deal', component: deal},
   {path: '/trade', component: trade},
   {path: '/alert', component: alert},
   {path: '/quote/:code', component: quote},
   {path: '/ohlc/:code', component: ohlcChart},
-  {path: '/rxOhlc/:code', component: rxOhlc},
   {path: '/constituent', component: constituent}
 ]
 const router = VueRouter.createRouter({
