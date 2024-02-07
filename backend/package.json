@@ -11,7 +11,7 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "algotrader": "github:twhtanghk/algotrader",
-    "binance": "github:twhtanghk/binance",
+    "binance": "https://github.com/twhtanghk/binance",
     "coffeescript": "^2.7.0",
     "koa": "^2.14.1",
     "koa-bodyparser": "^4.3.0",
@@ -19,6 +19,8 @@
     "koa-methodoverride": "^2.0.0",
     "koa-router": "^12.0.0",
     "koa-static": "^5.0.0",
-    "koa-websocket": "^7.0.0"
+    "koa-websocket": "^7.0.0",
+    "rxfutu": "github:twhtanghk/rxfutu",
+    "rxjs": "^7.8.1"
   }
 }

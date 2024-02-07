@@ -1,9 +1,10 @@
 moment = require 'moment'
-Futu = require('../index').default
+Futu = require('rxfutu').default
 Router = require 'koa-router'
 router = new Router()
 {freqDuration} = require('algotrader/data').default
 {ohlc} = require('algotrader/analysis').default
+import {buffer, last} from 'rxjs'
 
 module.exports = router
   # get support or resistance levels of specifed stock
@@ -22,13 +23,17 @@ module.exports = router
       start: beginTime
       end: endTime
       freq: freq
-    ctx.response.body = ohlc
-      .levels df
-      .map ([price, idx]) ->
-        price
-      .sort (a, b) ->
-        a - b
-    await next()
+    df
+      .pipe buffer df
+      .pipe last()
+      .subscribe (list) ->
+        ctx.response.body = ohlc
+          .levels list
+            .map ([price, idx]) ->
+              price
+          .sort (a, b) ->
+            a - b
+        await next()
   .get '/api/candle', (ctx, next) ->
     {rehabType, klType, security, beginTime, endTime} = ctx.request.body
     security.market = Futu.marketMap[security.market]
@@ -39,11 +44,7 @@ module.exports = router
     await next()
   .get '/api/name', (ctx, next) ->
     {market, code} = ctx.request.body
-    if not Array.isArray code
-      code = [code]
-    ctx.response.body = await ctx.api[market].marketState code.map (i) ->
-      market: Futu.marketMap[market]
-      code: i
+    ctx.response.body = await ctx.api[market].marketState {market, code}
     await next()
   .get '/api/quote', (ctx, next) ->
     {market, code} = ctx.request.body
@@ -57,13 +58,17 @@ module.exports = router
     await next()
   .get '/api/optionChain', (ctx, next) ->
     {market, code, min, max, beginTime, endTime} = ctx.request.body
+    if beginTime?
+      beginTime = moment beginTime
+    if endTime?
+      endTime = moment endTime
     strikeRange = [min, max]
     opts = {market, code, strikeRange, beginTime, endTime}
     ctx.response.body = await ctx.api[market].optionChain opts
     await next()
   .get '/api/position', (ctx, next) ->
     market = 'hk'
-    ctx.response.body = await ctx.api[market].position()
+    ctx.response.body = await (await ctx.api[market].accounts())[0].position()
     await next()
   .get '/api/order', (ctx, next) ->
     market = 'hk'
@@ -114,10 +119,14 @@ module.exports = router
     market ?= 'hk'
     end = if end? then moment(end) else moment()
     start = if start? then moment(start) else moment(end).subtract freqDuration[freq].dataFetched
-    ctx.response.body = await ctx.api[market].historyKL
+    (await ctx.api[market].historyKL
       market: market
       code: code
       start: start
       end: end
-      freq: freq
-    await next()
+      freq: freq)
+      .pipe buffer()
+      .pipe last()
+      .subscribe (x) ->
+        ctx.response.body = x
+        await next()

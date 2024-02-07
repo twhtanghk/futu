@@ -1,32 +1,28 @@
 <template>
-  <v-data-table :sort-by='sortBy' :headers='headers' :items='trade' density='compact' fixed-header='true' height='100%' items-per-page='-1'>
-    <template v-slot:item.trdSide='{ item }'>
-      <v-chip :color="item.raw.trdSide == 2 ? 'green' : 'red'">
-        {{trdSide(item.raw.trdSide)}}
-      </v-chip>
+  <v-data-table :sort-by='sortBy' :headers='headers' :items='orderList' density='compact' fixed-header='true' height='100%' items-per-page='-1'>
+    <template v-slot:item.id='{ item }'>
+      {{item.raw.id}}
     </template>
-    <template v-slot:item.orderID='{ item }'>
-      {{item.raw.orderID}}
+    <template v-slot:item.status='{ item }'>
+      {{item.raw.status}}
     </template>
-    <template v-slot:item.orderStatus='{ item }'>
-      {{orderStatus(item.raw.orderStatus)}}
+    <template v-slot:item.type='{ item }'>
+      {{item.raw.type}}
     </template>
     <template v-slot:item.qty='{ item }'>
       {{item.raw.fillQty}} / {{item.raw.qty}}
     </template>
     <template v-slot:item.price='{ item }'>
-      {{item.raw.fillAvgPrice.toFixed(2)}} / {{item.raw.price.toFixed(2)}}
+      {{item.raw.price.toFixed(2)}}
     </template>
-    <template v-slot:item.createTimestamp='{ item }'>
-      {{new Date(1000 * item.raw.createTimestamp).toLocaleString()}}
+    <template v-slot:item.createTime='{ item }'>
+      {{new Date(1000 * item.raw.createTime).toLocaleString()}}
     </template>
-    <template v-slot:item.updateTimestamp='{ item }'>
-      {{new Date(1000 * item.raw.updateTimestamp).toLocaleString()}}
+    <template v-slot:item.updateTime='{ item }'>
+      {{new Date(1000 * item.raw.updateTime).toLocaleString()}}
     </template>
     <template v-slot:item.action='{ item }'>
-      <v-btn density='compact' @click='cancel(item.raw)'
-        v-if='! isFilled(item.raw)'
-      >
+      <v-btn v-if="item.raw.status == 'submitted'" density='compact' @click='cancel(item.raw)'>
         Cancel
       </v-btn>
     </template>
@@ -39,80 +35,52 @@
 </template>
 
 <script lang='coffee'>
-moment = require 'moment'
-ws = require('../plugins/ws').default
+import moment from 'moment'
+import {default as ws} from '../plugins/ws'
+import {filter, map} from 'rxjs'
 api = require('../plugins/api').default
 trade = require('../plugins/trade').default
-import Futu from '../../../index'
-{QotMarket, OrderStatus} = Futu.constant
 
 export default
+  props:
+    market: String
   data: ->
-    market: QotMarket.QotMarket_HK_Security
-    sortBy: [{key: 'updateTimestamp', order: 'desc'}]
+    sortBy: [{key: 'updateTime', order: 'desc'}]
     headers: [
-      {title: 'Order ID', key: 'orderID'}
-      {title: 'Trade', key: 'trdSide'}
-      {title: 'Status', key: 'orderStatus'}
+      {title: 'Order ID', key: 'id'}
+      {title: 'Side', key: 'side'}
+      {title: 'Status', key: 'status'}
+      {title: 'Type', key: 'type'}
       {title: 'Code', key: 'code'}
       {title: 'Name', key: 'name'}
       {title: 'Qty', key: 'qty'}
       {title: 'Price', key: 'price'}
-      {title: 'Created at', key: 'createTimestamp'}
-      {title: 'Updated at', key: 'updateTimestamp'}
+      {title: 'Created at', key: 'createTime'}
+      {title: 'Updated at', key: 'updateTime'}
       {title: 'Action', key: 'action'}
     ]
-    trade: []
+    orderList: []
   methods:
-    nextPage: ->
-      [..., last] = @trade
-      endTime = null
-      if last?
-        endTime = moment
-          .unix last.createTimestamp
-          .format 'YYYY-MM-DD HH:mm:ss'
-      @trade = @trade.concat await trade.list data: {endTime}
-    trdSide: (i) ->
-      ['Unknown', 'Buy', 'Sell', 'SellShort', 'Buyback'][i]
-    isFilled: ({orderStatus}) ->
-      orderStatus not in [
-        OrderStatus.OrderStatus_Filled_Part
-        OrderStatus.OrderStatus_Submitted
-        OrderStatus.OrderStatus_WaitingSubmit
-        OrderStatus.OrderStatus_Submitting
-      ]
-    cancel: ({orderID}) ->
-      await trade.delete data: id: orderID
-    orderStatus: (i) ->
-      map = {
-        '-1': 'Unknown'
-        0: 'Unsubmitted'
-        1: 'WaitingSubmit'
-        2: 'Submitting'
-        3: 'SubmitFailed'
-        4: 'Timeout'
-        5: 'Submitted'
-        10: 'Filled_Part'
-        11: 'Filled_All'
-        12: 'Cancelling_Part'
-        13: 'Cancelling_All'
-        14: 'Cancelled_Part'
-        15: 'Cancelled_All'
-        21: 'Failed'
-        22: 'Disabled'
-        23: 'Deleted'
-        24: 'FillCancelled'
-      }
-      map[i]
-    onShow: (isIntersecting, entries, observer) ->
-      if isIntersecting
-        await @nextPage()
+    cancel: ({id}) ->
+      await trade.delete data: id
   mounted: ->
-    @ws = (await ws)
-      .subscribeAcc()
-      .on 'message', (msg) =>
-        {topic, data} = msg
-        if topic == 'trdUpdate'
-          @trade.shift data
-          @trade = _.uniqBy @trade, 'orderID'
+    ws
+      .subMarket {@market}
+      .pipe filter ({topic, data}) ->
+        topic in ['orderList', 'orderCreate', 'orderUpdate', 'orderDelete']
+      .pipe map ({topic, data}) =>
+        switch topic
+          when 'orderList'
+            @orderList.push data
+          when 'orderCreate'
+            @orderList.push data
+          when 'orderUpdate', 'orderCancel'
+            @orderList = _
+              .remove @orderList, id: data.id
+              .push data
+      .subscribe (x) -> return
+  watch:
+    market: (curr, prev) ->
+      ws
+        .unsubMarket {market: prev}
 </script>
