@@ -13,8 +13,8 @@ module.exports = (ctx, msg) ->
       when 'subMarket'
         {market} = msg
         (await (await ctx.websocket.broker[market].accounts())[0].orders())
-          .subscribe (i) ->
-            ctx.websocket.send JSON.stringify topic: 'orderList', data: i.toJSON()
+          .subscribe ({topic, data}) ->
+            ctx.websocket.send JSON.stringify {topic, data}
       when 'orderBook'
         {market, code} = msg
         (await ctx.websocket.broker[market].orderBook
