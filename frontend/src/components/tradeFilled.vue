@@ -62,7 +62,7 @@ export default
     orderList: []
   methods:
     cancel: ({id}) ->
-      await trade.delete data: id
+      await trade.delete data: {id}
   mounted: ->
     ws
       .subMarket {@market}
@@ -79,4 +79,8 @@ export default
               .remove @orderList, id: data.id
               .push data
       .subscribe (x) -> return
+  watch:
+    market: (curr, prev) ->
+      ws
+        .subMarket {market: curr}
 </script>

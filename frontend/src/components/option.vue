@@ -48,12 +48,12 @@ export default
   components:
     order: order
   data: ->
-    code: null
+    code: @$route.params.code
     name: null
     min: null
     max: null
     optionChain: []
-    market: 'hk'
+    market: @$route.params.market
     expiryDate: @comingMonth()[0]
     dateList: @comingMonth()
   methods:
@@ -72,8 +72,8 @@ export default
     @expiryDate ?= @comingMonth()[0]
     @setCode()
     {close} = await api.getQuote {@market, @code}
-    @min = close * 0.9
-    @max = close * 1.1
+    @min = (close * 0.9).toFixed 2
+    @max = (close * 1.1).toFixed 2
   computed:
     strikeParam: ->
       [@expiryDate, @min, @max]

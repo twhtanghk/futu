@@ -21,6 +21,7 @@
 <script lang='coffee'>
 api = require('../plugins/api').default
 ws = require('../plugins/ws').default
+import {filter} from 'rxjs'
 
 export default
   data: ->
@@ -46,20 +47,20 @@ export default
   mounted: ->
     (await ws)
       .constituent()
-      .subscribe (msg) =>
-        {topic, data} = msg
-        if topic == 'constituent'
-          @item.push 
-            code: data.code
-            name: await api.getName {code: data.code}
-            delta: (data['close'] - data['close.mean']) / data['close.stdev']
-            close: data['close']
-            'close.mean': data['close.mean']
-            'close.stdev': data['close.stdev']
-            'close.trend': data['close.trend']
-            volume: data['volume']
-            'volume.mean': data['volume.mean']
-            'volume.stdev': data['volume.stdev']
-            'volume.trend': data['volume.trend']
-            time: data['timestamp']
+      .pipe filter ({topic, data}) ->
+        topic == 'constituent'
+      .subscribe ({topic, data}) =>
+        @item.push 
+          code: data.code
+          name: data.name
+          delta: (data['close'] - data['close.mean']) / data['close.stdev']
+          close: data['close']
+          'close.mean': data['close.mean']
+          'close.stdev': data['close.stdev']
+          'close.trend': data['close.trend']
+          volume: data['volume']
+          'volume.mean': data['volume.mean']
+          'volume.stdev': data['volume.stdev']
+          'volume.trend': data['volume.trend']
+          time: data['timestamp']
 </script>

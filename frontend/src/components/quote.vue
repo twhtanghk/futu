@@ -6,7 +6,7 @@
     </div>
     <div :class='$vuetify.display.mdAndDown ? "col" : "col2"'>
       <orderBook :initCode='$route.params.code'/>
-      <opt :initCode='[$route.params.code, null, 290, 360]'/>
+      <opt v-if="market == 'hk'" :initCode='[$route.params.code, null, 290, 360]'/>
       <trade/>
     </div>
   </v-container>
@@ -24,6 +24,8 @@ export default
     opt: option
     orderBook: orderBook
     trade: trade
+  data: ->
+    market: @$route.params.market
 </script>
 
 <style lang='scss' scoped>

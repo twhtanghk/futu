@@ -24,5 +24,5 @@ export default
     tradeFilled
   }
   data: ->
-    market: 'hk'
+    market: @$route.params.market
 </script>

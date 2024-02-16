@@ -110,13 +110,13 @@ export default
     selectedStrategy: ['meanReversion']
     currStrategy: 'levels'
     strategyList: ['levels', 'gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol']
-    market: 'hk'
+    market: @$route.params.market || 'hk'
     chart: null
     series:
       candle: null
       volatility: null
       volume: null
-    code: null
+    code: @initCode[0] || @$route.params.code
     name: null
     freq: '1'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
@@ -228,7 +228,6 @@ export default
               text: "#{i.entryExit.strategy} #{side} #{plPrice}"
             @series.candle.setMarkers markers
   beforeMount: ->
-    @code = @initCode?[0] || @$route.params.code
     @redraw()
   mounted: ->
     window.addEventListener 'resize', =>

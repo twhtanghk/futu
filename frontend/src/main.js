@@ -33,10 +33,10 @@ const routes = [
   {path: '/', redirect: '/widget/chart'},
   {path: '/widget/:view', component: widget},
   {path: '/position', component: position},
-  {path: '/trade', component: trade},
+  {path: '/trade/:market/:code', component: trade},
   {path: '/alert', component: alert},
-  {path: '/quote/:code', component: quote},
-  {path: '/ohlc/:code', component: ohlcChart},
+  {path: '/quote/:market/:code', component: quote},
+  {path: '/ohlc/:market/:code', component: ohlcChart},
   {path: '/constituent', component: constituent}
 ]
 const router = VueRouter.createRouter({

@@ -38,28 +38,27 @@ export default
         '00700'
   data: ->
     api: require('../plugins/api').default
-    code: null
+    code: @$route.params.code
     name: null
-    market: 'hk'
+    market: @$route.params.market
     curr: null # last subscribed market and code
     ask: []
     bid: []
   methods:
     setCode: (event) ->
-      @name = await @api.getName {market: 'hk', code: @code}
+      @name = switch @market
+        when 'hk'
+          await @api.getName {@market, @code}
+        when 'crypto'
+          @code
       document.title = "#{@code} #{@name}"
       @subscribe()
     subscribe: ->
       if @curr?
-        ws.orderBook
-          market: 'hk'
-          code: @curr.code
+        ws.orderBook {@market, @code}
       @curr = {@market, @code}
-      ws.orderBook
-        market: 'hk'
-        code: @code
+      ws.orderBook {@market, @code}
   beforeMount: ->
-    @code = @initCode
     ws
       .orderBook {@market, @code}
       .pipe filter ({topic, data}) =>

@@ -23,7 +23,7 @@ export default
     market: String
   data: ->
     side: 'buy'
-    code: '00700'
+    code: @$route.params.code
     qty: 100
     price: 0
     sideList: ['buy', 'sell']
@@ -34,7 +34,7 @@ export default
       switch @market
         when 'hk'
           if @code?
-            @name = await api.getName {@market, code: @code}
+            @name = await api.getName {@market, @code}
         when 'crypto'
           @name = @code
     create: ->
