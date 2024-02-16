@@ -105,7 +105,7 @@ module.exports = router
     await next()
   .del '/api/trade/:id', (ctx, next) ->
     market = 'hk'
-    ctx.response.body = await ctx.api[market].cancelOrder id: ctx.request.params.id
+    ctx.response.body = await (await ctx.api[market].accounts())[0].cancelOrder id: parseInt ctx.request.params.id
     await next()
   .put '/api/trade/unlock', (ctx, next) ->
     {market, pwdMD5} = ctx.request.body

@@ -13,6 +13,7 @@
     "algotrader": "github:twhtanghk/algotrader",
     "binance": "https://github.com/twhtanghk/binance",
     "coffeescript": "^2.7.0",
+    "esm": "^3.2.25",
     "koa": "^2.14.1",
     "koa-bodyparser": "^4.3.0",
     "koa-logger": "^3.2.1",
@@ -20,6 +21,8 @@
     "koa-router": "^12.0.0",
     "koa-static": "^5.0.0",
     "koa-websocket": "^7.0.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
     "rxfutu": "github:twhtanghk/rxfutu",
     "rxjs": "^7.8.1"
   }
