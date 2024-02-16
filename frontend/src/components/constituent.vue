@@ -7,9 +7,6 @@
             {{ item.raw.code }}
           </a>
         </template>
-        <template v-slot:item.close='{ item }'>
-          {{ item.raw.close.toFixed(2) }}
-        </template>
         <template v-slot:item.time='{ item }'>
           {{ new Date(item.raw.time * 1000) }}
         </template>
@@ -43,7 +40,7 @@ export default
     ]
   methods:
     link: (code) ->
-      "#/quote/#{code}"
+      "#/quote/hk/#{code}"
   mounted: ->
     (await ws)
       .constituent()
@@ -53,14 +50,15 @@ export default
         @item.push 
           code: data.code
           name: data.name
-          delta: (data['close'] - data['close.mean']) / data['close.stdev']
-          close: data['close']
-          'close.mean': data['close.mean']
-          'close.stdev': data['close.stdev']
+          delta: ((data['close'] - data['close.mean']) / data['close.stdev'])
+            .toFixed 2
+          close: data['close'].toFixed 2
+          'close.mean': data['close.mean'].toFixed 2
+          'close.stdev': data['close.stdev'].toFixed 2
           'close.trend': data['close.trend']
           volume: data['volume']
-          'volume.mean': data['volume.mean']
-          'volume.stdev': data['volume.stdev']
+          'volume.mean': data['volume.mean'].toFixed 2
+          'volume.stdev': data['volume.stdev'].toFixed 2
           'volume.trend': data['volume.trend']
           time: data['timestamp']
 </script>
