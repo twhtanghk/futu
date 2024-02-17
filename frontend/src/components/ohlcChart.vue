@@ -118,7 +118,7 @@ export default
       volume: null
     code: @initCode?[0] || @$route.params.code
     name: null
-    freq: '1'
+    freq: '5'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
     subscription: null
     lastOpts: null

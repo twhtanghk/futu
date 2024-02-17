@@ -79,8 +79,9 @@ module.exports = router
     ctx.response.body = await ctx.api[market].historyDeal()
     await next()
   .post '/api/trade', (ctx, next) ->
-    {market, trdSide, code, qty, price} = ctx.request.body
-    ctx.response.body = await ctx.api[market].placeOrder {trdSide, code, qty, price}
+    {market, code, side, qty, price} = ctx.request.body
+    ctx.response.body = (await ctx.api[market].defaultAcc())
+      .placeOrder {code, side, qty, price}
     await next()
   .get '/api/trade', (ctx, next) ->
     {market, endTime, page} = ctx.request.body

@@ -11,7 +11,7 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "algotrader": "github:twhtanghk/algotrader",
-    "binance": "https://github.com/twhtanghk/binance",
+    "binance": "github:twhtanghk/binance",
     "coffeescript": "^2.7.0",
     "esm": "^3.2.25",
     "koa": "^2.14.1",
