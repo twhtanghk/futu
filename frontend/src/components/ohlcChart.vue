@@ -116,7 +116,7 @@ export default
       candle: null
       volatility: null
       volume: null
-    code: @initCode[0] || @$route.params.code
+    code: @initCode?[0] || @$route.params.code
     name: null
     freq: '1'
     intervalList: _.map Futu.klTypeMap, (v, k) -> k
