@@ -83,27 +83,6 @@ module.exports = router
     ctx.response.body = (await ctx.api[market].defaultAcc())
       .placeOrder {code, side, qty, price}
     await next()
-  .get '/api/trade', (ctx, next) ->
-    {market, endTime, page} = ctx.request.body
-    market ?= 'hk'
-    page ?= 20
-    endTime = if endTime? then moment(endTime, 'YYYY-MM-DD HH:mm:ss') else moment()
-    elapsed = 5
-    res = []
-    test = (cb) ->
-      if res.length >= page
-        res.slice 0, page
-      else
-        await cb()
-    nextPage = ->
-      beginTime = moment endTime
-        .subtract day: elapsed++
-      res = await ctx.api[market].historyOrder
-        beginTime: beginTime.format 'YYYY-MM-DD HH:mm:ss'
-        endTime: endTime.format 'YYYY-MM-DD HH:mm:ss'
-      await test nextPage
-    ctx.response.body = await test nextPage
-    await next()
   .del '/api/trade/:id', (ctx, next) ->
     market = 'hk'
     ctx.response.body = await (await ctx.api[market].accounts())[0].cancelOrder id: parseInt ctx.request.params.id

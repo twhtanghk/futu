@@ -30,7 +30,7 @@ const vuetify = createVuetify({
   }
 })
 const routes = [
-  {path: '/', redirect: '/widget/chart'},
+  {path: '/', redirect: '/widget/ohlcChart'},
   {path: '/widget/:view', component: widget},
   {path: '/position', component: position},
   {path: '/trade/:market/:code', component: trade},

@@ -47,7 +47,7 @@ export default
   data: ->
     sortBy: [{key: 'updateTime', order: 'desc'}]
     headers: [
-      {title: 'Order ID', key: 'id'}
+      {title: 'ID', key: 'id'}
       {title: 'Side', key: 'side'}
       {title: 'Status', key: 'status'}
       {title: 'Type', key: 'type'}
@@ -67,17 +67,16 @@ export default
     ws
       .subMarket {@market}
       .pipe filter ({topic, data}) ->
-        topic in ['orderList', 'orderCreate', 'orderUpdate', 'orderDelete']
+        topic in ['orderAdd', 'orderChg', 'orderList']
       .pipe map ({topic, data}) =>
         switch topic
           when 'orderList'
             @orderList.push data
-          when 'orderCreate'
+          when 'orderAdd'
             @orderList.push data
-          when 'orderUpdate', 'orderCancel'
-            @orderList = _
-              .remove @orderList, id: data.id
-              .push data
+          when 'orderChg'
+            i = _.findIndex @orderList, id: data.id
+            _.extend @orderList[i], data
       .subscribe (x) -> return
   watch:
     market: (curr, prev) ->

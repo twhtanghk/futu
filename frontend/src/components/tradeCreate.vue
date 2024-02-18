@@ -6,8 +6,8 @@
         <v-col><v-select :items='sideList' v-model='side'/></v-col>
         <v-col><v-select :items='marketList' :value='market' @update:modelValue='$emit("update:market", $event)'/></v-col>
         <v-col><v-text-field v-model='code' @keyup.enter='getName'/></v-col>
-        <v-col><v-text-field v-model='qty'/></v-col>
-        <v-col><v-text-field v-model='price'/></v-col>
+        <v-col><v-text-field v-model.number='qty' type='number'/></v-col>
+        <v-col><v-text-field v-model.number='price' type='number'/></v-col>
         <v-col><v-btn @click='create'>Create</v-btn></v-col>
       </v-row>
     </v-container>
@@ -38,7 +38,7 @@ export default
         when 'crypto'
           @name = @code
     create: ->
-      await trade.create data: {@market, @code, @qty, @price}
+      await trade.create data: {@side, @market, @code, @qty, @price}
   beforeMount: ->
     @getName()
 </script>
