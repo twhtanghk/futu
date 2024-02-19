@@ -1,7 +1,7 @@
 <template>
   <v-container class='d-flex flex-wrap' sytle='height: 100%'>
     <div :class='$vuetify.display.mdAndDown ? "col" : "col2"'>
-      <ohlcChart :initCode='[market == "hk" ? "800000" : $route.params.code, null, null, null]' style='height: 50vh'/>
+      <ohlcChart :initCode='[market == "hk" ? "800000" : "BTCUSDT", null, null, null]' style='height: 50vh'/>
       <ohlcChart :initCode='[$route.params.code, null, null, null]' style='height:50vh'/>
     </div>
     <div :class='$vuetify.display.mdAndDown ? "col" : "col2"'>

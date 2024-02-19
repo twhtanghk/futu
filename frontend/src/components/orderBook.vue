@@ -57,19 +57,18 @@ export default
       if @curr?
         ws.orderBook {@market, @code}
       @curr = {@market, @code}
-      ws.orderBook {@market, @code}
-  beforeMount: ->
-    ws
-      .orderBook {@market, @code}
-      .pipe filter ({topic, data}) =>
-        {market, code} = data
-        topic == 'orderBook' and
-        market == @market and
-        code == @code
-      .subscribe ({topic, data}) =>
-        {market, code, ask, bid} = data
-        @ask = ask
-        @bid = bid
+      ws
+        .orderBook {@market, @code}
+        .pipe filter ({topic, data}) =>
+          {market, code} = data
+          topic == 'orderBook' and
+          market == @market and
+          code == @code
+        .subscribe ({topic, data}) =>
+          {market, code, ask, bid} = data
+          @ask = ask
+          @bid = bid
+  mounted: ->
     @setCode()
   unmounted: ->
     ws.unsubOrderBook {@market, @code}
