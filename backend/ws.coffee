@@ -22,7 +22,6 @@ module.exports = (ctx, msg) ->
           market: market
           code: code)
           .subscribe (i) ->
-            _.extend i, {market, code}
             ctx.websocket.send JSON.stringify topic: 'orderBook', data: i
       when 'unsubKL'
         {market, code, freq} = msg
