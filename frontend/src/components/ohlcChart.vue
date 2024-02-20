@@ -5,7 +5,7 @@
     </v-tooltip>
     <v-row class='flex-grow-0'>
       <v-col>
-        <v-select density='compact' :items="strategyList" v-model="selectedStrategy" append-icon='fa-solid fa-gear' @click:append='dialog = true' multiple/>
+        <v-select density='compact' :items="strategyList" v-model="selectedStrategy" multiple/>
         <v-dialog v-model='dialog' width='auto' transition='dailog-top-transition'>
           <v-card :title='currStrategy'>
             <template v-slot:title>
@@ -51,6 +51,11 @@
       </v-col>
       <v-col><v-text-field density='compact' v-model='code' @keyup.enter='clear(); redraw();'/></v-col>
       <v-col><v-select density='compact' :items='intervalList' v-model='freq'/></v-col>
+      <v-col>
+        <v-icon @click='dialog = true' icon='fas fa-gear'/>
+        <v-icon @click='tradeEnable = true' v-if='!tradeEnable' icon='fas fa-lock'/>
+        <v-icon @click='tradeEnable = false' v-if='tradeEnable' icon='fas fa-lock-open'/>
+      </v-col>
     </v-row>
     <v-row no-gutters class='flex-grow-1'>
       <v-col>
@@ -73,6 +78,7 @@ import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
 import {uniqBy} from 'lodash'
 {meanBar, skipDup} = require('algotrader/analysis').default.ohlc
+trade = require('../plugins/trade').default
 
 export default
   props:
@@ -123,6 +129,7 @@ export default
     subscription: null
     lastOpts: null
     meanBar: null
+    tradeEnable: false
   methods:
     color: ({open, close}) ->
       if open > close then 'red' else 'green' 
@@ -227,6 +234,8 @@ export default
               shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
               text: "#{i.entryExit.strategy} #{side} #{plPrice}"
             @series.candle.setMarkers markers
+            if @tradeEnable
+              await trade.create data: {@market, @code, side, plPrice, qty: 1, price: (i.high + i.low) / 2}
   beforeMount: ->
     @redraw()
   mounted: ->

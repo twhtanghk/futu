@@ -47,6 +47,7 @@ export default
   data: ->
     sortBy: [{key: 'updateTime', order: 'desc'}]
     headers: [
+      {title: 'Action', key: 'action'}
       {title: 'ID', key: 'id'}
       {title: 'Side', key: 'side'}
       {title: 'Status', key: 'status'}
@@ -57,7 +58,6 @@ export default
       {title: 'Price', key: 'price'}
       {title: 'Created at', key: 'createTime'}
       {title: 'Updated at', key: 'updateTime'}
-      {title: 'Action', key: 'action'}
     ]
     orderList: []
   methods:
