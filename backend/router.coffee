@@ -79,13 +79,22 @@ module.exports = router
     ctx.response.body = await ctx.api[market].historyDeal()
     await next()
   .post '/api/trade', (ctx, next) ->
-    {market, code, side, qty, price} = ctx.request.body
+    {market, code, side, type, qty, price} = ctx.request.body
+    type ?= 'limit'
     ctx.response.body = (await ctx.api[market].defaultAcc())
-      .placeOrder {code, side, qty, price}
+      .placeOrder {code, side, type, qty, price}
     await next()
-  .del '/api/trade/:id', (ctx, next) ->
-    market = 'hk'
-    ctx.response.body = await (await ctx.api[market].accounts())[0].cancelOrder id: parseInt ctx.request.params.id
+  .put '/api/trade/enable/:market/:id', (ctx, next) ->
+    {market, id} = ctx.request.params
+    id = parseInt id
+    ctx.response.body = await (await ctx.api[market].defaultAcc())
+      .enableOrder id
+    await next()
+  .del '/api/trade/:market/:id', (ctx, next) ->
+    {market, id} = ctx.request.params
+    id = parseInt id
+    ctx.response.body = await (await ctx.api[market].defaultAcc())
+      .cancelOrder {id}
     await next()
   .put '/api/trade/unlock', (ctx, next) ->
     {market, pwdMD5} = ctx.request.body
