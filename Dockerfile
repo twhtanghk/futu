@@ -11,7 +11,6 @@ RUN  apt-get update \
 &&  apt-get install -y telnet git-core vim \
 &&  apt-get clean \
 &&  rm -rf /var/lib/apt/lists/* /tmp/$(basename $SRC) \
-&&  yarn install \
 &&  (cd frontend && yarn install && yarn build) \
 &&  (cd backend && yarn install)
 
