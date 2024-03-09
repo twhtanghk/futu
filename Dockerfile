@@ -1,17 +1,15 @@
-FROM node
+FROM node:19
 
 ENV APP=/usr/src/app \
-    SRC=https://softwarefile.futunn.com/FutuOpenD_7.0.3218_NN_Ubuntu16.04.tar.gz
+    SRC=Futu_OpenD_8.1.4108_Ubuntu16.04.tar.gz
 ADD . $APP
 
 WORKDIR $APP
 
-RUN  apt-get update \
-&&  (cd /tmp && wget -q $SRC && tar -C /opt -xf $(basename $SRC)) \
+RUN (tar -C /opt -xf $APP/$SRC) \
+&&  apt-get update \
 &&  apt-get install -y telnet git-core vim \
 &&  apt-get clean \
-&&  rm -rf /var/lib/apt/lists/* /tmp/$(basename $SRC) \
-&&  (cd frontend && yarn install && yarn build) \
-&&  (cd backend && yarn install)
+&&  rm -rf /var/lib/apt/lists/* $APP/$SRC
 
-CMD /opt/FutuOpenD_7.0.3218_NN_Ubuntu16.04/FutuOpenD_7.0.3218_NN_Ubuntu16.04/FutuOpenD
+CMD /opt/Futu_OpenD_8.1.4108_Ubuntu16.04/Futu_OpenD_8.1.4108_Ubuntu16.04/FutuOpenD
