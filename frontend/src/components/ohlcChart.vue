@@ -116,10 +116,12 @@ export default
         percent: 70
       insideBar:
         null
+      volUp:
+        n: 2
     api: require('../plugins/api').default
     selectedStrategy: ['meanReversion']
     currStrategy: 'levels'
-    strategyList: ['levels', 'gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol', 'pinBar', 'insideBar']
+    strategyList: ['levels', 'gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol', 'pinBar', 'insideBar', 'volUp']
     market: @$route.params.market || 'hk'
     chart: null
     series:
