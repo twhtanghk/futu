@@ -72,7 +72,7 @@ import {createChart, LineStyle} from 'lightweight-charts'
 import {bufferCount, tap, filter, map} from 'rxjs'
 import Futu from 'rxfutu'
 {Model} = require('model').default
-{freqDuration} = require('algotrader/data').default
+{freqDuration} = require('algotrader/rxData').default
 import {default as strategy} from 'algotrader/rxStrategy'
 import {default as generator} from 'generator'
 import fromEmitter from '@async-generators/from-emitter'
@@ -112,10 +112,14 @@ export default
         high: 0
         gridSize: 3
         stopLoss: 0.005
+      pinBar:
+        percent: 70
+      insideBar:
+        null
     api: require('../plugins/api').default
     selectedStrategy: ['meanReversion']
     currStrategy: 'levels'
-    strategyList: ['levels', 'gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol']
+    strategyList: ['levels', 'gridRange', 'gridTrend', 'meanReversion', 'levelVol', 'priceVol', 'pinBar', 'insideBar']
     market: @$route.params.market || 'hk'
     chart: null
     series:
@@ -137,8 +141,6 @@ export default
       time + 8 * 60 * 60 # adjust to HKT+8
     # request for ohlc data
     ohlc: ->
-      if @subscription?
-        @subscription.unsubscribe()
       if @lastOpts?
         @unsubKL @lastOpts
       @lastOpts = {@market, @code, @freq}
@@ -226,13 +228,17 @@ export default
             value: i['close.volatility']
           @meanBar = i.meanBar
           if 'entryExit' of i
-            {side, plPrice} = i.entryExit
+            text = i.entryExit.map (entry) ->
+              obj = {}
+              obj[entry.strategy] = entry.side
+              obj
+            side = i.entryExit[0]?.side
             markers.push
               time: i.time
               position: if side == 'buy' then 'belowBar' else 'aboveBar'
               color: if side == 'buy' then 'blue' else 'red'
               shape: if side == 'buy' then 'arrowUp' else 'arrowDown'
-              text: "#{i.entryExit.strategy} #{side} #{plPrice}"
+              text: JSON.stringify text
             @series.candle.setMarkers markers
             if @tradeEnable
               await trade.create data: {@market, @code, side, plPrice, qty: 1, price: (i.high + i.low) / 2}
@@ -289,9 +295,11 @@ export default
     @chart = null
   watch:
     freq: (newVal, oldVal) ->
+      @subscription?.unsubscribe()
       @clear()
       await @redraw()
     selectedStrategy: (newVal, oldVal) ->
+      @subscription?.unsubscribe()
       @clear()
       await @redraw()
 </script>

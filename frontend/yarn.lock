@@ -2156,11 +2156,12 @@ ajv@^8.0.0, ajv@^8.0.1, ajv@^8.8.0:
 
 "algotrader@https://github.com/twhtanghk/algotrader":
   version "0.0.1"
-  resolved "https://github.com/twhtanghk/algotrader#83fc5c1c61fcdf65866c5c2e8a0bd95e10e23de6"
+  resolved "https://github.com/twhtanghk/algotrader#ef01f387e1c1b37464911102e1b575a15f8bb4fd"
   dependencies:
-    "@async-generators/from-emitter" "^0.3.0"
+    algotrader "github:twhtanghk/algotrader"
     bluebird "^3.7.2"
-    generator "github:twhtanghk/generator"
+    coffeescript "^2.7.0"
+    lodash "^4.17.21"
     moment "^2.30.1"
     rxjs "^7.8.1"
     stats-lite "^2.2.0"
