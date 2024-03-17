@@ -227,7 +227,7 @@ export default
         .subscribe (i) =>
           @series.volatility.update
             time: i.time
-            value: i['close.volatility']
+            value: i['close.stdev']
           @meanBar = i.meanBar
           if 'entryExit' of i
             text = i.entryExit.map (entry) ->
