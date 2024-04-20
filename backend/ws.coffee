@@ -1,7 +1,7 @@
 _ = require 'lodash'
 moment = require 'moment'
 Futu = require('rxfutu').default
-{freqDuration} = require('algotrader/data').default
+{freqDuration} = require('algotrader/rxData').default
 {filterByStdev} = require('algotrader/rxStrategy').default
 
 module.exports = (ctx, msg) ->
