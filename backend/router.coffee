@@ -2,7 +2,7 @@ moment = require 'moment'
 Futu = require('rxfutu').default
 Router = require 'koa-router'
 router = new Router()
-{freqDuration} = require('algotrader/data').default
+{freqDuration} = require('algotrader/rxData').default
 {ohlc} = require('algotrader/analysis').default
 import {buffer, last} from 'rxjs'
 
