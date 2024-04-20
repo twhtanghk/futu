@@ -75,7 +75,6 @@ import Futu from 'rxfutu'
 {freqDuration} = require('algotrader/rxData').default
 import {default as strategy} from 'algotrader/rxStrategy'
 import {default as generator} from 'generator'
-import fromEmitter from '@async-generators/from-emitter'
 import {uniqBy} from 'lodash'
 {meanBar, skipDup} = require('algotrader/analysis').default.ohlc
 trade = require('../plugins/trade').default
@@ -127,6 +126,7 @@ export default
     series:
       candle: null
       volatility: null
+      stdevSq: null
       volume: null
     code: @initCode?[0] || @$route.params.code
     name: null
@@ -172,6 +172,7 @@ export default
       @series.candle.setData []
       @series.candle.setMarkers []
       @series.volatility.setData []
+      @series.stdevSq.setData []
       @series.volume.setData []
     getHistory:  ({beginTime, endTime} = {}) ->
       klList = await @api.history
@@ -228,6 +229,9 @@ export default
           @series.volatility.update
             time: i.time
             value: i['close.stdev']
+          @series.stdevSq.update
+            time: i.time
+            value: i['close.stdev.stdev']
           @meanBar = i.meanBar
           if 'entryExit' of i
             text = i.entryExit.map (entry) ->
@@ -261,6 +265,12 @@ export default
       priceFormat:
         type: 'price'
       priceScaleId: 'volatility'
+    @series.stdevSq = @chart.addLineSeries 
+      color: 'red'
+      lineWidth: 1
+      priceFormat:
+        type: 'price'
+      priceScaleId: 'stdevSq'
     @series.volume = @chart.addHistogramSeries
       priceFormat:
         type: 'volume'
