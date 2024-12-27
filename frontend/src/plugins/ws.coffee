@@ -39,7 +39,7 @@ class WS extends WebSocketSubject
   # calculate mean and stdev for every chunkSize of data
   # check if last close fall outside +-n * stdev of last element
   constituent: (opts={}) ->
-    opts.idx ?= 'HSI Constituent'
+    opts.idx ?= 'HSI Constituent Stocks'
     opts.dataSize ?= month: 6
     opts.chunkSize ?= 20
     opts.n ?= 2
