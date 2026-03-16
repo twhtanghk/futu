@@ -1,12 +1,11 @@
-moment = require 'moment'
-Futu = require('rxfutu').default
-Router = require 'koa-router'
-router = new Router()
-{freqDuration} = require('algotrader/rxData').default
-{ohlc} = require('algotrader/analysis').default
-import {buffer, last} from 'rxjs'
+import moment from 'moment'
+import Futu from 'rxfutu'
+import Router from 'koa-router'
+import { freqDuration } from 'algotrader/rxData'
+import { ohlc } from 'algotrader/analysis'
+import { buffer, last } from 'rxjs'
 
-module.exports = router
+export default router
   # get support or resistance levels of specifed stock
   # req.body = {market, code, freq, beginTime, endTime}
   # res.body = {level: [price1, price2, ...]

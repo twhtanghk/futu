@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "@koa/cors": "^5.0.0",
-    "algotrader": "github:twhtanghk/algotrader",
+    "algotrader": "github:twhtanghk/algotrader#es2015",
     "axios": "^0.27.2",
     "binance": "https://github.com/twhtanghk/binance",
     "coffeescript": "^2.7.0",

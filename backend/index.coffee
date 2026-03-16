@@ -1,13 +1,13 @@
-Futu = require('rxfutu').default
-Binance = require('binance').default
-Koa = require 'koa'
-logger = require 'koa-logger'
-bodyParser = require 'koa-bodyparser'
-methodOverride = require 'koa-methodoverride'
-cors = require '@koa/cors'
-router = require './router'
-serve = require 'koa-static'
-ws = require 'koa-websocket'
+import {Futu} from 'algotrader/futu.js'
+import Binance from 'binance'
+import Koa from 'koa'
+import logger from 'koa-logger'
+import bodyParser from 'koa-bodyparser'
+import methodOverride from 'koa-methodoverride'
+import cors from '@koa/cors'
+import router from './router'
+import serve from 'koa-static'
+import ws from 'koa-websocket'
 
 app = ws new Koa()
 app.keys = process.env.KEYS?.split(',') || ['keep it secret']
