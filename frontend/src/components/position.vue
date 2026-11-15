@@ -6,26 +6,26 @@
     <v-row>
   <v-data-table :sort-by='sortBy' :headers='headers' :items='position' :items-per-page='-1' density='compact'>
     <template v-slot:item.price='{ item }'>
-      {{ item.raw.price.toFixed(2) }}
+      {{ item.price.toFixed(2) }}
     </template>
-    <template v-slot:column.plVal='{ column }'>
+    <template v-slot:header.plVal='{ column }'>
       <v-chip :color="plSum() > 0 ? 'green' : 'red'">
         {{ column.title }} {{ plSum() }}
       </v-chip>
     </template>
     <template v-slot:item.plVal='{ item }'>
-      <v-chip :color="item.raw.plVal > 0 ? 'green' : 'red'">
-        {{ item.raw.plVal }}
+      <v-chip :color="item.plVal > 0 ? 'green' : 'red'">
+        {{ item.plVal }}
       </v-chip>
     </template>
     <template v-slot:item.plRatio='{ item }'>
-      <v-chip :color="item.raw.plRatio > 0 ? 'green' : 'red'">
-        {{ (item.raw.plRatio * 100).toFixed(2) }}
+      <v-chip :color="item.plRatio > 0 ? 'green' : 'red'">
+        {{ (item.plRatio * 100).toFixed(2) }}
       </v-chip>
     </template>
     <template v-slot:item.action='{ item }'>
-      <v-btn class='mr-md-2' variant='outlined' color='red' @click='buy(item.raw)'>Buy</v-btn>
-      <v-btn variant='outlined' color='green' @click='sell(item.raw)'>Sell</v-btn>
+      <v-btn class='mr-md-2' variant='outlined' color='red' @click='buy(item)'>Buy</v-btn>
+      <v-btn variant='outlined' color='green' @click='sell(item)'>Sell</v-btn>
     </template>
   </v-data-table>
     </v-row>

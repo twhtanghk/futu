@@ -3,12 +3,12 @@
     <v-row>
       <v-data-table :sort-by='sortBy' :headers='headers' :items='item' :items-per-page='-1' density='compact'>
         <template v-slot:item.code='{ item }'>
-          <a :href="link(item.raw.code)" target='_blank'>
-            {{ item.raw.code }}
+          <a :href="link(item.code)" target='_blank'>
+            {{ item.code }}
           </a>
         </template>
         <template v-slot:item.time='{ item }'>
-          {{ new Date(item.raw.time * 1000) }}
+          {{ new Date(item.time * 1000).toLocaleDateString() }}
         </template>
       </v-data-table>
     </v-row>

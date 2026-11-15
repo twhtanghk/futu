@@ -29,10 +29,9 @@
     "rxjs": "^7.8.1",
     "sass": "^1.69.5",
     "stats-lite": "^2.2.0",
-    "volatility": "^0.2.1",
-    "vue": "^3.2.13",
+    "vue": "^3.5.45",
     "vue-router": "^4.1.6",
-    "vuetify": "^3"
+    "vuetify": "^3.13.7"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

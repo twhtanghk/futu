@@ -1,9 +1,11 @@
 {
   "name": "backend",
+  "type": "module",
   "version": "0.0.1",
   "description": "futu api",
   "scripts": {
-    "start": "node -r coffeescript/register -r esm index.coffee",
+    "build": "coffee -c index.coffee router.coffee ws.coffee",
+    "start": "node index.js",
     "test": "mocha test/*.coffee"
   },
   "author": "Tommy Tang",
@@ -11,8 +13,8 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "algotrader": "github:twhtanghk/algotrader#es2015",
-    "axios": "^0.27.2",
-    "binance": "https://github.com/twhtanghk/binance",
+    "axios": "^1.13.6",
+    "bs-logger": "^0.2.6",
     "coffeescript": "^2.7.0",
     "esm": "^3.2.25",
     "koa": "^2.14.1",

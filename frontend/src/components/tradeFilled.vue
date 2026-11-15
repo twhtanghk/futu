@@ -1,28 +1,28 @@
 <template>
   <v-data-table :sort-by='sortBy' :headers='headers' :items='orderList' density='compact' fixed-header='true' height='100%' items-per-page='-1'>
     <template v-slot:item.id='{ item }'>
-      {{item.raw.id}}
+      {{item.id}}
     </template>
     <template v-slot:item.status='{ item }'>
-      {{item.raw.status}}
+      {{item.status}}
     </template>
     <template v-slot:item.type='{ item }'>
-      {{item.raw.type}}
+      {{item.type}}
     </template>
     <template v-slot:item.qty='{ item }'>
-      {{item.raw.fillQty}} / {{item.raw.qty}}
+      {{item.fillQty}} / {{item.qty}}
     </template>
     <template v-slot:item.price='{ item }'>
-      {{item.raw.price.toFixed(2)}}
+      {{item.price.toFixed(2)}}
     </template>
     <template v-slot:item.createTime='{ item }'>
-      {{new Date(1000 * item.raw.createTime).toLocaleString()}}
+      {{new Date(1000 * item.createTime).toLocaleString()}}
     </template>
     <template v-slot:item.updateTime='{ item }'>
-      {{new Date(1000 * item.raw.updateTime).toLocaleString()}}
+      {{new Date(1000 * item.updateTime).toLocaleString()}}
     </template>
     <template v-slot:item.action='{ item }'>
-      <v-btn v-if="item.raw.status == 'submitted'" density='compact' @click='cancel(item.raw)'>
+      <v-btn v-if="item.status == 'submitted'" density='compact' @click='cancel(item)'>
         Cancel
       </v-btn>
     </template>

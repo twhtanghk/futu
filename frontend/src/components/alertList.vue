@@ -1,23 +1,23 @@
 <template>
   <v-data-table :headers='headers' :items='alert' density='compact' fixed-header='true' height='100%' items-per-page='-1'>
     <template v-slot:item.below='{ item }'>
-      <span v-if='item.raw.edit'>
-        <v-text-field type='number' @keyup.enter='update(item.raw)' v-model='item.raw.below'/>
+      <span v-if='item.edit'>
+        <v-text-field type='number' @keyup.enter='update(item)' v-model='item.below'/>
       </span>
-      <span @click='item.raw.edit=true' v-else :class='{red: item.raw.hitBelow}'>
-        {{ item.raw.below }}
+      <span @click='item.edit=true' v-else :class='{red: item.hitBelow}'>
+        {{ item.below }}
       </span>
     </template>
     <template v-slot:item.above='{ item }'>
-      <span v-if='item.raw.edit'>
-        <v-text-field type='number' @keyup.enter='update(item.raw)' v-model='item.raw.above'/>
+      <span v-if='item.edit'>
+        <v-text-field type='number' @keyup.enter='update(item)' v-model='item.above'/>
       </span>
-      <span @click='item.raw.edit=true' v-else :class='{green: item.raw.hitAbove}'>
-        {{ item.raw.above}}
+      <span @click='item.edit=true' v-else :class='{green: item.hitAbove}'>
+        {{ item.above}}
       </span>
     </template>
     <template v-slot:item.action='{ item }'>
-      <v-btn density='compact' @click='cancel(item.raw.index)'>
+      <v-btn density='compact' @click='cancel(item.index)'>
         Delete
       </v-btn>
     </template>

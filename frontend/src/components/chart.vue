@@ -18,7 +18,6 @@ import moment from 'moment'
 import {default as ws} from '../plugins/ws'
 import {createChart, LineStyle} from 'lightweight-charts'
 import Futu from 'rxfutu'
-import {volSML} from '../plugins/lib'
 {Model} = require('model').default
 
 export default
@@ -41,7 +40,6 @@ export default
     chart: null
     series:
       candle: null
-      volatility: null
       volume: null
     code: null
     name: null
@@ -102,12 +100,8 @@ export default
           i
         @nodata = klList.length == 0
         @candles = [data..., @candles...]
-        volSML @candles, 20, 20, 20
         [..., last] = @candles
         @series.candle.setData @candles
-        @series.volatility.setData @candles.map ({time, volatility}) ->
-          time: time
-          value: volatility.s
         @series.volume.setData @candles.map ({time, volume, open, close}) =>
           time: time
           value: volume
@@ -140,12 +134,6 @@ export default
       @resize()
     @chart = createChart @$refs.curr, @chartOptions
     @series.candle = @chart.addCandlestickSeries upColor: 'transparent'
-    @series.volatility = @chart.addLineSeries 
-      color: 'blue'
-      lineWidth: 1
-      priceFormat:
-        type: 'price'
-      priceScaleId: 'volatility'
     @series.volume = @chart.addHistogramSeries
       color: 'blue'
       priceFormat:

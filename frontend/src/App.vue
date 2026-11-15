@@ -16,4 +16,8 @@ body {
 #app {
   height: 100%;
 }
+.v-container {
+  margin: 0 !important;
+  max-width: 100% !important;
+}
 </style>

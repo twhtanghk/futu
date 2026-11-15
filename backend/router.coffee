@@ -1,9 +1,11 @@
 import moment from 'moment'
-import Futu from 'rxfutu'
+import {Futu} from 'algotrader/futu.js'
 import Router from 'koa-router'
-import { freqDuration } from 'algotrader/rxData'
-import { ohlc } from 'algotrader/analysis'
+import { freqDuration } from 'algotrader/broker.js'
+import { ohlc } from 'algotrader/analysis.js'
 import { buffer, last } from 'rxjs'
+
+router = new Router()
 
 export default router
   # get support or resistance levels of specifed stock
